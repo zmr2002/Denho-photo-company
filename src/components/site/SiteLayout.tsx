@@ -1,0 +1,28 @@
+import type { ReactNode } from "react";
+import type { SiteLanguage } from "@/data/navigation";
+import { Footer } from "@/components/site/Footer";
+import { Header } from "@/components/site/Header";
+
+type PageTheme = "home" | "services" | "works" | "about" | "contact" | "placeholder";
+
+interface SiteLayoutProps {
+  children: ReactNode;
+  lang: SiteLanguage;
+  currentPath: string;
+  page?: PageTheme;
+}
+
+export function SiteLayout({
+  children,
+  lang,
+  currentPath,
+  page = "home",
+}: SiteLayoutProps) {
+  return (
+    <div className={`site-shell page-theme-${page}`} lang={lang}>
+      <Header lang={lang} currentPath={currentPath} />
+      <main>{children}</main>
+      <Footer lang={lang} />
+    </div>
+  );
+}

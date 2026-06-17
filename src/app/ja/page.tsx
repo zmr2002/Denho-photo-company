@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <SiteLayout lang="ja" page="home" currentPath="/">
+    <SiteLayout lang="ja" page="home" currentPath="/ja/">
       <HomePage content={homeContent.ja} basePath="/ja" />
     </SiteLayout>
   );

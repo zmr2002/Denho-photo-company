@@ -5,14 +5,14 @@ import { homeContent } from "@/data/home";
 import { site } from "@/data/site";
 
 export const metadata: Metadata = {
-  title: `${site.name} | 写真・映像制作`,
-  description: site.description,
+  title: `${site.name} | 日本摄影与视频制作`,
+  description: "位于日本，提供从策划、摄影、视频制作到编辑与交付的一体化影像服务。",
 };
 
 export default function Page() {
   return (
-    <SiteLayout lang="ja" page="home" currentPath="/">
-      <HomePage content={homeContent.ja} basePath="/ja" />
+    <SiteLayout lang="zh" page="home" currentPath="/zh/">
+      <HomePage content={homeContent.zh} basePath="/zh" />
     </SiteLayout>
   );
 }
