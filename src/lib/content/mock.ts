@@ -191,50 +191,50 @@ export const mockServiceDetails: ServiceDetail[] = locales.flatMap((language) =>
     language,
     slug: "web-production",
     eyebrow: "Web Production",
-    title: `${localeLabel[language]} web production testcontext`,
+    title: [`${localeLabel[language]} web production`, "testcontext"],
     description:
       "testcontext service page for local verification of the approved Web Production route.",
     sections: [
       {
         label: "Scope",
-        title: "Website planning and production",
+        title: ["Website planning", "and production"],
         text: "testcontext text for a developer-controlled service page. This is not CMS-editable layout content.",
         bullets: ["Site planning", "Page production", "Content handoff"],
       },
       {
         label: "Workflow",
-        title: "Content and media coordination",
+        title: ["Content and media", "coordination"],
         text: "testcontext text for verifying service detail rendering across all three languages.",
         bullets: ["Requirements", "Draft structure", "Launch preparation"],
       },
     ],
     ctaLabel: "Project Inquiry",
-    ctaTitle: "testcontext web production inquiry",
+    ctaTitle: ["testcontext web production", "inquiry"],
     linkLabel: "Contact",
   },
   {
     language,
     slug: "event-setup",
     eyebrow: "Event Setup",
-    title: `${localeLabel[language]} event setup testcontext`,
+    title: [`${localeLabel[language]} event setup`, "testcontext"],
     description:
       "testcontext service page for local verification of the approved Event Setup route.",
     sections: [
       {
         label: "Scope",
-        title: "Event preparation support",
+        title: ["Event preparation", "support"],
         text: "testcontext text for event setup service structure without changing the design system.",
         bullets: ["Venue coordination", "Media flow", "Production support"],
       },
       {
         label: "Workflow",
-        title: "On-site production readiness",
+        title: ["On-site production", "readiness"],
         text: "testcontext text for confirming route and content behavior before real copy is ready.",
         bullets: ["Setup plan", "On-site checks", "Delivery coordination"],
       },
     ],
     ctaLabel: "Project Inquiry",
-    ctaTitle: "testcontext event setup inquiry",
+    ctaTitle: ["testcontext event setup", "inquiry"],
     linkLabel: "Contact",
   },
 ]);

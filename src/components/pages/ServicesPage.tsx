@@ -2,6 +2,7 @@ import type { ServicesPageContent } from "@/data/pages";
 import { BusinessField } from "@/components/ui/BusinessField";
 import { PageHero } from "@/components/ui/PageHero";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { LineBreakText } from "@/components/ui/LineBreakText";
 
 interface ServicesPageProps {
   content: ServicesPageContent;
@@ -53,7 +54,7 @@ export function ServicesPage({ content, basePath }: ServicesPageProps) {
           <div>
             <p className="section-label">{content.cta.label}</p>
             <h2 className="mt-5 max-w-3xl text-3xl font-semibold tracking-[-0.03em] md:text-5xl">
-              {content.cta.title}
+              <LineBreakText text={content.cta.title} />
             </h2>
           </div>
           <a className="button-dark shrink-0" href={`${basePath}/contact/`}>

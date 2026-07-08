@@ -1,4 +1,5 @@
 import type { Locale, ServiceDetail } from "@/lib/content";
+import { LineBreakText } from "@/components/ui/LineBreakText";
 import { PageHero } from "@/components/ui/PageHero";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 
@@ -22,7 +23,9 @@ export function ServiceDetailPage({ content, locale }: ServiceDetailPageProps) {
             {content.sections.map((section, index) => (
               <article key={section.label}>
                 <span>{String(index + 1).padStart(2, "0")}</span>
-                <h3>{section.title}</h3>
+                <h3>
+                  <LineBreakText text={section.title} />
+                </h3>
                 <p>{section.text}</p>
                 <ul className="mt-6 grid gap-2 text-sm leading-7 text-stone-600">
                   {section.bullets.map((bullet) => (

@@ -3,6 +3,7 @@ import { PageHero } from "@/components/ui/PageHero";
 import { PlaceholderMedia } from "@/components/ui/PlaceholderMedia";
 import { SampleRequestCta } from "@/components/ui/SampleRequestCta";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { LineBreakText } from "@/components/ui/LineBreakText";
 
 interface AboutPageProps {
   content: AboutPageContent;
@@ -22,7 +23,9 @@ export function AboutPage({ content, basePath }: AboutPageProps) {
               <p className="section-label">{content.statementLabel}</p>
             </div>
             <div className="lg:col-span-8 lg:col-start-5">
-              <h2 className="statement-title">{content.statementTitle}</h2>
+              <h2 className="statement-title">
+                <LineBreakText text={content.statementTitle} />
+              </h2>
               <div className="mt-8 grid gap-6 text-base leading-8 text-stone-600 md:grid-cols-2">
                 {content.statementParagraphs.map((paragraph) => (
                   <p key={paragraph}>{paragraph}</p>
@@ -74,7 +77,7 @@ export function AboutPage({ content, basePath }: AboutPageProps) {
           <div className="lg:col-span-4">
             <p className="section-label">{content.languageLabel}</p>
             <h2 className="mt-5 text-3xl font-semibold tracking-[-0.03em] md:text-5xl">
-              {content.languageTitle}
+              <LineBreakText text={content.languageTitle} />
             </h2>
           </div>
           <div className="lg:col-span-7 lg:col-start-6">

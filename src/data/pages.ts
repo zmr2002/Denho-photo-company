@@ -1,5 +1,6 @@
 import { site } from './site';
 import type { ServiceCategoryId, WorksCategoryId } from './categories';
+import type { DisplayText } from '@/lib/text/display-text';
 
 export type MediaTone = 'neutral' | 'warm' | 'cool' | 'rust';
 
@@ -7,7 +8,7 @@ export interface ServiceField {
 	categoryId: ServiceCategoryId;
 	number: string;
 	label: string;
-	title: string;
+	title: DisplayText;
 	description: string;
 	mediaLabel: string;
 	mediaTone: MediaTone;
@@ -30,7 +31,7 @@ export interface WorkCategory {
 	id: WorksCategoryId;
 	number: string;
 	label: string;
-	title: string;
+	title: DisplayText;
 	description: string;
 	impressionLabel: string;
 	impressionTone: MediaTone;
@@ -39,7 +40,7 @@ export interface WorkCategory {
 
 export interface PageHeroContent {
 	eyebrow: string;
-	title: string;
+	title: DisplayText;
 	description: string;
 }
 
@@ -47,11 +48,11 @@ export interface ServicesPageContent {
 	metaTitle: string;
 	metaDescription: string;
 	hero: PageHeroContent;
-	fieldsHeading: { label: string; title: string; description: string };
+	fieldsHeading: { label: string; title: DisplayText; description: string };
 	fields: ServiceField[];
-	processHeading: { label: string; title: string; description: string };
+	processHeading: { label: string; title: DisplayText; description: string };
 	process: { number: string; label: string; title: string; text: string }[];
-	cta: { label: string; title: string; linkLabel: string };
+	cta: { label: string; title: DisplayText; linkLabel: string };
 }
 
 export interface WorksPageContent {
@@ -59,12 +60,12 @@ export interface WorksPageContent {
 	metaDescription: string;
 	hero: PageHeroContent;
 	categories: WorkCategory[];
-	cta: { label: string; title: string; linkLabel: string };
+	cta: { label: string; title: DisplayText; linkLabel: string };
 }
 
 export interface SampleRequestContent {
 	label: string;
-	title: string;
+	title: DisplayText;
 	description: string;
 	linkLabel: string;
 }
@@ -75,14 +76,14 @@ export interface AboutPageContent {
 	hero: PageHeroContent;
 	mediaLabel: string;
 	statementLabel: string;
-	statementTitle: string;
+	statementTitle: DisplayText;
 	statementParagraphs: string[];
-	attitudeHeading: { label: string; title: string };
+	attitudeHeading: { label: string; title: DisplayText };
 	attitudes: { number: string; title: string; text: string }[];
-	typesHeading: { label: string; title: string; description: string };
+	typesHeading: { label: string; title: DisplayText; description: string };
 	projectTypes: string[];
 	languageLabel: string;
-	languageTitle: string;
+	languageTitle: DisplayText;
 	languageDescription: string;
 	companyInfo: { term: string; detail: string }[];
 	sampleRequest: SampleRequestContent;
@@ -117,7 +118,7 @@ export interface ContactPageContent {
 	metaDescription: string;
 	hero: PageHeroContent;
 	guideLabel: string;
-	guideTitle: string;
+	guideTitle: DisplayText;
 	guideItems: string[];
 	googleFormTitle: string;
 	googleFormText: string;

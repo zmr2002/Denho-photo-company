@@ -3,6 +3,8 @@ import { BusinessField } from "@/components/ui/BusinessField";
 import { PlaceholderMedia } from "@/components/ui/PlaceholderMedia";
 import { ProjectCase } from "@/components/ui/ProjectCase";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { LineBreakText } from "@/components/ui/LineBreakText";
+import { displayTextToString } from "@/lib/text/display-text";
 
 interface HomePageProps {
   content: HomeContent;
@@ -17,7 +19,9 @@ export function HomePage({ content, basePath }: HomePageProps) {
         <div className="home-hero-overlay">
           <div className="wide-container">
             <p>{content.hero.label}</p>
-            <h1>{content.hero.title}</h1>
+            <h1>
+              <LineBreakText text={content.hero.title} />
+            </h1>
             <div className="hero-footer">
               <p>{content.hero.description}</p>
               <span>SCROLL</span>
@@ -52,7 +56,9 @@ export function HomePage({ content, basePath }: HomePageProps) {
             <p className="section-label">{content.about.label}</p>
           </div>
           <div className="lg:col-span-8 lg:col-start-5">
-            <h2 className="statement-title">{content.about.title}</h2>
+            <h2 className="statement-title">
+              <LineBreakText text={content.about.title} />
+            </h2>
             <p className="mt-8 max-w-3xl text-base leading-8 text-stone-600 md:text-lg">
               {content.about.description}
             </p>
@@ -121,7 +127,7 @@ export function HomePage({ content, basePath }: HomePageProps) {
           <div className="mt-16">
             {content.works.items.map((work, index) => (
               <ProjectCase
-                key={work.title}
+                key={displayTextToString(work.title)}
                 {...work}
                 number={String(index + 1).padStart(2, "0")}
               />
@@ -146,7 +152,9 @@ export function HomePage({ content, basePath }: HomePageProps) {
             <p className="section-label text-stone-950">{content.contact.label}</p>
           </div>
           <div className="md:col-span-7">
-            <h2>{content.contact.title}</h2>
+            <h2>
+              <LineBreakText text={content.contact.title} />
+            </h2>
             <p>{content.contact.description}</p>
           </div>
           <div className="md:col-span-2 md:text-right">

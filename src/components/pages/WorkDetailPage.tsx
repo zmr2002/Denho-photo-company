@@ -1,4 +1,5 @@
 import type { Work } from "@/lib/content";
+import { LineBreakText } from "@/components/ui/LineBreakText";
 import { PageHero } from "@/components/ui/PageHero";
 import { PlaceholderMedia } from "@/components/ui/PlaceholderMedia";
 
@@ -40,7 +41,9 @@ export function WorkDetailPage({ work }: WorkDetailPageProps) {
             </aside>
 
             <article className="lg:col-span-8 lg:col-start-5">
-              <h2 className="statement-title">Case study testcontext</h2>
+              <h2 className="statement-title">
+                <LineBreakText text="Case study testcontext" />
+              </h2>
               <div className="mt-8 grid gap-8 text-base leading-8 text-stone-600">
                 <section>
                   <p className="section-label">Challenge</p>

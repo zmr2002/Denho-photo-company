@@ -1,4 +1,5 @@
 import type { WorksPageContent } from "@/data/pages";
+import { LineBreakText } from "@/components/ui/LineBreakText";
 import { PageHero } from "@/components/ui/PageHero";
 import { WorkCategorySection } from "@/components/ui/WorkCategorySection";
 
@@ -35,7 +36,7 @@ export function WorksPage({ content, basePath }: WorksPageProps) {
           <div>
             <p className="section-label">{content.cta.label}</p>
             <h2 className="mt-5 max-w-3xl text-3xl font-semibold tracking-[-0.03em] text-white md:text-5xl">
-              {content.cta.title}
+              <LineBreakText text={content.cta.title} />
             </h2>
           </div>
           <a className="button-light shrink-0" href={`${basePath}/contact/`}>

@@ -1,4 +1,5 @@
 import type { MediaTone, WorkMediaType } from "@/data/pages";
+import type { DisplayText } from "@/lib/text/display-text";
 
 export type Locale = "ja" | "zh" | "en";
 export type PublishStatus = "draft" | "published";
@@ -69,15 +70,15 @@ export interface ServiceDetail {
   language: Locale;
   slug: "web-production" | "event-setup";
   eyebrow: string;
-  title: string;
+  title: DisplayText;
   description: string;
   sections: {
     label: string;
-    title: string;
+    title: DisplayText;
     text: string;
     bullets: string[];
   }[];
   ctaLabel: string;
-  ctaTitle: string;
+  ctaTitle: DisplayText;
   linkLabel: string;
 }

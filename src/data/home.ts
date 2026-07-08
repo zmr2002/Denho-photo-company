@@ -1,4 +1,5 @@
 import { site } from './site';
+import type { DisplayText } from '@/lib/text/display-text';
 
 export interface HomeNewsItem {
 	date: string;
@@ -10,7 +11,7 @@ export interface HomeNewsItem {
 export interface HomeServiceItem {
 	number: string;
 	label: string;
-	title: string;
+	title: DisplayText;
 	description: string;
 	mediaLabel: string;
 	mediaTone: 'neutral' | 'warm' | 'cool' | 'rust';
@@ -18,7 +19,7 @@ export interface HomeServiceItem {
 
 export interface HomeWorkItem {
 	category: string;
-	title: string;
+	title: DisplayText;
 	description: string;
 	scope: string;
 	mediaLabel: string;
@@ -28,39 +29,39 @@ export interface HomeWorkItem {
 export interface HomeContent {
 	hero: {
 		label: string;
-		title: string;
+		title: DisplayText;
 		description: string;
 		mediaLabel: string;
 	};
 	about: {
 		label: string;
-		title: string;
+		title: DisplayText;
 		description: string;
 		languageNote: string;
 		linkLabel: string;
 	};
 	news: {
 		label: string;
-		title: string;
+		title: DisplayText;
 		items: HomeNewsItem[];
 	};
 	services: {
 		label: string;
-		title: string;
+		title: DisplayText;
 		description: string;
 		linkLabel: string;
 		items: HomeServiceItem[];
 	};
 	works: {
 		label: string;
-		title: string;
+		title: DisplayText;
 		description: string;
 		linkLabel: string;
 		items: HomeWorkItem[];
 	};
 	contact: {
 		label: string;
-		title: string;
+		title: DisplayText;
 		description: string;
 		linkLabel: string;
 	};

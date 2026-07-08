@@ -1,5 +1,6 @@
 import type { HomeContent } from "@/data/home";
 import { homeContent } from "@/data/home";
+import type { DisplayText } from "@/lib/text/display-text";
 import type {
   AboutPageContent,
   ContactPageContent,
@@ -152,6 +153,10 @@ function toneForIndex(index: number): MediaTone {
   return tones[index % tones.length];
 }
 
+function lines(...text: string[]): DisplayText {
+  return text;
+}
+
 export function workToProjectCase(work: {
   category: string;
   title: string;
@@ -174,14 +179,14 @@ export function workToProjectCase(work: {
 const englishHomeContent: HomeContent = {
   hero: {
     label: "Photography / Film / Live Delivery",
-    title: "Photography and film production in Japan.",
+    title: lines("Photography and film production", "in Japan."),
     description:
       "testcontext English homepage content for local mock CMS verification.",
     mediaLabel: "English home hero placeholder",
   },
   about: {
     label: "About",
-    title: "Local production support from planning to delivery.",
+    title: lines("Local production support", "from planning to delivery."),
     description:
       "testcontext English about summary for local verification. This is temporary content.",
     languageNote: "Japanese / Simplified Chinese / English structure",
@@ -194,7 +199,7 @@ const englishHomeContent: HomeContent = {
   },
   services: {
     label: "Services",
-    title: "Production services",
+    title: lines("Production", "services"),
     description: "testcontext service overview for local English route verification.",
     linkLabel: "Services",
     items: [
@@ -234,14 +239,14 @@ const englishHomeContent: HomeContent = {
   },
   works: {
     label: "Selected Works",
-    title: "Mock featured works",
+    title: lines("Mock featured", "works"),
     description: "testcontext featured works from the mock content adapter.",
     linkLabel: "Works",
     items: [],
   },
   contact: {
     label: "Contact",
-    title: "Discuss a local production project.",
+    title: lines("Discuss a local", "production project."),
     description: "testcontext contact summary for local verification.",
     linkLabel: "Contact",
   },
@@ -252,12 +257,12 @@ const englishServicesPageContent: ServicesPageContent = {
   metaDescription: "English testcontext services page.",
   hero: {
     eyebrow: "Services",
-    title: "Production services for local verification.",
+    title: lines("Production services", "for local verification."),
     description: "testcontext services page content.",
   },
   fieldsHeading: {
     label: "Business Fields",
-    title: "Core service areas",
+    title: lines("Core service", "areas"),
     description: "testcontext service area structure.",
   },
   fields: englishHomeContent.services.items.map((item, index) => ({
@@ -273,7 +278,7 @@ const englishServicesPageContent: ServicesPageContent = {
   })),
   processHeading: {
     label: "Production Process",
-    title: "From inquiry to delivery",
+    title: lines("From inquiry", "to delivery"),
     description: "testcontext production process.",
   },
   process: ["Inquiry", "Planning", "Shooting", "Editing", "Delivery"].map((label, index) => ({
@@ -284,7 +289,7 @@ const englishServicesPageContent: ServicesPageContent = {
   })),
   cta: {
     label: "Project Inquiry",
-    title: "testcontext service inquiry",
+    title: lines("testcontext", "service inquiry"),
     linkLabel: "Contact",
   },
 };
@@ -294,7 +299,7 @@ const englishWorksPageContent: WorksPageContent = {
   metaDescription: "English testcontext works page.",
   hero: {
     eyebrow: "Works / Case Study",
-    title: "Mock CMS works for local verification.",
+    title: lines("Mock CMS works", "for local verification."),
     description: "testcontext works listing content from the adapter.",
   },
   categories: worksPageContent.ja.categories.map((category) => ({
@@ -305,7 +310,7 @@ const englishWorksPageContent: WorksPageContent = {
   })),
   cta: {
     label: "Start a Project",
-    title: "testcontext works inquiry",
+    title: lines("testcontext", "works inquiry"),
     linkLabel: "Contact",
   },
 };
@@ -315,17 +320,17 @@ const englishAboutPageContent: AboutPageContent = {
   metaDescription: "English testcontext about page.",
   hero: {
     eyebrow: "About",
-    title: "Production support in Japan.",
+    title: lines("Production support", "in Japan."),
     description: "testcontext about page content.",
   },
   mediaLabel: "English about placeholder",
   statementLabel: "Company Statement",
-  statementTitle: "testcontext company statement",
+  statementTitle: lines("testcontext", "company statement"),
   statementParagraphs: [
     "testcontext about paragraph one.",
     "testcontext about paragraph two.",
   ],
-  attitudeHeading: { label: "Production Attitude", title: "testcontext attitude" },
+  attitudeHeading: { label: "Production Attitude", title: lines("testcontext", "attitude") },
   attitudes: [1, 2, 3].map((number) => ({
     number: String(number).padStart(2, "0"),
     title: `Attitude ${number}`,
@@ -333,12 +338,12 @@ const englishAboutPageContent: AboutPageContent = {
   })),
   typesHeading: {
     label: "Project Types",
-    title: "Supported project types",
+    title: lines("Supported", "project types"),
     description: "testcontext project type list.",
   },
   projectTypes: ["Event / Conference", "Space / Stay", "Interview", "Portrait"],
   languageLabel: "Multilingual Support",
-  languageTitle: "Japanese / Simplified Chinese / English",
+  languageTitle: lines("Japanese / Simplified Chinese", "/ English"),
   languageDescription: "testcontext multilingual support description.",
   companyInfo: [
     { term: "Company", detail: "Mock company info" },
@@ -347,7 +352,7 @@ const englishAboutPageContent: AboutPageContent = {
   ],
   sampleRequest: {
     label: "Sample Consultation",
-    title: "testcontext sample request",
+    title: lines("testcontext", "sample request"),
     description: "testcontext sample request description.",
     linkLabel: "Contact",
   },
@@ -358,11 +363,11 @@ const englishContactPageContent: ContactPageContent = {
   metaDescription: "English testcontext contact page.",
   hero: {
     eyebrow: "Contact / Project Inquiry",
-    title: "Tell us about the project.",
+    title: lines("Tell us about", "the project."),
     description: "testcontext contact page content.",
   },
   guideLabel: "Before Inquiry",
-  guideTitle: "Helpful project information",
+  guideTitle: lines("Helpful project", "information"),
   guideItems: ["Purpose", "Date", "Location", "Deliverables", "Deadline"],
   googleFormTitle: "External form placeholder",
   googleFormText: "The final form strategy is still open.",
@@ -398,7 +403,7 @@ const englishContactPageContent: ContactPageContent = {
   ],
   sampleRequest: {
     label: "Sample Consultation",
-    title: "testcontext contact CTA",
+    title: lines("testcontext", "contact CTA"),
     description: "testcontext contact CTA description.",
     linkLabel: "Contact",
   },

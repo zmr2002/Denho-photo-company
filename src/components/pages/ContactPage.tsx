@@ -2,6 +2,7 @@ import type { ContactPageContent } from "@/data/pages";
 import { InquiryForm } from "@/components/ui/InquiryForm";
 import { PageHero } from "@/components/ui/PageHero";
 import { SampleRequestCta } from "@/components/ui/SampleRequestCta";
+import { LineBreakText } from "@/components/ui/LineBreakText";
 
 interface ContactPageProps {
   content: ContactPageContent;
@@ -17,7 +18,7 @@ export function ContactPage({ content }: ContactPageProps) {
           <aside className="lg:col-span-4">
             <p className="section-label">{content.guideLabel}</p>
             <h2 className="mt-5 text-3xl font-semibold tracking-[-0.03em] md:text-4xl">
-              {content.guideTitle}
+              <LineBreakText text={content.guideTitle} />
             </h2>
             <ol className="inquiry-guide mt-10">
               {content.guideItems.map((item, index) => (

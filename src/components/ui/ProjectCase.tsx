@@ -1,10 +1,12 @@
 import type { MediaTone } from "@/data/pages";
+import type { DisplayText } from "@/lib/text/display-text";
+import { LineBreakText } from "@/components/ui/LineBreakText";
 import { PlaceholderMedia } from "@/components/ui/PlaceholderMedia";
 
 interface ProjectCaseProps {
   number?: string;
   category: string;
-  title: string;
+  title: DisplayText;
   description: string;
   scope: string;
   mediaLabel: string;
@@ -28,7 +30,9 @@ export function ProjectCase({
       <div className="project-case-info">
         <div>
           <p className="section-label">{number ? `${number} / ${category}` : category}</p>
-          <h3>{title}</h3>
+          <h3>
+            <LineBreakText text={title} />
+          </h3>
         </div>
         <div>
           <p className="project-description">{description}</p>

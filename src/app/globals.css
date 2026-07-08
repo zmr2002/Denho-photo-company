@@ -147,6 +147,16 @@ a {
 	letter-spacing: -0.045em;
 }
 
+.display-line {
+	display: block;
+}
+
+.display-phrase {
+	display: inline-block;
+	max-width: 100%;
+	text-wrap: balance;
+}
+
 .page-hero {
 	border-bottom: 1px solid #d6d1c9;
 	background:

@@ -1,4 +1,5 @@
 import type { WorkCategory } from "@/data/pages";
+import { LineBreakText } from "@/components/ui/LineBreakText";
 import { PlaceholderMedia } from "@/components/ui/PlaceholderMedia";
 import { WorkCaseCard } from "@/components/ui/WorkCaseCard";
 
@@ -26,7 +27,9 @@ export function WorkCategorySection({
             <p>
               {number} / {label}
             </p>
-            <h2 id={`${id}-title`}>{title}</h2>
+            <h2 id={`${id}-title`}>
+              <LineBreakText text={title} />
+            </h2>
           </div>
           <p>{description}</p>
         </div>

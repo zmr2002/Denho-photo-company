@@ -1,10 +1,12 @@
 import type { MediaTone } from "@/data/pages";
 import { PlaceholderMedia } from "@/components/ui/PlaceholderMedia";
+import { LineBreakText } from "@/components/ui/LineBreakText";
+import type { DisplayText } from "@/lib/text/display-text";
 
 interface BusinessFieldProps {
   number: string;
   label: string;
-  title: string;
+  title: DisplayText;
   description: string;
   mediaLabel: string;
   mediaTone?: MediaTone;
@@ -40,7 +42,9 @@ export function BusinessField({
             <span className="field-number">{number}</span>
             <p className="section-label">{label}</p>
           </div>
-          <h3>{title}</h3>
+          <h3>
+            <LineBreakText text={title} />
+          </h3>
           <p className="field-description">{description}</p>
           {formats.length > 0 ? (
             <ul className="format-list" aria-label="Available formats">

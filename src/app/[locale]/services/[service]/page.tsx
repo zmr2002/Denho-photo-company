@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ServiceDetailPage } from "@/components/pages/ServiceDetailPage";
 import { SiteLayout } from "@/components/site/SiteLayout";
+import { displayTextToString } from "@/lib/text/display-text";
 import {
   getServiceDetail,
   getServiceDetails,
@@ -25,7 +26,7 @@ export async function generateMetadata({
   if (!isSupportedLocale(locale) || !isServiceSlug(service)) return {};
   const detail = getServiceDetail(locale, service);
   return {
-    title: detail?.title ?? "Service",
+    title: detail ? displayTextToString(detail.title) : "Service",
     description: detail?.description,
   };
 }
