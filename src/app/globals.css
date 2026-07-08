@@ -16,6 +16,7 @@ html {
 body {
 	--page-accent: #a64024;
 	--page-accent-soft: #d86645;
+	--ambient-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
 	margin: 0;
 	min-width: 320px;
 	background:
@@ -106,6 +107,11 @@ a {
 	padding-block: 5rem;
 }
 
+.section-space > .wide-container,
+.section-space > .site-container {
+	animation: ambient-rise 900ms var(--ambient-ease) both;
+}
+
 .section-dark {
 	background: #0b0b0b;
 	color: #e8e5df;
@@ -120,8 +126,19 @@ a {
 }
 
 .section-heading {
+	position: relative;
 	display: grid;
 	gap: 1.5rem;
+	animation: ambient-rise 820ms var(--ambient-ease) both;
+}
+
+.section-heading::after {
+	width: min(8rem, 36vw);
+	height: 1px;
+	background: linear-gradient(90deg, var(--page-accent), transparent);
+	content: "";
+	transform-origin: left center;
+	animation: line-reveal 960ms var(--ambient-ease) both;
 }
 
 .section-title {
@@ -137,6 +154,7 @@ a {
 	max-width: 37rem;
 	line-height: 1.9;
 	color: #66635f;
+	animation: ambient-soft-in 900ms var(--ambient-ease) both;
 }
 
 .statement-title {
@@ -145,6 +163,7 @@ a {
 	font-weight: 600;
 	line-height: 1.2;
 	letter-spacing: -0.045em;
+	animation: ambient-rise 960ms var(--ambient-ease) both;
 }
 
 .display-line {
@@ -169,7 +188,7 @@ a {
 .page-hero .section-label,
 .page-hero h1,
 .page-hero h1 + p {
-	animation: fade-up 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+	animation: fade-up 700ms var(--ambient-ease) both;
 }
 
 .page-hero h1 {
@@ -381,6 +400,7 @@ a {
 		background-position 900ms ease,
 		border-color 300ms ease,
 		box-shadow 400ms ease;
+	animation: media-breathe 30s ease-in-out infinite alternate;
 }
 
 .placeholder-media::after {
@@ -391,14 +411,17 @@ a {
 		radial-gradient(circle at 68% 28%, rgb(255 255 255 / 0.32), transparent 24%),
 		linear-gradient(125deg, transparent 30%, rgb(70 66 61 / 0.18) 31%, transparent 70%);
 	content: "";
-	transition: transform 1.2s cubic-bezier(0.2, 0.7, 0.2, 1);
+	transition: transform 1.2s var(--ambient-ease);
+	animation: texture-drift 24s ease-in-out infinite alternate;
 }
 
-.placeholder-media:hover::after {
+.portfolio-trigger:hover .placeholder-media::after,
+.portfolio-trigger:focus-visible .placeholder-media::after {
 	transform: translate3d(1.5%, -1%, 0) scale(1.055);
 }
 
-.placeholder-media:hover {
+.portfolio-trigger:hover .placeholder-media,
+.portfolio-trigger:focus-visible .placeholder-media {
 	border-color: #aeb7b7;
 	background-position: 100% 50%;
 	box-shadow: 0 1rem 2.5rem rgb(70 77 78 / 0.1);
@@ -522,7 +545,7 @@ a {
 .home-hero-overlay > div > p,
 .home-hero-overlay h1,
 .home-hero-overlay .hero-footer {
-	animation: fade-up 900ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+	animation: fade-up 900ms var(--ambient-ease) both;
 }
 
 .home-hero-overlay h1 {
@@ -695,6 +718,7 @@ a {
 	border: 1px solid #d6d1c9;
 	background: rgb(250 249 246 / 0.98);
 	box-shadow: 0 2rem 5rem rgb(0 0 0 / 0.24);
+	animation: modal-sheet-in 360ms var(--ambient-ease) both;
 }
 
 .news-detail-header {
@@ -743,6 +767,10 @@ a {
 
 .news-detail-article {
 	padding-top: clamp(2rem, 5vw, 4rem);
+}
+
+.news-detail-article > * {
+	animation: ambient-soft-in 720ms var(--ambient-ease) both;
 }
 
 .news-detail-panel h3 {
@@ -815,14 +843,9 @@ a {
 .business-field {
 	border-top: 1px solid #aaa59d;
 	padding-block: 3rem;
+	animation: ambient-rise 900ms var(--ambient-ease) both;
 	transition:
-		border-color 300ms ease,
-		transform 350ms ease;
-}
-
-.business-field:hover {
-	border-color: #7f8988;
-	transform: translateY(-0.2rem);
+		border-color 300ms ease;
 }
 
 .business-field:last-child {
@@ -855,6 +878,10 @@ a {
 
 .business-field-copy {
 	align-self: center;
+}
+
+.business-field-copy > * {
+	animation: ambient-soft-in 900ms var(--ambient-ease) both;
 }
 
 .field-number {
@@ -1044,6 +1071,7 @@ a {
 .process-grid li {
 	padding-block: 2rem;
 	border-bottom: 1px solid #3c3a37;
+	animation: ambient-soft-in 900ms var(--ambient-ease) both;
 }
 
 .process-grid li > span,
@@ -1138,6 +1166,10 @@ a {
 	align-content: end;
 	gap: 1.5rem;
 	padding: 1.5rem;
+}
+
+.work-impression-overlay > * {
+	animation: ambient-rise 950ms var(--ambient-ease) both;
 }
 
 .work-impression-overlay > div > p {
@@ -1372,6 +1404,7 @@ a {
 	background: rgb(250 249 246 / 0.98);
 	box-shadow: 0 1.5rem 4rem rgb(0 0 0 / 0.22);
 	color: #20201e;
+	animation: modal-sheet-in 340ms var(--ambient-ease) both;
 }
 
 .site-opening-notice-label {
@@ -1434,15 +1467,8 @@ a {
 	color: #fff;
 	transition:
 		border-color 300ms ease,
-		box-shadow 400ms ease,
-		transform 400ms ease;
+		box-shadow 400ms ease;
 	animation: sample-light 26s ease-in-out infinite alternate;
-}
-
-.sample-request:hover {
-	border-color: #83736a;
-	box-shadow: 0 1.5rem 3.5rem rgb(46 49 49 / 0.14);
-	transform: translateY(-0.25rem);
 }
 
 .sample-request > div:first-child > p {
@@ -1481,6 +1507,7 @@ a {
 	gap: 1rem;
 	padding-block: 2rem;
 	border-bottom: 1px solid #aaa59d;
+	animation: ambient-soft-in 900ms var(--ambient-ease) both;
 }
 
 .attitude-list span {
@@ -1740,6 +1767,70 @@ a {
 	}
 	to {
 		background-position: 100% 55%;
+	}
+}
+
+@keyframes media-breathe {
+	from {
+		background-position: 18% 45%;
+	}
+	to {
+		background-position: 82% 55%;
+	}
+}
+
+@keyframes texture-drift {
+	from {
+		opacity: 0.78;
+		transform: translate3d(-0.8%, -0.4%, 0) scale(1);
+	}
+	to {
+		opacity: 1;
+		transform: translate3d(1%, 0.6%, 0) scale(1.025);
+	}
+}
+
+@keyframes ambient-rise {
+	from {
+		opacity: 0;
+		transform: translateY(0.75rem);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes ambient-soft-in {
+	from {
+		opacity: 0;
+		transform: translateY(0.35rem);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes line-reveal {
+	from {
+		opacity: 0;
+		transform: scaleX(0);
+	}
+	to {
+		opacity: 1;
+		transform: scaleX(1);
+	}
+}
+
+@keyframes modal-sheet-in {
+	from {
+		opacity: 0;
+		transform: translateY(0.75rem) scale(0.99);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
 	}
 }
 
