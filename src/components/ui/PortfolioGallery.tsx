@@ -39,10 +39,12 @@ export function PortfolioGallery({
   const [activeIndex, setActiveIndex] = useState(0);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const titleText = displayTextToString(title);
+  const isVideo = video || mediaType === "video";
+  const canOpenGallery = !isVideo;
 
   const images = useMemo<GalleryImage[]>(
     () =>
-      galleryImages?.length
+      canOpenGallery && galleryImages?.length
         ? galleryImages
         : [
             {
@@ -51,7 +53,7 @@ export function PortfolioGallery({
               tone: mediaTone,
             },
           ],
-    [galleryImages, mediaLabel, mediaTone, titleText],
+    [canOpenGallery, galleryImages, mediaLabel, mediaTone, titleText],
   );
 
   const activeImage = images[activeIndex];
@@ -59,6 +61,7 @@ export function PortfolioGallery({
   const activeLabel = String(activeIndex + 1).padStart(2, "0");
 
   const openGallery = () => {
+    if (!canOpenGallery) return;
     setActiveIndex(0);
     setIsOpen(true);
   };
@@ -74,6 +77,8 @@ export function PortfolioGallery({
   }, [images.length]);
 
   const handleTriggerKeyDown = (event: ReactKeyboardEvent<HTMLElement>) => {
+    if (!canOpenGallery) return;
+
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       openGallery();
@@ -82,6 +87,8 @@ export function PortfolioGallery({
 
   useEffect(() => {
     if (!isOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
 
     const handleKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -98,7 +105,10 @@ export function PortfolioGallery({
     };
 
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, [closeGallery, isOpen, showNext, showPrevious]);
 
   const handleTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
@@ -120,13 +130,13 @@ export function PortfolioGallery({
     <>
       {variant === "project" ? (
         <article
-          className="project-case portfolio-trigger"
-          role="button"
-          tabIndex={0}
-          aria-haspopup="dialog"
-          aria-expanded={isOpen}
-          onClick={openGallery}
-          onKeyDown={handleTriggerKeyDown}
+          className={`project-case${canOpenGallery ? " portfolio-trigger" : ""}`}
+          role={canOpenGallery ? "button" : undefined}
+          tabIndex={canOpenGallery ? 0 : undefined}
+          aria-haspopup={canOpenGallery ? "dialog" : undefined}
+          aria-expanded={canOpenGallery ? isOpen : undefined}
+          onClick={canOpenGallery ? openGallery : undefined}
+          onKeyDown={canOpenGallery ? handleTriggerKeyDown : undefined}
         >
           <PlaceholderMedia label={mediaLabel} size="panoramic" video={video} tone={mediaTone} />
           <div className="project-case-info">
@@ -144,23 +154,23 @@ export function PortfolioGallery({
         </article>
       ) : (
         <article
-          className="work-case-card portfolio-trigger"
-          role="button"
-          tabIndex={0}
-          aria-haspopup="dialog"
-          aria-expanded={isOpen}
-          onClick={openGallery}
-          onKeyDown={handleTriggerKeyDown}
+          className={`work-case-card${canOpenGallery ? " portfolio-trigger" : ""}`}
+          role={canOpenGallery ? "button" : undefined}
+          tabIndex={canOpenGallery ? 0 : undefined}
+          aria-haspopup={canOpenGallery ? "dialog" : undefined}
+          aria-expanded={canOpenGallery ? isOpen : undefined}
+          onClick={canOpenGallery ? openGallery : undefined}
+          onKeyDown={canOpenGallery ? handleTriggerKeyDown : undefined}
         >
           <div className={`work-case-media work-case-media-${mediaType}`}>
             <PlaceholderMedia
               label={mediaLabel}
               size="wide"
               tone={mediaTone}
-              video={mediaType === "video"}
+              video={isVideo}
             />
             <span className="work-media-type">{mediaType.toUpperCase()}</span>
-            {images.length > 1 ? (
+            {canOpenGallery && images.length > 1 ? (
               <span className="gallery-count">01 / {totalLabel}</span>
             ) : null}
           </div>
@@ -177,21 +187,23 @@ export function PortfolioGallery({
           className="portfolio-gallery-backdrop"
           role="dialog"
           aria-modal="true"
-          aria-labelledby="portfolio-gallery-title"
+          aria-label={`${titleText} image gallery`}
+          onClick={closeGallery}
         >
-          <div className="portfolio-gallery-panel">
-            <div className="portfolio-gallery-header">
-              <div>
-                <p>{category}</p>
-                <h2 id="portfolio-gallery-title">
-                  <LineBreakText text={title} />
-                </h2>
-              </div>
-              <button type="button" onClick={closeGallery}>
-                Close
-              </button>
-            </div>
-
+          <button className="portfolio-gallery-close" type="button" onClick={closeGallery}>
+            Close
+          </button>
+          <button
+            className="portfolio-gallery-side portfolio-gallery-prev"
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              showPrevious();
+            }}
+          >
+            Prev
+          </button>
+          <div className="portfolio-gallery-frame" onClick={(event) => event.stopPropagation()}>
             <div
               className="portfolio-gallery-stage"
               onTouchStart={(event) => setTouchStartX(event.touches[0].clientX)}
@@ -201,25 +213,22 @@ export function PortfolioGallery({
                 label={activeImage.label}
                 size="panoramic"
                 tone={activeImage.tone}
-                video={video && activeIndex === 0}
               />
             </div>
-
-            <div className="portfolio-gallery-footer">
-              <p>{activeImage.alt}</p>
-              <div className="portfolio-gallery-controls">
-                <button type="button" onClick={showPrevious}>
-                  Prev
-                </button>
-                <strong aria-live="polite">
-                  {activeLabel} / {totalLabel}
-                </strong>
-                <button type="button" onClick={showNext}>
-                  Next
-                </button>
-              </div>
-            </div>
+            <p className="portfolio-gallery-counter" aria-live="polite">
+              {activeLabel} / {totalLabel}
+            </p>
           </div>
+          <button
+            className="portfolio-gallery-side portfolio-gallery-next"
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              showNext();
+            }}
+          >
+            Next
+          </button>
         </div>
       ) : null}
     </>

@@ -12,6 +12,8 @@ export function NewsNoticeViewer({ items }: NewsNoticeViewerProps) {
 
   useEffect(() => {
     if (!selected) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -20,7 +22,10 @@ export function NewsNoticeViewer({ items }: NewsNoticeViewerProps) {
     };
 
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, [selected]);
 
   return (
@@ -50,19 +55,22 @@ export function NewsNoticeViewer({ items }: NewsNoticeViewerProps) {
 
       {selected ? (
         <div
-          className="news-detail-panel"
+          className="news-modal-backdrop"
           role="dialog"
-          aria-modal="false"
+          aria-modal="true"
           aria-labelledby="news-detail-title"
+          onClick={() => setSelected(null)}
         >
-          <div className="news-detail-header">
-            <p>{selected.category}</p>
-            <button type="button" onClick={() => setSelected(null)}>
-              Close
-            </button>
+          <div className="news-detail-panel" onClick={(event) => event.stopPropagation()}>
+            <div className="news-detail-header">
+              <p>{selected.category}</p>
+              <button type="button" onClick={() => setSelected(null)}>
+                Close
+              </button>
+            </div>
+            <h3 id="news-detail-title">{selected.detailTitle ?? selected.title}</h3>
+            <p>{selected.detailBody ?? selected.excerpt}</p>
           </div>
-          <h3 id="news-detail-title">{selected.detailTitle ?? selected.title}</h3>
-          <p>{selected.detailBody ?? selected.excerpt}</p>
         </div>
       ) : null}
     </div>
