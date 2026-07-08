@@ -1,7 +1,7 @@
 import type { MediaTone } from "@/data/pages";
 import type { GalleryImage } from "@/data/pages";
 import type { DisplayText } from "@/lib/text/display-text";
-import { PortfolioGallery } from "@/components/ui/PortfolioGallery";
+import { PortfolioGallery, type GalleryControlLabels } from "@/components/ui/PortfolioGallery";
 
 interface ProjectCaseProps {
   number?: string;
@@ -13,6 +13,7 @@ interface ProjectCaseProps {
   mediaTone?: MediaTone;
   video?: boolean;
   galleryImages?: GalleryImage[];
+  galleryLabels?: GalleryControlLabels;
 }
 
 export function ProjectCase({
@@ -25,6 +26,7 @@ export function ProjectCase({
   mediaTone = "neutral",
   video = false,
   galleryImages,
+  galleryLabels,
 }: ProjectCaseProps) {
   return (
     <PortfolioGallery
@@ -38,6 +40,7 @@ export function ProjectCase({
       mediaTone={mediaTone}
       video={video}
       galleryImages={galleryImages}
+      galleryLabels={galleryLabels}
     />
   );
 }

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent, TouchEvent } from "react";
+import { createPortal } from "react-dom";
 import type { DisplayText } from "@/lib/text/display-text";
 import { displayTextToString } from "@/lib/text/display-text";
 import type { GalleryImage, MediaTone, WorkMediaType } from "@/data/pages";
@@ -20,7 +21,22 @@ interface PortfolioGalleryProps {
   mediaType?: WorkMediaType;
   video?: boolean;
   galleryImages?: GalleryImage[];
+  galleryLabels?: GalleryControlLabels;
 }
+
+export interface GalleryControlLabels {
+  dialog: string;
+  close: string;
+  previous: string;
+  next: string;
+}
+
+const defaultGalleryLabels: GalleryControlLabels = {
+  dialog: "Image gallery",
+  close: "Close image viewer",
+  previous: "Previous image",
+  next: "Next image",
+};
 
 export function PortfolioGallery({
   variant,
@@ -34,10 +50,12 @@ export function PortfolioGallery({
   mediaType = "photo",
   video = false,
   galleryImages,
+  galleryLabels = defaultGalleryLabels,
 }: PortfolioGalleryProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const portalRoot = typeof document === "undefined" ? null : document.body;
   const titleText = displayTextToString(title);
   const isVideo = video || mediaType === "video";
   const canOpenGallery = !isVideo;
@@ -59,6 +77,7 @@ export function PortfolioGallery({
   const activeImage = images[activeIndex];
   const totalLabel = String(images.length).padStart(2, "0");
   const activeLabel = String(activeIndex + 1).padStart(2, "0");
+  const hasMultipleImages = images.length > 1;
 
   const openGallery = () => {
     if (!canOpenGallery) return;
@@ -182,27 +201,36 @@ export function PortfolioGallery({
         </article>
       )}
 
-      {isOpen ? (
+      {isOpen && portalRoot
+        ? createPortal(
         <div
           className="portfolio-gallery-backdrop"
           role="dialog"
           aria-modal="true"
-          aria-label={`${titleText} image gallery`}
+          aria-label={`${titleText} ${galleryLabels.dialog}`}
           onClick={closeGallery}
         >
-          <button className="portfolio-gallery-close" type="button" onClick={closeGallery}>
-            Close
-          </button>
           <button
-            className="portfolio-gallery-side portfolio-gallery-prev"
+            className="portfolio-gallery-close"
             type="button"
-            onClick={(event) => {
-              event.stopPropagation();
-              showPrevious();
-            }}
+            aria-label={galleryLabels.close}
+            onClick={closeGallery}
           >
-            Prev
+            ×
           </button>
+          {hasMultipleImages ? (
+            <button
+              className="portfolio-gallery-side portfolio-gallery-prev"
+              type="button"
+              aria-label={galleryLabels.previous}
+              onClick={(event) => {
+                event.stopPropagation();
+                showPrevious();
+              }}
+            >
+              ‹
+            </button>
+          ) : null}
           <div className="portfolio-gallery-frame" onClick={(event) => event.stopPropagation()}>
             <div
               className="portfolio-gallery-stage"
@@ -219,18 +247,23 @@ export function PortfolioGallery({
               {activeLabel} / {totalLabel}
             </p>
           </div>
-          <button
-            className="portfolio-gallery-side portfolio-gallery-next"
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation();
-              showNext();
-            }}
-          >
-            Next
-          </button>
-        </div>
-      ) : null}
+          {hasMultipleImages ? (
+            <button
+              className="portfolio-gallery-side portfolio-gallery-next"
+              type="button"
+              aria-label={galleryLabels.next}
+              onClick={(event) => {
+                event.stopPropagation();
+                showNext();
+              }}
+            >
+              ›
+            </button>
+          ) : null}
+        </div>,
+          portalRoot,
+        )
+        : null}
     </>
   );
 }

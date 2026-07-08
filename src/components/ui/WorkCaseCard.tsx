@@ -1,7 +1,11 @@
 import type { WorkCase } from "@/data/pages";
-import { PortfolioGallery } from "@/components/ui/PortfolioGallery";
+import { PortfolioGallery, type GalleryControlLabels } from "@/components/ui/PortfolioGallery";
 
-export function WorkCaseCard(workCase: WorkCase) {
+interface WorkCaseCardProps extends WorkCase {
+  galleryLabels?: GalleryControlLabels;
+}
+
+export function WorkCaseCard(workCase: WorkCaseCardProps) {
   return (
     <PortfolioGallery
       variant="work"
@@ -13,6 +17,7 @@ export function WorkCaseCard(workCase: WorkCase) {
       mediaTone={workCase.mediaTone}
       mediaType={workCase.mediaType}
       galleryImages={workCase.galleryImages}
+      galleryLabels={workCase.galleryLabels}
     />
   );
 }

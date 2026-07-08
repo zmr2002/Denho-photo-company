@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import type { SiteLanguage } from "@/data/navigation";
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
+import { SiteOpeningNotice } from "@/components/ui/SiteOpeningNotice";
+import { getSiteOpeningNotice } from "@/lib/content";
 
 type PageTheme = "home" | "services" | "works" | "about" | "contact" | "placeholder";
 
@@ -18,11 +20,14 @@ export function SiteLayout({
   currentPath,
   page = "home",
 }: SiteLayoutProps) {
+  const openingNotice = getSiteOpeningNotice(lang);
+
   return (
     <div className={`site-shell page-theme-${page}`} lang={lang}>
       <Header lang={lang} currentPath={currentPath} />
       <main>{children}</main>
       <Footer lang={lang} />
+      <SiteOpeningNotice notice={openingNotice} />
     </div>
   );
 }

@@ -5,18 +5,18 @@ export const navigationLabels: Record<
 	{ home: string; services: string; works: string; about: string; contact: string }
 > = {
 	ja: {
-		home: 'HOME',
-		services: 'SERVICES',
-		works: 'WORKS',
-		about: 'ABOUT',
-		contact: 'CONTACT',
+		home: 'ホーム',
+		services: 'サービス',
+		works: '制作実績',
+		about: '会社情報',
+		contact: 'お問い合わせ',
 	},
 	zh: {
-		home: 'HOME',
-		services: 'SERVICES',
-		works: 'WORKS',
-		about: 'ABOUT',
-		contact: 'CONTACT',
+		home: '首页',
+		services: '服务',
+		works: '案例',
+		about: '关于',
+		contact: '咨询',
 	},
 	en: {
 		home: 'HOME',
@@ -29,7 +29,7 @@ export const navigationLabels: Record<
 
 export const languageLinks = [
 	{ lang: 'ja', label: 'JP', href: '/ja/' },
-	{ lang: 'zh', label: '中文', href: '/zh/' },
+	{ lang: 'zh', label: '简中', href: '/zh/' },
 	{ lang: 'en', label: 'EN', href: '/en/' },
 ] as const;
 

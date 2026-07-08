@@ -9,6 +9,27 @@ interface WorksPageProps {
 }
 
 export function WorksPage({ content, basePath }: WorksPageProps) {
+  const galleryLabels = basePath === "/zh"
+    ? {
+        dialog: "图片画廊",
+        close: "关闭图片查看器",
+        previous: "上一张图片",
+        next: "下一张图片",
+      }
+    : basePath === "/en"
+      ? {
+          dialog: "image gallery",
+          close: "Close image viewer",
+          previous: "Previous image",
+          next: "Next image",
+        }
+      : {
+          dialog: "画像ギャラリー",
+          close: "画像ビューアを閉じる",
+          previous: "前の画像",
+          next: "次の画像",
+        };
+
   return (
     <>
       <PageHero {...content.hero} />
@@ -25,7 +46,7 @@ export function WorksPage({ content, basePath }: WorksPageProps) {
 
           <div className="work-category-list">
             {content.categories.map((category) => (
-              <WorkCategorySection key={category.id} {...category} />
+              <WorkCategorySection key={category.id} {...category} galleryLabels={galleryLabels} />
             ))}
           </div>
         </div>

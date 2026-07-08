@@ -2,6 +2,11 @@ import type { WorkCategory } from "@/data/pages";
 import { LineBreakText } from "@/components/ui/LineBreakText";
 import { PlaceholderMedia } from "@/components/ui/PlaceholderMedia";
 import { WorkCaseCard } from "@/components/ui/WorkCaseCard";
+import type { GalleryControlLabels } from "@/components/ui/PortfolioGallery";
+
+interface WorkCategorySectionProps extends WorkCategory {
+  galleryLabels?: GalleryControlLabels;
+}
 
 export function WorkCategorySection({
   id,
@@ -12,7 +17,8 @@ export function WorkCategorySection({
   impressionLabel,
   impressionTone,
   cases,
-}: WorkCategory) {
+  galleryLabels,
+}: WorkCategorySectionProps) {
   return (
     <section className="work-category-section" id={id} aria-labelledby={`${id}-title`}>
       <div className="work-impression-strip">
@@ -36,7 +42,7 @@ export function WorkCategorySection({
       </div>
       <div className="work-case-grid">
         {cases.map((workCase) => (
-          <WorkCaseCard key={`${id}-${workCase.title}`} {...workCase} />
+          <WorkCaseCard key={`${id}-${workCase.title}`} {...workCase} galleryLabels={galleryLabels} />
         ))}
       </div>
     </section>

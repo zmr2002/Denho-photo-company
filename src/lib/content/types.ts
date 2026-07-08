@@ -11,6 +11,16 @@ export interface MockImage {
   tone: MediaTone;
 }
 
+export interface ArticleImageBlock extends MockImage {
+  caption?: string;
+}
+
+export interface ArticleSection {
+  heading: string;
+  paragraphs: string[];
+  image?: ArticleImageBlock;
+}
+
 export interface Notice {
   id: string;
   language: Locale;
@@ -18,10 +28,32 @@ export interface Notice {
   excerpt: string;
   detailTitle: string;
   detailBody: string;
+  detailLead: string;
+  detailSectionTitle: string;
+  detailParagraphs: string[];
+  detailImage?: ArticleImageBlock;
+  detailSections?: ArticleSection[];
+  detailClosing: string;
+  closeLabel: string;
   category: string;
   publishedAt: string;
   status: PublishStatus;
   linkHref?: string;
+}
+
+export interface SiteNotice {
+  id: string;
+  language: Locale;
+  enabled: boolean;
+  label: string;
+  title: string;
+  body: string;
+  dismissLabel: string;
+  storageKey: string;
+  dismissalMode: "session" | "local";
+  status: PublishStatus;
+  startAt?: string;
+  endAt?: string;
 }
 
 export interface Article {

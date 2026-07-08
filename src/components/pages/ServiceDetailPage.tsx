@@ -9,6 +9,12 @@ interface ServiceDetailPageProps {
 }
 
 export function ServiceDetailPage({ content, locale }: ServiceDetailPageProps) {
+  const ctaDescription = {
+    ja: "制作範囲や進行方法について、現在分かる情報からご相談ください。",
+    zh: "请根据目前已确定的信息，咨询制作范围与执行方式。",
+    en: "Share the current details so the team can discuss scope and workflow.",
+  }[locale];
+
   return (
     <>
       <PageHero
@@ -43,7 +49,7 @@ export function ServiceDetailPage({ content, locale }: ServiceDetailPageProps) {
           <SectionHeading
             label={content.ctaLabel}
             title={content.ctaTitle}
-            description="Temporary service CTA for local verification."
+            description={ctaDescription}
             light
           />
           <a className="button-light mt-12" href={`/${locale}/contact/`}>

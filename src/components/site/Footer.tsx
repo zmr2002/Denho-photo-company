@@ -6,9 +6,15 @@ interface FooterProps {
 }
 
 const productionText: Record<SiteLanguage, string> = {
-  ja: "企画・撮影・編集・納品",
+  ja: "企画、撮影、編集、納品",
   zh: "策划、拍摄、编辑与交付",
   en: "Planning, Shooting, Editing and Delivery",
+};
+
+const mediaText: Record<SiteLanguage, string> = {
+  ja: "写真 / 映像 / 当日納品",
+  zh: "摄影 / 视频 / 现场交付",
+  en: "Photography / Film / Live Delivery",
 };
 
 export function Footer({ lang }: FooterProps) {
@@ -18,7 +24,7 @@ export function Footer({ lang }: FooterProps) {
         <div>
           <p className="text-xl font-semibold tracking-[0.08em] text-white">{site.name}</p>
           <p className="mt-5 max-w-lg text-sm leading-7 text-stone-400">
-            Photography / Film / Live Delivery
+            {mediaText[lang]}
             <br />
             {productionText[lang]}
           </p>

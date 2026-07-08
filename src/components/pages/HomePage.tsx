@@ -13,6 +13,60 @@ interface HomePageProps {
 }
 
 export function HomePage({ content, basePath }: HomePageProps) {
+  const homeLabels = basePath === "/zh"
+    ? {
+        production: "一站式制作",
+        planning: "策划",
+        shooting: "拍摄",
+        editing: "编辑",
+        delivery: "交付",
+        scroll: "滚动",
+        previous: "上一项",
+        next: "下一项",
+      }
+    : basePath === "/en"
+      ? {
+          production: "One-stop production",
+          planning: "Planning",
+          shooting: "Shooting",
+          editing: "Editing",
+          delivery: "Delivery",
+          scroll: "Scroll",
+          previous: "Prev",
+          next: "Next",
+        }
+      : {
+          production: "ワンストップ制作",
+          planning: "企画",
+          shooting: "撮影",
+          editing: "編集",
+          delivery: "納品",
+          scroll: "スクロール",
+          previous: "前へ",
+          next: "次へ",
+        };
+
+  const galleryLabels = basePath === "/zh"
+    ? {
+        dialog: "图片画廊",
+        close: "关闭图片查看器",
+        previous: "上一张图片",
+        next: "下一张图片",
+      }
+    : basePath === "/en"
+      ? {
+          dialog: "image gallery",
+          close: "Close image viewer",
+          previous: "Previous image",
+          next: "Next image",
+        }
+      : {
+          dialog: "画像ギャラリー",
+          close: "画像ビューアを閉じる",
+          previous: "前の画像",
+          next: "次の画像",
+        };
+
   return (
     <>
       <section className="home-hero">
@@ -25,7 +79,7 @@ export function HomePage({ content, basePath }: HomePageProps) {
             </h1>
             <div className="hero-footer">
               <p>{content.hero.description}</p>
-              <span>SCROLL</span>
+              <span>{homeLabels.scroll}</span>
             </div>
           </div>
         </div>
@@ -33,19 +87,19 @@ export function HomePage({ content, basePath }: HomePageProps) {
 
       <section className="production-band" aria-label="Production capabilities">
         <div className="wide-container">
-          <p>ONE-STOP PRODUCTION</p>
+          <p>{homeLabels.production}</p>
           <ol>
             <li>
-              <span>01</span> Planning
+              <span>01</span> {homeLabels.planning}
             </li>
             <li>
-              <span>02</span> Shooting
+              <span>02</span> {homeLabels.shooting}
             </li>
             <li>
-              <span>03</span> Editing
+              <span>03</span> {homeLabels.editing}
             </li>
             <li>
-              <span>04</span> Delivery
+              <span>04</span> {homeLabels.delivery}
             </li>
           </ol>
         </div>
@@ -115,6 +169,7 @@ export function HomePage({ content, basePath }: HomePageProps) {
                 key={displayTextToString(work.title)}
                 {...work}
                 number={String(index + 1).padStart(2, "0")}
+                galleryLabels={galleryLabels}
               />
             ))}
           </div>
@@ -123,9 +178,9 @@ export function HomePage({ content, basePath }: HomePageProps) {
               {content.works.linkLabel}
             </a>
             <div className="static-controls" aria-label="Static carousel preview">
-              <span>PREV</span>
+              <span>{homeLabels.previous}</span>
               <strong>01 / 03</strong>
-              <span>NEXT</span>
+              <span>{homeLabels.next}</span>
             </div>
           </div>
         </div>

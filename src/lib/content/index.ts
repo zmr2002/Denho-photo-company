@@ -20,11 +20,12 @@ import type { Locale } from "@/lib/content/types";
 import {
   mockArticles,
   mockNotices,
+  mockSiteNotices,
   mockServiceDetails,
   mockWorks,
 } from "@/lib/content/mock";
 
-export type { Article, Locale, Notice, ServiceDetail, Work } from "@/lib/content/types";
+export type { Article, Locale, Notice, ServiceDetail, SiteNotice, Work } from "@/lib/content/types";
 
 export const contentSource = "mock";
 
@@ -40,6 +41,17 @@ export function isSupportedLocale(value: string): value is Locale {
 
 export function getNotices(locale: Locale) {
   return mockNotices.filter((notice) => notice.language === locale && notice.status === "published");
+}
+
+export function getSiteOpeningNotice(locale: Locale) {
+  const now = new Date();
+
+  return mockSiteNotices.find((notice) => {
+    if (notice.language !== locale || notice.status !== "published" || !notice.enabled) return false;
+    if (notice.startAt && new Date(notice.startAt) > now) return false;
+    if (notice.endAt && new Date(notice.endAt) < now) return false;
+    return true;
+  });
 }
 
 export function getArticles(locale: Locale) {
@@ -88,6 +100,13 @@ export function getHomePageContent(locale: Locale): HomeContent {
         excerpt: notice.excerpt,
         detailTitle: notice.detailTitle,
         detailBody: notice.detailBody,
+        detailLead: notice.detailLead,
+        detailSectionTitle: notice.detailSectionTitle,
+        detailParagraphs: notice.detailParagraphs,
+        detailImage: notice.detailImage,
+        detailSections: notice.detailSections,
+        detailClosing: notice.detailClosing,
+        closeLabel: notice.closeLabel,
       })),
     },
     works: {
@@ -99,6 +118,8 @@ export function getHomePageContent(locale: Locale): HomeContent {
         scope: work.scope,
         mediaLabel: work.featuredImage.label,
         mediaTone: work.featuredImage.tone,
+        mediaType: work.mediaType,
+        video: work.mediaType === "video",
         galleryImages: work.galleryImages,
       })),
     },
@@ -153,11 +174,6 @@ function getBaseHomeContent(locale: Locale): HomeContent {
   return homeContent[locale];
 }
 
-function toneForIndex(index: number): MediaTone {
-  const tones: MediaTone[] = ["rust", "warm", "cool", "neutral"];
-  return tones[index % tones.length];
-}
-
 function lines(...text: string[]): DisplayText {
   return text;
 }
@@ -185,18 +201,18 @@ export function workToProjectCase(work: {
 
 const englishHomeContent: HomeContent = {
   hero: {
-    label: "Photography / Film / Live Delivery",
-    title: lines("Photography and film production", "in Japan."),
+    label: "Photography / Film / Same-day Delivery",
+    title: lines("Production support", "from planning to delivery."),
     description:
-      "Temporary English homepage content for local mock CMS verification.",
-    mediaLabel: "English home hero placeholder",
+      "A temporary English homepage sample for photography, film, and on-site media delivery projects in Japan.",
+    mediaLabel: "Home hero visual",
   },
   about: {
     label: "About",
-    title: lines("Local production support", "from planning to delivery."),
+    title: lines("We shape project value", "from the real production site."),
     description:
-      "Temporary English about summary for local verification.",
-    languageNote: "Japanese / Simplified Chinese / English structure",
+      "This local sample describes an end-to-end production team for planning, shooting, editing, and delivery.",
+    languageNote: "Japanese / Simplified Chinese / English support",
     linkLabel: "About",
   },
   news: {
@@ -206,71 +222,71 @@ const englishHomeContent: HomeContent = {
   },
   services: {
     label: "Services",
-    title: lines("Production", "services"),
-    description: "Temporary service overview for local English route verification.",
+    title: lines("Four production", "service areas"),
+    description: "Temporary service overview for event, space, interview, and portrait projects.",
     linkLabel: "Services",
     items: [
       {
         number: "01",
         label: "Event / Conference",
         title: "Event and conference production",
-        description: "Temporary service card.",
-        mediaLabel: "Event placeholder",
+        description: "Capture the schedule, speakers, and atmosphere of business events.",
+        mediaLabel: "Event production",
         mediaTone: "rust",
       },
       {
         number: "02",
-        label: "Space / Property / Stay",
+        label: "Space / Stay",
         title: "Space and stay media",
-        description: "Temporary service card.",
-        mediaLabel: "Space placeholder",
+        description: "Show the design intent, details, and visitor experience of a place.",
+        mediaLabel: "Space production",
         mediaTone: "warm",
       },
       {
         number: "03",
-        label: "Interview / Documentary",
+        label: "Interview / Brand Story",
         title: "Interview and brand story",
-        description: "Temporary service card.",
-        mediaLabel: "Interview placeholder",
+        description: "Turn people, work, and background into credible production content.",
+        mediaLabel: "Interview production",
         mediaTone: "cool",
       },
       {
         number: "04",
         label: "Portrait / Profile",
         title: "Portrait and profile",
-        description: "Temporary service card.",
-        mediaLabel: "Portrait placeholder",
+        description: "Create natural and professional profile visuals for people and teams.",
+        mediaLabel: "Portrait production",
         mediaTone: "neutral",
       },
     ],
   },
   works: {
     label: "Selected Works",
-    title: lines("Mock featured", "works"),
-    description: "Temporary featured works from the mock content adapter.",
+    title: lines("Sample featured", "projects"),
+    description: "Temporary project examples from the local mock content adapter.",
     linkLabel: "Works",
     items: [],
   },
   contact: {
     label: "Contact",
-    title: lines("Discuss a local", "production project."),
-    description: "Temporary contact summary for local verification.",
+    title: lines("Discuss a production", "project in Japan."),
+    description: "Share the current project background, date, location, and deliverables.",
     linkLabel: "Contact",
   },
 };
 
 const englishServicesPageContent: ServicesPageContent = {
   metaTitle: "Services",
-  metaDescription: "English temporary services page.",
+  metaDescription: "Temporary English services page for local verification.",
   hero: {
     eyebrow: "Services",
-    title: lines("Production services", "for local verification."),
-    description: "Temporary services page content.",
+    title: lines("Production services", "organized around project goals."),
+    description: "The sample service page keeps photography, film, editing, and delivery in one workflow.",
   },
   fieldsHeading: {
-    label: "Business Fields",
-    title: lines("Core service", "areas"),
-    description: "Temporary service area structure.",
+    label: "Service Areas",
+    title: lines("Four core", "production areas"),
+    description: "Each area can combine photography, video, editing, and delivery support.",
   },
   fields: englishHomeContent.services.items.map((item, index) => ({
     categoryId: (["event", "space", "interview", "portrait"] as const)[index],
@@ -279,106 +295,172 @@ const englishServicesPageContent: ServicesPageContent = {
     title: item.title,
     description: item.description,
     mediaLabel: item.mediaLabel,
-    mediaTone: toneForIndex(index),
+    mediaTone: item.mediaTone,
     formats: ["Planning", "Shooting", "Editing", "Delivery"],
     reversed: index % 2 === 1,
   })),
   processHeading: {
     label: "Production Process",
     title: lines("From inquiry", "to delivery"),
-    description: "Temporary production process.",
+    description: "A clear temporary workflow for local production verification.",
   },
   process: ["Inquiry", "Planning", "Shooting", "Editing", "Delivery"].map((label, index) => ({
     number: String(index + 1).padStart(2, "0"),
     label,
     title: `${label} step`,
-    text: "Temporary process text.",
+    text: "Temporary process text for local verification.",
   })),
   cta: {
     label: "Project Inquiry",
-    title: lines("Service", "inquiry"),
+    title: lines("Discuss the right", "production method."),
     linkLabel: "Contact",
   },
 };
 
+const englishWorkCategories: WorkCategory[] = [
+  {
+    id: "featured",
+    number: "00",
+    label: "Featured Projects",
+    title: "Featured projects",
+    description: "Representative temporary projects that combine multiple production areas.",
+    impressionLabel: "Featured production overview",
+    impressionTone: "rust",
+    cases: [],
+  },
+  {
+    id: "event",
+    number: "01",
+    label: "Event / Conference",
+    title: "Event and conference",
+    description: "Capture the venue, speakers, and audience interaction as a full-day production story.",
+    impressionLabel: "Live event atmosphere",
+    impressionTone: "rust",
+    cases: [],
+  },
+  {
+    id: "space",
+    number: "02",
+    label: "Space / Stay",
+    title: "Space and stay",
+    description: "Show design, materials, light, and use cases through local sample media.",
+    impressionLabel: "Space and hospitality mood",
+    impressionTone: "warm",
+    cases: [],
+  },
+  {
+    id: "interview",
+    number: "03",
+    label: "Interview / Brand Story",
+    title: "Interview and brand story",
+    description: "Combine spoken content and work scenes to communicate organizational background.",
+    impressionLabel: "Voice and workplace detail",
+    impressionTone: "cool",
+    cases: [],
+  },
+  {
+    id: "portrait",
+    number: "04",
+    label: "Portrait / Profile",
+    title: "Portrait and profile",
+    description: "Build a natural and professional profile expression for people and teams.",
+    impressionLabel: "Portrait direction",
+    impressionTone: "neutral",
+    cases: [
+      { title: "Creative Leaders", description: "A unified profile series for multiple team leads.", scope: "Portrait / Retouching", mediaLabel: "Creative leaders", mediaTone: "neutral", mediaType: "gallery" },
+      { title: "Executive Profile", description: "Management portraits for corporate and public relations use.", scope: "Direction / Photo", mediaLabel: "Executive profile", mediaTone: "cool", mediaType: "photo" },
+      { title: "Artist in Studio", description: "A short video profile combining person and workspace.", scope: "Portrait / Film", mediaLabel: "Artist profile", mediaTone: "warm", mediaType: "video" },
+    ],
+  },
+  {
+    id: "video",
+    number: "05",
+    label: "Video Projects",
+    title: "Video projects",
+    description: "Short films and documentary-style content using sound, movement, and time.",
+    impressionLabel: "Film sequence and movement",
+    impressionTone: "rust",
+    cases: [
+      { title: "A Day at the Workshop", description: "A temporary observational film sample from a workshop.", scope: "Film / Sound / Editing", mediaLabel: "Workshop film", mediaTone: "rust", mediaType: "video" },
+      { title: "Hospitality Brand Film", description: "A short sample film showing arrival and stay experience.", scope: "Planning / Film", mediaLabel: "Hospitality film", mediaTone: "warm", mediaType: "video" },
+      { title: "Conference Highlight", description: "A public-facing event highlight sample.", scope: "Event / Film / Editing", mediaLabel: "Conference highlight", mediaTone: "cool", mediaType: "video" },
+    ],
+  },
+];
+
 const englishWorksPageContent: WorksPageContent = {
   metaTitle: "Works",
-  metaDescription: "English temporary works page.",
+  metaDescription: "Temporary English works page for local verification.",
   hero: {
     eyebrow: "Works / Case Study",
-    title: lines("Mock CMS works", "for local verification."),
-    description: "Temporary works listing content from the adapter.",
+    title: lines("Projects begin", "with goals and context."),
+    description: "Temporary work examples from the local content adapter.",
   },
-  categories: worksPageContent.ja.categories.map((category) => ({
-    ...category,
-    title: `${category.label} examples`,
-    description: "Temporary work category description.",
-    impressionLabel: `${category.label} placeholder`,
-  })),
+  categories: englishWorkCategories,
   cta: {
     label: "Start a Project",
-    title: lines("Works", "inquiry"),
+    title: lines("Need a similar", "production project in Japan?"),
     linkLabel: "Contact",
   },
 };
 
 const englishAboutPageContent: AboutPageContent = {
   metaTitle: "About",
-  metaDescription: "English temporary about page.",
+  metaDescription: "Temporary English about page.",
   hero: {
     eyebrow: "About",
-    title: lines("Production support", "in Japan."),
-    description: "Temporary about page content.",
+    title: lines("Production support", "based in Japan."),
+    description: "This sample page explains the team's production attitude, project types, and language support.",
   },
-  mediaLabel: "English about placeholder",
+  mediaLabel: "Production team",
   statementLabel: "Company Statement",
-  statementTitle: lines("Temporary", "company statement"),
+  statementTitle: lines("Not just recording images,", "but understanding what to communicate."),
   statementParagraphs: [
-    "Temporary about paragraph one.",
-    "Temporary about paragraph two.",
+    "The sample company supports event, space, interview, brand story, and portrait projects.",
+    "The workflow covers planning, direction, shooting, editing, and delivery inside Japan.",
   ],
-  attitudeHeading: { label: "Production Attitude", title: lines("Temporary", "attitude") },
-  attitudes: [1, 2, 3].map((number) => ({
-    number: String(number).padStart(2, "0"),
-    title: `Attitude ${number}`,
-    text: "Temporary attitude text.",
-  })),
+  attitudeHeading: { label: "Production Attitude", title: lines("How the team", "approaches production") },
+  attitudes: [
+    { number: "01", title: "Understand the goal first", text: "The intended use shapes the shoot priorities and delivery format." },
+    { number: "02", title: "Make decisions on site", text: "The plan guides production while the team responds to real conditions." },
+    { number: "03", title: "Own the delivery", text: "File specs, timing, editing, and handoff are treated as part of production." },
+  ],
   typesHeading: {
     label: "Project Types",
     title: lines("Supported", "project types"),
-    description: "Temporary project type list.",
+    description: "Temporary project types for local English verification.",
   },
-  projectTypes: ["Event / Conference", "Space / Stay", "Interview", "Portrait"],
-  languageLabel: "Multilingual Support",
+  projectTypes: ["Event / Conference", "Space / Stay", "Interview / Brand Story", "Portrait / Profile"],
+  languageLabel: "Language Support",
   languageTitle: lines("Japanese / Simplified Chinese", "/ English"),
-  languageDescription: "Temporary multilingual support description.",
+  languageDescription: "Communication can be supported in Japanese, Simplified Chinese, and English.",
   companyInfo: [
-    { term: "Company", detail: "Mock company info" },
-    { term: "Location", detail: "Japan / temporary" },
-    { term: "Business", detail: "Photography, film, live delivery" },
+    { term: "Company", detail: "Temporary company information" },
+    { term: "Location", detail: "Japan / details to be confirmed" },
+    { term: "Business", detail: "Photography, film, editing, and delivery" },
   ],
   sampleRequest: {
     label: "Sample Consultation",
-    title: lines("Temporary", "sample request"),
-    description: "Temporary sample request description.",
+    title: lines("Discuss sample", "production references"),
+    description: "Share the project type, use case, and desired direction when requesting references.",
     linkLabel: "Contact",
   },
 };
 
 const englishContactPageContent: ContactPageContent = {
   metaTitle: "Contact",
-  metaDescription: "English temporary contact page.",
+  metaDescription: "Temporary English contact page.",
   hero: {
     eyebrow: "Contact / Project Inquiry",
     title: lines("Tell us about", "the project."),
-    description: "Temporary contact page content.",
+    description: "Share the current background, date, location, and expected deliverables.",
   },
   guideLabel: "Before Inquiry",
   guideTitle: lines("Helpful project", "information"),
   guideItems: ["Purpose", "Date", "Location", "Deliverables", "Deadline"],
   googleFormTitle: "External form placeholder",
   googleFormText: "The final form strategy is still open.",
-  formHeading: "PROJECT INQUIRY FORM",
+  formHeading: "Project inquiry form",
   formStatus: "Static layout / No submission",
   form: {
     ariaLabel: "Project inquiry form",
@@ -399,19 +481,19 @@ const englishContactPageContent: ContactPageContent = {
     locationPlaceholder: "City, venue, or area",
     messageLabel: "Message",
     messageEnglish: "Message",
-    messagePlaceholder: "Temporary project background",
+    messagePlaceholder: "Project background, use case, deliverables, and timing",
     buttonLabel: "Submit inquiry",
     statusText: "Static form. No data is submitted in this local phase.",
   },
   facts: [
     { label: "Production Area", value: "Japan-based" },
     { label: "Languages", value: "Japanese / Simplified Chinese / English" },
-    { label: "Response", value: "Temporary" },
+    { label: "Response", value: "Temporary display" },
   ],
   sampleRequest: {
     label: "Sample Consultation",
-    title: lines("Temporary", "contact CTA"),
-    description: "Temporary contact CTA description.",
+    title: lines("Discuss sample", "production references"),
+    description: "Use the form to describe the shoot type and intended use.",
     linkLabel: "Contact",
   },
 };
