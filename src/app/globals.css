@@ -619,7 +619,16 @@ a {
 	border-bottom: 1px solid #bbb6ae;
 	transition:
 		border-color 220ms ease,
-		transform 220ms ease;
+	transform 220ms ease;
+}
+
+.news-row-button {
+	width: 100%;
+	border: 0;
+	background: transparent;
+	color: inherit;
+	text-align: left;
+	cursor: pointer;
 }
 
 .news-row:hover {
@@ -662,6 +671,69 @@ a {
 
 .news-row:hover .news-arrow {
 	transform: translate(0.2rem, -0.2rem);
+}
+
+.news-detail-panel {
+	margin-top: 1.5rem;
+	padding: 1.5rem;
+	border: 1px solid #aaa59d;
+	background: rgb(250 249 246 / 0.95);
+	box-shadow: 0 1rem 2rem rgb(61 68 69 / 0.08);
+}
+
+.news-detail-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+}
+
+.news-detail-header p {
+	font-size: 0.62rem;
+	font-weight: 700;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--page-accent);
+}
+
+.news-detail-header button,
+.portfolio-gallery-header button,
+.portfolio-gallery-controls button {
+	border: 1px solid #aaa59d;
+	background: transparent;
+	padding: 0.55rem 0.75rem;
+	font-size: 0.62rem;
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: inherit;
+	cursor: pointer;
+	transition:
+		background-color 180ms ease,
+		border-color 180ms ease,
+		color 180ms ease;
+}
+
+.news-detail-header button:hover,
+.portfolio-gallery-header button:hover,
+.portfolio-gallery-controls button:hover {
+	border-color: var(--page-accent);
+	background: var(--page-accent);
+	color: #fff;
+}
+
+.news-detail-panel h3 {
+	margin-top: 1.5rem;
+	font-size: clamp(1.4rem, 3vw, 2.25rem);
+	font-weight: 600;
+	line-height: 1.2;
+}
+
+.news-detail-panel > p {
+	margin-top: 1rem;
+	font-size: 0.95rem;
+	line-height: 1.8;
+	color: #66635f;
 }
 
 .business-field {
@@ -775,6 +847,10 @@ a {
 .project-case {
 	padding-block: 1.25rem 4rem;
 	border-top: 1px solid #aaa59d;
+}
+
+.portfolio-trigger {
+	cursor: pointer;
 }
 
 .project-case-info {
@@ -1098,6 +1174,81 @@ a {
 	font-size: 0.85rem;
 	line-height: 1.75;
 	color: #66635f;
+}
+
+.portfolio-gallery-backdrop {
+	position: fixed;
+	z-index: 90;
+	inset: 0;
+	display: grid;
+	place-items: center;
+	padding: 1rem;
+	background: rgb(11 11 11 / 0.74);
+}
+
+.portfolio-gallery-panel {
+	width: min(100%, 68rem);
+	max-height: min(90vh, 56rem);
+	overflow: auto;
+	border: 1px solid #d6d1c9;
+	background: #faf9f6;
+	color: #20201e;
+	box-shadow: 0 2rem 5rem rgb(0 0 0 / 0.28);
+}
+
+.portfolio-gallery-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 1.25rem;
+	border-bottom: 1px solid #d6d1c9;
+}
+
+.portfolio-gallery-header p {
+	font-size: 0.62rem;
+	font-weight: 700;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--page-accent);
+}
+
+.portfolio-gallery-header h2 {
+	margin-top: 0.5rem;
+	font-size: clamp(1.5rem, 3vw, 2.6rem);
+	font-weight: 600;
+	line-height: 1.15;
+}
+
+.portfolio-gallery-stage {
+	padding: 1.25rem;
+	touch-action: pan-y;
+}
+
+.portfolio-gallery-footer {
+	display: grid;
+	gap: 1rem;
+	padding: 0 1.25rem 1.25rem;
+}
+
+.portfolio-gallery-footer > p {
+	font-size: 0.78rem;
+	line-height: 1.6;
+	color: #66635f;
+}
+
+.portfolio-gallery-controls {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+}
+
+.portfolio-gallery-controls strong {
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.14em;
+	color: var(--page-accent);
 }
 
 .sample-request {

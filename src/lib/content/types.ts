@@ -16,6 +16,8 @@ export interface Notice {
   language: Locale;
   title: string;
   excerpt: string;
+  detailTitle: string;
+  detailBody: string;
   category: string;
   publishedAt: string;
   status: PublishStatus;
@@ -60,6 +62,7 @@ export interface Work {
   featuredOnHomepage: boolean;
   featuredOrder: number;
   featuredImage: MockImage;
+  galleryImages: MockImage[];
   mediaType: WorkMediaType;
   seoTitle: string;
   seoDescription: string;

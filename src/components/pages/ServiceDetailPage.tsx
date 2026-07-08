@@ -43,7 +43,7 @@ export function ServiceDetailPage({ content, locale }: ServiceDetailPageProps) {
           <SectionHeading
             label={content.ctaLabel}
             title={content.ctaTitle}
-            description="testcontext service CTA"
+            description="Temporary service CTA for local verification."
             light
           />
           <a className="button-light mt-12" href={`/${locale}/contact/`}>

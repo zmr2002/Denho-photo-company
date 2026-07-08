@@ -1,7 +1,7 @@
 import type { MediaTone } from "@/data/pages";
+import type { GalleryImage } from "@/data/pages";
 import type { DisplayText } from "@/lib/text/display-text";
-import { LineBreakText } from "@/components/ui/LineBreakText";
-import { PlaceholderMedia } from "@/components/ui/PlaceholderMedia";
+import { PortfolioGallery } from "@/components/ui/PortfolioGallery";
 
 interface ProjectCaseProps {
   number?: string;
@@ -12,6 +12,7 @@ interface ProjectCaseProps {
   mediaLabel: string;
   mediaTone?: MediaTone;
   video?: boolean;
+  galleryImages?: GalleryImage[];
 }
 
 export function ProjectCase({
@@ -23,22 +24,20 @@ export function ProjectCase({
   mediaLabel,
   mediaTone = "neutral",
   video = false,
+  galleryImages,
 }: ProjectCaseProps) {
   return (
-    <article className="project-case">
-      <PlaceholderMedia label={mediaLabel} size="panoramic" video={video} tone={mediaTone} />
-      <div className="project-case-info">
-        <div>
-          <p className="section-label">{number ? `${number} / ${category}` : category}</p>
-          <h3>
-            <LineBreakText text={title} />
-          </h3>
-        </div>
-        <div>
-          <p className="project-description">{description}</p>
-          <p className="project-scope">{scope}</p>
-        </div>
-      </div>
-    </article>
+    <PortfolioGallery
+      variant="project"
+      number={number}
+      category={category}
+      title={title}
+      description={description}
+      scope={scope}
+      mediaLabel={mediaLabel}
+      mediaTone={mediaTone}
+      video={video}
+      galleryImages={galleryImages}
+    />
   );
 }

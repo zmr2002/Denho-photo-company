@@ -1,11 +1,14 @@
 import { site } from './site';
 import type { DisplayText } from '@/lib/text/display-text';
+import type { GalleryImage } from '@/data/pages';
 
 export interface HomeNewsItem {
 	date: string;
 	category: string;
 	title: string;
 	excerpt: string;
+	detailTitle?: string;
+	detailBody?: string;
 }
 
 export interface HomeServiceItem {
@@ -24,6 +27,7 @@ export interface HomeWorkItem {
 	scope: string;
 	mediaLabel: string;
 	mediaTone: 'neutral' | 'warm' | 'cool' | 'rust';
+	galleryImages?: GalleryImage[];
 }
 
 export interface HomeContent {

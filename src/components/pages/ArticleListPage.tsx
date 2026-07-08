@@ -15,7 +15,7 @@ export function ArticleListPage({ articles, locale }: ArticleListPageProps) {
     <>
       <PageHero
         eyebrow="Articles / Journal"
-        title="Articles testcontext"
+        title="Articles"
         description="Mock CMS article listing for local verification."
       />
 

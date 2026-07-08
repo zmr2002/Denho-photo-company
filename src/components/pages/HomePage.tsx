@@ -4,6 +4,7 @@ import { PlaceholderMedia } from "@/components/ui/PlaceholderMedia";
 import { ProjectCase } from "@/components/ui/ProjectCase";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { LineBreakText } from "@/components/ui/LineBreakText";
+import { NewsNoticeViewer } from "@/components/ui/NewsNoticeViewer";
 import { displayTextToString } from "@/lib/text/display-text";
 
 interface HomePageProps {
@@ -77,23 +78,7 @@ export function HomePage({ content, basePath }: HomePageProps) {
           <SectionHeading label={content.news.label} title={content.news.title} />
           <div className="news-layout mt-12">
             <PlaceholderMedia label="Recent production activity" size="wide" tone="cool" />
-            <div className="border-t border-stone-400">
-              {content.news.items.map((item) => (
-                <article className="news-row" key={`${item.date}-${item.title}`}>
-                  <div className="news-meta">
-                    <time>{item.date}</time>
-                    <span>{item.category}</span>
-                  </div>
-                  <div>
-                    <h3>{item.title}</h3>
-                    <p>{item.excerpt}</p>
-                  </div>
-                  <span className="news-arrow" aria-hidden="true">
-                    ↗
-                  </span>
-                </article>
-              ))}
-            </div>
+            <NewsNoticeViewer items={content.news.items} />
           </div>
         </div>
       </section>

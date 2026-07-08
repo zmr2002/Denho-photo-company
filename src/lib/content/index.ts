@@ -86,6 +86,8 @@ export function getHomePageContent(locale: Locale): HomeContent {
         category: notice.category,
         title: notice.title,
         excerpt: notice.excerpt,
+        detailTitle: notice.detailTitle,
+        detailBody: notice.detailBody,
       })),
     },
     works: {
@@ -97,6 +99,7 @@ export function getHomePageContent(locale: Locale): HomeContent {
         scope: work.scope,
         mediaLabel: work.featuredImage.label,
         mediaTone: work.featuredImage.tone,
+        galleryImages: work.galleryImages,
       })),
     },
   };
@@ -120,12 +123,14 @@ export function getWorksPageContent(locale: Locale): WorksPageContent {
     return {
       ...category,
       cases: categoryWorks.map((work) => ({
+        category: work.category,
         title: work.title,
         description: work.summary,
         scope: work.scope,
         mediaLabel: work.featuredImage.label,
         mediaTone: work.featuredImage.tone,
         mediaType: work.mediaType,
+        galleryImages: work.galleryImages,
       })),
     };
   });
@@ -163,6 +168,7 @@ export function workToProjectCase(work: {
   summary: string;
   scope: string;
   featuredImage: { label: string; tone: MediaTone };
+  galleryImages?: { label: string; alt: string; tone: MediaTone }[];
   mediaType: WorkMediaType;
 }) {
   return {
@@ -172,6 +178,7 @@ export function workToProjectCase(work: {
     scope: work.scope,
     mediaLabel: work.featuredImage.label,
     mediaTone: work.featuredImage.tone,
+    galleryImages: work.galleryImages,
     video: work.mediaType === "video",
   };
 }
@@ -181,14 +188,14 @@ const englishHomeContent: HomeContent = {
     label: "Photography / Film / Live Delivery",
     title: lines("Photography and film production", "in Japan."),
     description:
-      "testcontext English homepage content for local mock CMS verification.",
+      "Temporary English homepage content for local mock CMS verification.",
     mediaLabel: "English home hero placeholder",
   },
   about: {
     label: "About",
     title: lines("Local production support", "from planning to delivery."),
     description:
-      "testcontext English about summary for local verification. This is temporary content.",
+      "Temporary English about summary for local verification.",
     languageNote: "Japanese / Simplified Chinese / English structure",
     linkLabel: "About",
   },
@@ -200,14 +207,14 @@ const englishHomeContent: HomeContent = {
   services: {
     label: "Services",
     title: lines("Production", "services"),
-    description: "testcontext service overview for local English route verification.",
+    description: "Temporary service overview for local English route verification.",
     linkLabel: "Services",
     items: [
       {
         number: "01",
         label: "Event / Conference",
         title: "Event and conference production",
-        description: "testcontext service card.",
+        description: "Temporary service card.",
         mediaLabel: "Event placeholder",
         mediaTone: "rust",
       },
@@ -215,7 +222,7 @@ const englishHomeContent: HomeContent = {
         number: "02",
         label: "Space / Property / Stay",
         title: "Space and stay media",
-        description: "testcontext service card.",
+        description: "Temporary service card.",
         mediaLabel: "Space placeholder",
         mediaTone: "warm",
       },
@@ -223,7 +230,7 @@ const englishHomeContent: HomeContent = {
         number: "03",
         label: "Interview / Documentary",
         title: "Interview and brand story",
-        description: "testcontext service card.",
+        description: "Temporary service card.",
         mediaLabel: "Interview placeholder",
         mediaTone: "cool",
       },
@@ -231,7 +238,7 @@ const englishHomeContent: HomeContent = {
         number: "04",
         label: "Portrait / Profile",
         title: "Portrait and profile",
-        description: "testcontext service card.",
+        description: "Temporary service card.",
         mediaLabel: "Portrait placeholder",
         mediaTone: "neutral",
       },
@@ -240,30 +247,30 @@ const englishHomeContent: HomeContent = {
   works: {
     label: "Selected Works",
     title: lines("Mock featured", "works"),
-    description: "testcontext featured works from the mock content adapter.",
+    description: "Temporary featured works from the mock content adapter.",
     linkLabel: "Works",
     items: [],
   },
   contact: {
     label: "Contact",
     title: lines("Discuss a local", "production project."),
-    description: "testcontext contact summary for local verification.",
+    description: "Temporary contact summary for local verification.",
     linkLabel: "Contact",
   },
 };
 
 const englishServicesPageContent: ServicesPageContent = {
   metaTitle: "Services",
-  metaDescription: "English testcontext services page.",
+  metaDescription: "English temporary services page.",
   hero: {
     eyebrow: "Services",
     title: lines("Production services", "for local verification."),
-    description: "testcontext services page content.",
+    description: "Temporary services page content.",
   },
   fieldsHeading: {
     label: "Business Fields",
     title: lines("Core service", "areas"),
-    description: "testcontext service area structure.",
+    description: "Temporary service area structure.",
   },
   fields: englishHomeContent.services.items.map((item, index) => ({
     categoryId: (["event", "space", "interview", "portrait"] as const)[index],
@@ -279,92 +286,92 @@ const englishServicesPageContent: ServicesPageContent = {
   processHeading: {
     label: "Production Process",
     title: lines("From inquiry", "to delivery"),
-    description: "testcontext production process.",
+    description: "Temporary production process.",
   },
   process: ["Inquiry", "Planning", "Shooting", "Editing", "Delivery"].map((label, index) => ({
     number: String(index + 1).padStart(2, "0"),
     label,
-    title: `${label} testcontext`,
-    text: "testcontext process text.",
+    title: `${label} step`,
+    text: "Temporary process text.",
   })),
   cta: {
     label: "Project Inquiry",
-    title: lines("testcontext", "service inquiry"),
+    title: lines("Service", "inquiry"),
     linkLabel: "Contact",
   },
 };
 
 const englishWorksPageContent: WorksPageContent = {
   metaTitle: "Works",
-  metaDescription: "English testcontext works page.",
+  metaDescription: "English temporary works page.",
   hero: {
     eyebrow: "Works / Case Study",
     title: lines("Mock CMS works", "for local verification."),
-    description: "testcontext works listing content from the adapter.",
+    description: "Temporary works listing content from the adapter.",
   },
   categories: worksPageContent.ja.categories.map((category) => ({
     ...category,
-    title: `${category.label} testcontext`,
-    description: "testcontext work category description.",
+    title: `${category.label} examples`,
+    description: "Temporary work category description.",
     impressionLabel: `${category.label} placeholder`,
   })),
   cta: {
     label: "Start a Project",
-    title: lines("testcontext", "works inquiry"),
+    title: lines("Works", "inquiry"),
     linkLabel: "Contact",
   },
 };
 
 const englishAboutPageContent: AboutPageContent = {
   metaTitle: "About",
-  metaDescription: "English testcontext about page.",
+  metaDescription: "English temporary about page.",
   hero: {
     eyebrow: "About",
     title: lines("Production support", "in Japan."),
-    description: "testcontext about page content.",
+    description: "Temporary about page content.",
   },
   mediaLabel: "English about placeholder",
   statementLabel: "Company Statement",
-  statementTitle: lines("testcontext", "company statement"),
+  statementTitle: lines("Temporary", "company statement"),
   statementParagraphs: [
-    "testcontext about paragraph one.",
-    "testcontext about paragraph two.",
+    "Temporary about paragraph one.",
+    "Temporary about paragraph two.",
   ],
-  attitudeHeading: { label: "Production Attitude", title: lines("testcontext", "attitude") },
+  attitudeHeading: { label: "Production Attitude", title: lines("Temporary", "attitude") },
   attitudes: [1, 2, 3].map((number) => ({
     number: String(number).padStart(2, "0"),
     title: `Attitude ${number}`,
-    text: "testcontext attitude text.",
+    text: "Temporary attitude text.",
   })),
   typesHeading: {
     label: "Project Types",
     title: lines("Supported", "project types"),
-    description: "testcontext project type list.",
+    description: "Temporary project type list.",
   },
   projectTypes: ["Event / Conference", "Space / Stay", "Interview", "Portrait"],
   languageLabel: "Multilingual Support",
   languageTitle: lines("Japanese / Simplified Chinese", "/ English"),
-  languageDescription: "testcontext multilingual support description.",
+  languageDescription: "Temporary multilingual support description.",
   companyInfo: [
     { term: "Company", detail: "Mock company info" },
-    { term: "Location", detail: "Japan / testcontext" },
+    { term: "Location", detail: "Japan / temporary" },
     { term: "Business", detail: "Photography, film, live delivery" },
   ],
   sampleRequest: {
     label: "Sample Consultation",
-    title: lines("testcontext", "sample request"),
-    description: "testcontext sample request description.",
+    title: lines("Temporary", "sample request"),
+    description: "Temporary sample request description.",
     linkLabel: "Contact",
   },
 };
 
 const englishContactPageContent: ContactPageContent = {
   metaTitle: "Contact",
-  metaDescription: "English testcontext contact page.",
+  metaDescription: "English temporary contact page.",
   hero: {
     eyebrow: "Contact / Project Inquiry",
     title: lines("Tell us about", "the project."),
-    description: "testcontext contact page content.",
+    description: "Temporary contact page content.",
   },
   guideLabel: "Before Inquiry",
   guideTitle: lines("Helpful project", "information"),
@@ -392,19 +399,19 @@ const englishContactPageContent: ContactPageContent = {
     locationPlaceholder: "City, venue, or area",
     messageLabel: "Message",
     messageEnglish: "Message",
-    messagePlaceholder: "testcontext project background",
+    messagePlaceholder: "Temporary project background",
     buttonLabel: "Submit inquiry",
     statusText: "Static form. No data is submitted in this local phase.",
   },
   facts: [
     { label: "Production Area", value: "Japan-based" },
     { label: "Languages", value: "Japanese / Simplified Chinese / English" },
-    { label: "Response", value: "testcontext" },
+    { label: "Response", value: "Temporary" },
   ],
   sampleRequest: {
     label: "Sample Consultation",
-    title: lines("testcontext", "contact CTA"),
-    description: "testcontext contact CTA description.",
+    title: lines("Temporary", "contact CTA"),
+    description: "Temporary contact CTA description.",
     linkLabel: "Contact",
   },
 };

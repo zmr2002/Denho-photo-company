@@ -42,7 +42,7 @@ export function WorkDetailPage({ work }: WorkDetailPageProps) {
 
             <article className="lg:col-span-8 lg:col-start-5">
               <h2 className="statement-title">
-                <LineBreakText text="Case study testcontext" />
+                <LineBreakText text="Case study" />
               </h2>
               <div className="mt-8 grid gap-8 text-base leading-8 text-stone-600">
                 <section>

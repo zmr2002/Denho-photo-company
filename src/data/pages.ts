@@ -18,13 +18,21 @@ export interface ServiceField {
 
 export type WorkMediaType = 'photo' | 'video' | 'gallery';
 
+export interface GalleryImage {
+	label: string;
+	alt: string;
+	tone: MediaTone;
+}
+
 export interface WorkCase {
+	category?: string;
 	title: string;
 	description: string;
 	scope: string;
 	mediaLabel: string;
 	mediaTone: MediaTone;
 	mediaType: WorkMediaType;
+	galleryImages?: GalleryImage[];
 }
 
 export interface WorkCategory {
