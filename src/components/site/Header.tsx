@@ -20,7 +20,6 @@ export function Header({ lang, currentPath }: HeaderProps) {
     { href: `${navBase}/contact/`, label: labels.contact },
   ];
 
-  const isAvailable = (href: string) => lang !== "en" || href === "/en/";
   const isCurrent = (href: string) =>
     currentPath === href || (isRootMarket && href === "/ja/");
 
@@ -34,12 +33,10 @@ export function Header({ lang, currentPath }: HeaderProps) {
         <nav className="primary-navigation" aria-label="Primary navigation">
           <ul>
             {navItems.map((item) => {
-              const available = isAvailable(item.href);
               const current = isCurrent(item.href);
               const className = [
                 "nav-link",
                 current ? "active" : "",
-                available ? "" : "muted",
               ]
                 .filter(Boolean)
                 .join(" ");
@@ -48,7 +45,7 @@ export function Header({ lang, currentPath }: HeaderProps) {
                 <li key={item.href}>
                   <Link
                     className={className}
-                    href={available ? item.href : `/${lang}/`}
+                    href={item.href}
                     aria-current={current ? "page" : undefined}
                   >
                     {item.label}

@@ -1,0 +1,56 @@
+import type { Article } from "@/lib/content";
+import { PageHero } from "@/components/ui/PageHero";
+import { PlaceholderMedia } from "@/components/ui/PlaceholderMedia";
+
+interface ArticleDetailPageProps {
+  article: Article;
+}
+
+export function ArticleDetailPage({ article }: ArticleDetailPageProps) {
+  return (
+    <>
+      <PageHero
+        eyebrow={`${article.category} / ${article.publishedAt}`}
+        title={article.title}
+        description={article.excerpt}
+      />
+
+      <section className="section-space">
+        <div className="wide-container grid gap-12 lg:grid-cols-12">
+          <aside className="lg:col-span-3">
+            <p className="section-label">Article Info</p>
+            <dl className="company-info mt-8">
+              <div>
+                <dt>Author</dt>
+                <dd>{article.authorName}</dd>
+              </div>
+              <div>
+                <dt>Updated</dt>
+                <dd>{article.updatedAt}</dd>
+              </div>
+            </dl>
+          </aside>
+
+          <article className="lg:col-span-8 lg:col-start-5">
+            <PlaceholderMedia
+              label={article.featuredImage.label}
+              size="panoramic"
+              tone={article.featuredImage.tone}
+            />
+            <div className="mt-10 grid gap-6 text-base leading-8 text-stone-600 md:text-lg">
+              {article.body.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
+            </div>
+            <div className="mt-10 border-t border-stone-300 pt-6">
+              <p className="section-label">Related Services</p>
+              <p className="mt-3 text-sm leading-7 text-stone-600">
+                {article.relatedServices.join(" / ")}
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+    </>
+  );
+}

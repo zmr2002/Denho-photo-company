@@ -3,7 +3,7 @@ import { WorksPage } from "@/components/pages/WorksPage";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { getWorksPageContent } from "@/lib/content";
 
-const content = getWorksPageContent("zh");
+const content = getWorksPageContent("en");
 
 export const metadata: Metadata = {
   title: content.metaTitle,
@@ -12,8 +12,8 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <SiteLayout lang="zh" page="works" currentPath="/zh/works/">
-      <WorksPage content={content} basePath="/zh" />
+    <SiteLayout lang="en" page="works" currentPath="/en/works/">
+      <WorksPage content={content} basePath="/en" />
     </SiteLayout>
   );
 }

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { WorksPage } from "@/components/pages/WorksPage";
+import { ContactPage } from "@/components/pages/ContactPage";
 import { SiteLayout } from "@/components/site/SiteLayout";
-import { getWorksPageContent } from "@/lib/content";
+import { getContactPageContent } from "@/lib/content";
 
-const content = getWorksPageContent("zh");
+const content = getContactPageContent("en");
 
 export const metadata: Metadata = {
   title: content.metaTitle,
@@ -12,8 +12,8 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <SiteLayout lang="zh" page="works" currentPath="/zh/works/">
-      <WorksPage content={content} basePath="/zh" />
+    <SiteLayout lang="en" page="contact" currentPath="/en/contact/">
+      <ContactPage content={content} />
     </SiteLayout>
   );
 }
