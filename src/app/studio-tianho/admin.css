@@ -170,6 +170,12 @@
   resize: vertical;
 }
 
+.admin-check-field input {
+  width: auto;
+  min-width: 1.1rem;
+  min-height: 1.1rem;
+}
+
 .admin-error {
   color: #9f3426;
   font-size: 0.78rem;
