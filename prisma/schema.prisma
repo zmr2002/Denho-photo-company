@@ -1,0 +1,144 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String?
+  passwordHash String
+  role         String    @default("admin")
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  articles     Article[] @relation("ArticleUpdatedBy")
+}
+
+model Article {
+  id             String         @id @default(cuid())
+  locale         String
+  slug           String
+  title          String
+  excerpt        String
+  category       String
+  authorName     String         @default("Editorial Team")
+  heroLabel      String?
+  heroAlt        String?
+  heroTone       String         @default("neutral")
+  heroCaption    String?
+  closingNote    String?
+  ctaLabel       String?
+  ctaHref        String?
+  status         String         @default("draft")
+  publishedAt    DateTime?
+  displayOrder   Int            @default(0)
+  relatedServices String        @default("[]")
+  seoTitle       String?
+  seoDescription String?
+  youtubeUrl     String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  updatedById    String?
+  updatedBy      AdminUser?     @relation("ArticleUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  blocks         ArticleBlock[]
+
+  @@unique([locale, slug])
+  @@index([locale, status, displayOrder])
+}
+
+model ArticleBlock {
+  id        String   @id @default(cuid())
+  articleId String
+  type      String   @default("paragraph")
+  heading   String?
+  body      String?
+  imagePath String?
+  imageAlt  String?
+  imageTone String   @default("neutral")
+  caption   String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@index([articleId, sortOrder])
+}
+
+model OpeningNotice {
+  id            String    @id @default(cuid())
+  locale        String
+  enabled       Boolean   @default(true)
+  label         String
+  title         String
+  body          String
+  dismissLabel  String
+  linkLabel     String?
+  linkHref      String?
+  storageKey    String
+  dismissalMode String    @default("session")
+  status        String    @default("published")
+  startAt       DateTime?
+  endAt         DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([locale])
+  @@index([locale, status, enabled])
+}
+
+model Work {
+  id                 String      @id @default(cuid())
+  locale             String
+  slug               String
+  title              String
+  summary            String
+  clientName         String
+  projectDate        String
+  category           String
+  serviceCategory    String
+  scope              String
+  challenge          String
+  approach           String      @default("[]")
+  outcome            String
+  deliverables       String      @default("[]")
+  status             String      @default("draft")
+  featuredOnHomepage Boolean     @default(false)
+  featuredOrder      Int         @default(0)
+  mediaType          String      @default("photo")
+  galleryEnabled     Boolean     @default(false)
+  seoTitle           String?
+  seoDescription     String?
+  youtubeUrl         String?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  images             WorkImage[]
+
+  @@unique([locale, slug])
+  @@index([locale, status, featuredOnHomepage, featuredOrder])
+}
+
+model WorkImage {
+  id        String   @id @default(cuid())
+  workId    String
+  path      String
+  label     String
+  tone      String   @default("neutral")
+  altJa     String?
+  altZh     String?
+  altEn     String?
+  captionJa String?
+  captionZh String?
+  captionEn String?
+  isCover   Boolean  @default(false)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  work      Work     @relation(fields: [workId], references: [id], onDelete: Cascade)
+
+  @@index([workId, sortOrder])
+}
