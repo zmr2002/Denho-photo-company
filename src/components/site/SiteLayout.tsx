@@ -14,13 +14,13 @@ interface SiteLayoutProps {
   page?: PageTheme;
 }
 
-export function SiteLayout({
+export async function SiteLayout({
   children,
   lang,
   currentPath,
   page = "home",
 }: SiteLayoutProps) {
-  const openingNotice = getSiteOpeningNotice(lang);
+  const openingNotice = await getSiteOpeningNotice(lang);
 
   return (
     <div className={`site-shell page-theme-${page}`} lang={lang}>

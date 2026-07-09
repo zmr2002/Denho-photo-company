@@ -9,10 +9,12 @@ export const metadata: Metadata = {
   description: site.description,
 };
 
-export default function Page() {
+export default async function Page() {
+  const content = await getHomePageContent("zh");
+
   return (
     <SiteLayout lang="zh" page="home" currentPath="/zh/">
-      <HomePage content={getHomePageContent("zh")} basePath="/zh" />
+      <HomePage content={content} basePath="/zh" />
     </SiteLayout>
   );
 }

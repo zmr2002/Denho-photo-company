@@ -17,17 +17,20 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, slug } = await params;
   if (!isSupportedLocale(locale)) return {};
-  const work = getWork(locale, slug);
+  const work = await getWork(locale, slug);
   return {
     title: work?.seoTitle ?? "Work",
     description: work?.seoDescription,
   };
 }
 
-export function generateStaticParams() {
-  return getSupportedLocales().flatMap((locale) =>
-    getWorks(locale).map((work) => ({ locale, slug: work.slug })),
+export async function generateStaticParams() {
+  const params = await Promise.all(
+    getSupportedLocales().map(async (locale) =>
+      (await getWorks(locale)).map((work) => ({ locale, slug: work.slug })),
+    ),
   );
+  return params.flat();
 }
 
 export default async function Page({
@@ -39,7 +42,7 @@ export default async function Page({
   if (!isSupportedLocale(localeParam)) notFound();
 
   const locale: Locale = localeParam;
-  const work = getWork(locale, slug);
+  const work = await getWork(locale, slug);
   if (!work) notFound();
 
   return (

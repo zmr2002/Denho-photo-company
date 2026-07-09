@@ -32,7 +32,7 @@ export function AdminWorkImagesForm({ workId, defaultValues }: AdminWorkImagesFo
     const payload = {
       ...values,
       galleryEnabled: values.mediaType === "video" ? false : values.galleryEnabled,
-      images: values.images.map((image, index) => ({ ...image, sortOrder: index })),
+      images: (values.images ?? []).map((image, index) => ({ ...image, sortOrder: index })),
     };
 
     const response = await fetch(`/api/admin/works/${workId}/images`, {

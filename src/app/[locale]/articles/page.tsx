@@ -30,7 +30,7 @@ export default async function Page({
 
   return (
     <SiteLayout lang={locale} page="works" currentPath={`/${locale}/articles/`}>
-      <ArticleListPage articles={getArticles(locale)} locale={locale} />
+      <ArticleListPage articles={await getArticles(locale)} locale={locale} />
     </SiteLayout>
   );
 }

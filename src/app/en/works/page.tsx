@@ -3,14 +3,17 @@ import { WorksPage } from "@/components/pages/WorksPage";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { getWorksPageContent } from "@/lib/content";
 
-const content = getWorksPageContent("en");
+export async function generateMetadata(): Promise<Metadata> {
+  const content = await getWorksPageContent("en");
+  return {
+    title: content.metaTitle,
+    description: content.metaDescription,
+  };
+}
 
-export const metadata: Metadata = {
-  title: content.metaTitle,
-  description: content.metaDescription,
-};
+export default async function Page() {
+  const content = await getWorksPageContent("en");
 
-export default function Page() {
   return (
     <SiteLayout lang="en" page="works" currentPath="/en/works/">
       <WorksPage content={content} basePath="/en" />

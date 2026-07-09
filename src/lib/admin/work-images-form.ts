@@ -1,5 +1,7 @@
 import type { AdminWorkImagesFormValues } from "@/components/admin/AdminWorkImagesForm";
 
+type WorkImageFormItem = NonNullable<AdminWorkImagesFormValues["images"]>[number];
+
 type WorkForImageForm = {
   mediaType: string;
   galleryEnabled: boolean;
@@ -25,7 +27,7 @@ export function workToImageFormValues(work: WorkForImageForm): AdminWorkImagesFo
     images: work.images.map((image) => ({
       path: image.path,
       label: image.label,
-      tone: image.tone as AdminWorkImagesFormValues["images"][number]["tone"],
+      tone: image.tone as WorkImageFormItem["tone"],
       altJa: image.altJa || "",
       altZh: image.altZh || "",
       altEn: image.altEn || "",

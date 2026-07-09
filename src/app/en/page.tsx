@@ -9,10 +9,12 @@ export const metadata: Metadata = {
   description: "English mock content for local production verification.",
 };
 
-export default function Page() {
+export default async function Page() {
+  const content = await getHomePageContent("en");
+
   return (
     <SiteLayout lang="en" page="home" currentPath="/en/">
-      <HomePage content={getHomePageContent("en")} basePath="/en" />
+      <HomePage content={content} basePath="/en" />
     </SiteLayout>
   );
 }

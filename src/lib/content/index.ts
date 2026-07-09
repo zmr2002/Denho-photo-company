@@ -24,10 +24,16 @@ import {
   mockServiceDetails,
   mockWorks,
 } from "@/lib/content/mock";
+import {
+  getDbArticles,
+  getDbNotices,
+  getDbOpeningNotice,
+  getDbWorks,
+} from "@/lib/content/db";
 
 export type { Article, Locale, Notice, ServiceDetail, SiteNotice, Work } from "@/lib/content/types";
 
-export const contentSource = "mock";
+export const contentSource = process.env.CONTENT_PROVIDER === "db" ? "db" : "mock";
 
 const supportedLocales: Locale[] = ["ja", "zh", "en"];
 
@@ -39,11 +45,36 @@ export function isSupportedLocale(value: string): value is Locale {
   return supportedLocales.includes(value as Locale);
 }
 
-export function getNotices(locale: Locale) {
+export async function getNotices(locale: Locale) {
+  if (contentSource === "db") {
+    try {
+      return await getDbNotices(locale);
+    } catch (error) {
+      console.error("Falling back to mock notices.", error);
+    }
+  }
+
+  return getMockNotices(locale);
+}
+
+export async function getSiteOpeningNotice(locale: Locale) {
+  if (contentSource === "db") {
+    try {
+      const notice = await getDbOpeningNotice(locale);
+      if (notice) return notice;
+    } catch (error) {
+      console.error("Falling back to mock opening notice.", error);
+    }
+  }
+
+  return getMockSiteOpeningNotice(locale);
+}
+
+function getMockNotices(locale: Locale) {
   return mockNotices.filter((notice) => notice.language === locale && notice.status === "published");
 }
 
-export function getSiteOpeningNotice(locale: Locale) {
+function getMockSiteOpeningNotice(locale: Locale) {
   const now = new Date();
 
   return mockSiteNotices.find((notice) => {
@@ -54,24 +85,48 @@ export function getSiteOpeningNotice(locale: Locale) {
   });
 }
 
-export function getArticles(locale: Locale) {
+export async function getArticles(locale: Locale) {
+  if (contentSource === "db") {
+    try {
+      return await getDbArticles(locale);
+    } catch (error) {
+      console.error("Falling back to mock articles.", error);
+    }
+  }
+
+  return getMockArticles(locale);
+}
+
+export async function getArticle(locale: Locale, slug: string) {
+  return (await getArticles(locale)).find((article) => article.slug === slug);
+}
+
+function getMockArticles(locale: Locale) {
   return mockArticles.filter((article) => article.language === locale && article.status === "published");
 }
 
-export function getArticle(locale: Locale, slug: string) {
-  return getArticles(locale).find((article) => article.slug === slug);
+export async function getWorks(locale: Locale) {
+  if (contentSource === "db") {
+    try {
+      return await getDbWorks(locale);
+    } catch (error) {
+      console.error("Falling back to mock works.", error);
+    }
+  }
+
+  return getMockWorks(locale);
 }
 
-export function getWorks(locale: Locale) {
+export async function getWork(locale: Locale, slug: string) {
+  return (await getWorks(locale)).find((work) => work.slug === slug);
+}
+
+function getMockWorks(locale: Locale) {
   return mockWorks.filter((work) => work.language === locale && work.status === "published");
 }
 
-export function getWork(locale: Locale, slug: string) {
-  return getWorks(locale).find((work) => work.slug === slug);
-}
-
-export function getFeaturedWorks(locale: Locale) {
-  return getWorks(locale)
+export async function getFeaturedWorks(locale: Locale) {
+  return (await getWorks(locale))
     .filter((work) => work.featuredOnHomepage)
     .sort((a, b) => a.featuredOrder - b.featuredOrder);
 }
@@ -84,10 +139,10 @@ export function getServiceDetails(locale: Locale) {
   return mockServiceDetails.filter((service) => service.language === locale);
 }
 
-export function getHomePageContent(locale: Locale): HomeContent {
+export async function getHomePageContent(locale: Locale): Promise<HomeContent> {
   const base = getBaseHomeContent(locale);
-  const notices = getNotices(locale).slice(0, 3);
-  const featuredWorks = getFeaturedWorks(locale).slice(0, 3);
+  const notices = (await getNotices(locale)).slice(0, 3);
+  const featuredWorks = (await getFeaturedWorks(locale)).slice(0, 3);
 
   return {
     ...base,
@@ -131,9 +186,9 @@ export function getServicesPageContent(locale: Locale): ServicesPageContent {
   return servicesPageContent[locale];
 }
 
-export function getWorksPageContent(locale: Locale): WorksPageContent {
+export async function getWorksPageContent(locale: Locale): Promise<WorksPageContent> {
   const base = locale === "en" ? englishWorksPageContent : worksPageContent[locale];
-  const works = getWorks(locale);
+  const works = await getWorks(locale);
   const categories = base.categories.map((category): WorkCategory => {
     const categoryWorks = works.filter((work) =>
       category.id === "featured" ? work.featuredOnHomepage : work.serviceCategory === category.id,
