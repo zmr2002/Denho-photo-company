@@ -92,6 +92,7 @@ async function main() {
         category: text.category,
         authorName: "Local Admin",
         heroLabel: "test",
+        heroImagePath: `/placeholders/${locale}-article-test.svg`,
         heroAlt: "test",
         heroTone: "cool",
         closingNote: "testcontext",
@@ -124,6 +125,7 @@ async function main() {
         category: text.articleCategory,
         authorName: "Local Admin",
         heroLabel: "Production planning",
+        heroImagePath: `/placeholders/${locale}-article-production-planning.svg`,
         heroAlt: "Production planning",
         heroTone: "warm",
         status: "published",
@@ -213,11 +215,20 @@ async function main() {
 function bootstrapLocalSqlite() {
   const dbPath = resolve("prisma", "dev.db");
   const migrationPath = resolve("prisma", "migrations", "20260709000000_init_custom_admin_local_mvp", "migration.sql");
+  const heroPathMigrationPath = resolve("prisma", "migrations", "20260709001000_add_article_hero_image_path", "migration.sql");
   const migrationSql = readFileSync(migrationPath, "utf8");
+  const heroPathMigrationSql = readFileSync(heroPathMigrationPath, "utf8");
   const db = new DatabaseSync(dbPath);
 
   try {
     db.exec(migrationSql);
+    try {
+      db.exec(heroPathMigrationSql);
+    } catch (error) {
+      if (!(error instanceof Error) || !error.message.includes("duplicate column")) {
+        throw error;
+      }
+    }
   } finally {
     db.close();
   }

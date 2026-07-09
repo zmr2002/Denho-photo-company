@@ -28,6 +28,7 @@ model Article {
   category       String
   authorName     String         @default("Editorial Team")
   heroLabel      String?
+  heroImagePath  String?
   heroAlt        String?
   heroTone       String         @default("neutral")
   heroCaption    String?

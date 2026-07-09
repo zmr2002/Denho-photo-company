@@ -35,6 +35,7 @@ export const articleMutationSchema = z.object({
   category: requiredText,
   authorName: z.string().trim().min(1).default("Editorial Team"),
   heroLabel: optionalText,
+  heroImagePath: optionalText,
   heroAlt: optionalText,
   heroTone: toneSchema.default("neutral"),
   heroCaption: optionalText,

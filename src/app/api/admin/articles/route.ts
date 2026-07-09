@@ -37,6 +37,7 @@ export async function POST(request: Request) {
         category: data.category,
         authorName: data.authorName,
         heroLabel: nullable(data.heroLabel),
+        heroImagePath: nullable(data.heroImagePath),
         heroAlt: nullable(data.heroAlt),
         heroTone: data.heroTone,
         heroCaption: nullable(data.heroCaption),
