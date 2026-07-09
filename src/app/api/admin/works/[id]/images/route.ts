@@ -19,7 +19,7 @@ export async function GET(_request: Request, context: RouteContext) {
       include: { images: { orderBy: { sortOrder: "asc" } } },
     });
 
-    if (!work) return jsonError("Work not found.", 404);
+    if (!work) return jsonError("作品不存在。", 404);
     return NextResponse.json({ work });
   } catch (error) {
     return handleRouteError(error);
@@ -38,7 +38,7 @@ export async function PATCH(request: Request, context: RouteContext) {
 
   try {
     const existing = await prisma.work.findUnique({ where: { id } });
-    if (!existing) return jsonError("Work not found.", 404);
+    if (!existing) return jsonError("作品不存在。", 404);
 
     const mediaType = data.mediaType || existing.mediaType;
     const galleryEnabled = mediaType === "video" ? false : data.galleryEnabled;

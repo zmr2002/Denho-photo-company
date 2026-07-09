@@ -8,12 +8,12 @@ export const workMediaTypeSchema = z.enum(["photo", "gallery", "video"]);
 export const dismissalModeSchema = z.enum(["session", "local"]);
 
 const optionalText = z.string().trim().optional().nullable();
-const requiredText = z.string().trim().min(1, "Required");
+const requiredText = z.string().trim().min(1, "必填");
 const slugSchema = z
   .string()
   .trim()
-  .min(1, "Required")
-  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase letters, numbers, and hyphens.");
+  .min(1, "必填")
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "请使用小写字母、数字和连字符。");
 
 export const articleBlockSchema = z.object({
   id: z.string().optional(),
@@ -33,7 +33,7 @@ export const articleMutationSchema = z.object({
   title: requiredText,
   excerpt: requiredText,
   category: requiredText,
-  authorName: z.string().trim().min(1).default("Editorial Team"),
+  authorName: z.string().trim().min(1).default("编辑团队"),
   heroLabel: optionalText,
   heroImagePath: optionalText,
   heroAlt: optionalText,
@@ -49,7 +49,7 @@ export const articleMutationSchema = z.object({
   seoTitle: optionalText,
   seoDescription: optionalText,
   youtubeUrl: optionalText,
-  blocks: z.array(articleBlockSchema).min(1, "At least one content block is required."),
+  blocks: z.array(articleBlockSchema).min(1, "至少需要一个内容区块。"),
 });
 
 export const noticeMutationSchema = z.object({

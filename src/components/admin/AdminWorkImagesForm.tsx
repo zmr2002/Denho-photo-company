@@ -44,16 +44,16 @@ export function AdminWorkImagesForm({ workId, defaultValues }: AdminWorkImagesFo
     setSubmitting(false);
 
     if (!response.ok) {
-      setMessage("Save failed. Check the image rows and try again.");
+      setMessage("保存失败。请检查图片资料后重试。");
       return;
     }
 
-    setMessage("Saved.");
+    setMessage("已保存。");
     router.refresh();
   }
 
   function removeImage(index: number) {
-    if (window.confirm("Remove this image metadata row?")) {
+    if (window.confirm("确定要移除这条图片资料吗？")) {
       remove(index);
     }
   }
@@ -62,31 +62,33 @@ export function AdminWorkImagesForm({ workId, defaultValues }: AdminWorkImagesFo
     <form className="admin-form" onSubmit={handleSubmit(onSubmit)}>
       <div className="admin-form-grid">
         <label className="admin-field">
-          <span className="admin-label">Media type</span>
+          <span className="admin-label">媒体类型</span>
           <select {...register("mediaType")} onChange={(event) => {
             register("mediaType").onChange(event);
             if (event.target.value === "video") setValue("galleryEnabled", false);
           }}>
-            <option value="photo">Photo</option>
-            <option value="gallery">Gallery</option>
-            <option value="video">Video</option>
+            <option value="photo">照片</option>
+            <option value="gallery">图片相册</option>
+            <option value="video">视频</option>
           </select>
+          <span className="admin-help">视频类型不会作为图片相册打开。</span>
         </label>
         <label className="admin-field admin-check-field">
-          <span className="admin-label">Gallery enabled</span>
+          <span className="admin-label">启用图库</span>
           <input type="checkbox" disabled={mediaType === "video"} {...register("galleryEnabled")} />
+          <span className="admin-help">只有照片或图片相册类型才可启用。</span>
         </label>
       </div>
 
       {mediaType === "video" ? (
-        <p className="admin-warning">Video works remain separate from image galleries. Gallery mode is disabled for this record.</p>
+        <p className="admin-warning">视频作品与图片图库分开管理。此记录已禁用图库模式。</p>
       ) : null}
 
-      <section className="admin-block-list" aria-label="Work images">
+      <section className="admin-block-list" aria-label="作品图片">
         <div className="admin-page-header">
           <div>
-            <p className="admin-kicker">Image metadata</p>
-            <h3>Images</h3>
+            <p className="admin-kicker">图片资料</p>
+            <h3>图片</h3>
           </div>
           <button
             className="admin-button-secondary"
@@ -94,7 +96,7 @@ export function AdminWorkImagesForm({ workId, defaultValues }: AdminWorkImagesFo
             onClick={() =>
               append({
                 path: "/placeholders/new-work-image.svg",
-                label: "New image",
+                label: "新图片",
                 tone: "neutral",
                 altJa: "",
                 altZh: "",
@@ -107,7 +109,7 @@ export function AdminWorkImagesForm({ workId, defaultValues }: AdminWorkImagesFo
               })
             }
           >
-            Add image row
+            添加图片资料
           </button>
         </div>
 
@@ -115,61 +117,69 @@ export function AdminWorkImagesForm({ workId, defaultValues }: AdminWorkImagesFo
           <article className="admin-block" key={field.id}>
             <div className="admin-form-grid">
               <label className="admin-field">
-                <span className="admin-label">Path</span>
+                <span className="admin-label">图片路径</span>
                 <input {...register(`images.${index}.path`)} />
+                <span className="admin-help">当前阶段填写已有图片路径，不上传新图片。</span>
               </label>
               <label className="admin-field">
-                <span className="admin-label">Label</span>
+                <span className="admin-label">后台标签</span>
                 <input {...register(`images.${index}.label`)} />
+                <span className="admin-help">用于后台识别这张图片，也可能显示在占位图上。</span>
               </label>
               <label className="admin-field">
-                <span className="admin-label">Tone</span>
+                <span className="admin-label">色调</span>
                 <select {...register(`images.${index}.tone`)}>
-                  <option value="neutral">Neutral</option>
-                  <option value="warm">Warm</option>
-                  <option value="cool">Cool</option>
-                  <option value="rust">Rust</option>
+                  <option value="neutral">中性</option>
+                  <option value="warm">暖色</option>
+                  <option value="cool">冷色</option>
+                  <option value="rust">砖红</option>
                 </select>
               </label>
             </div>
 
             <div className="admin-form-grid">
               <label className="admin-field">
-                <span className="admin-label">Alt JA</span>
+                <span className="admin-label">日语页面替代文字</span>
                 <input {...register(`images.${index}.altJa`)} />
+                <span className="admin-help">给日语页面使用的图片文字说明。</span>
               </label>
               <label className="admin-field">
-                <span className="admin-label">Alt ZH</span>
+                <span className="admin-label">中文替代文字</span>
                 <input {...register(`images.${index}.altZh`)} />
+                <span className="admin-help">给中文页面使用的图片文字说明。</span>
               </label>
               <label className="admin-field">
-                <span className="admin-label">Alt EN</span>
+                <span className="admin-label">英语页面替代文字</span>
                 <input {...register(`images.${index}.altEn`)} />
+                <span className="admin-help">给英语页面使用的图片文字说明。</span>
               </label>
             </div>
 
             <div className="admin-form-grid">
               <label className="admin-field">
-                <span className="admin-label">Caption JA</span>
+                <span className="admin-label">日语页面说明</span>
                 <input {...register(`images.${index}.captionJa`)} />
+                <span className="admin-help">显示给日语读者看的图片注释。</span>
               </label>
               <label className="admin-field">
-                <span className="admin-label">Caption ZH</span>
+                <span className="admin-label">中文说明</span>
                 <input {...register(`images.${index}.captionZh`)} />
+                <span className="admin-help">显示给中文读者看的图片注释。</span>
               </label>
               <label className="admin-field">
-                <span className="admin-label">Caption EN</span>
+                <span className="admin-label">英语页面说明</span>
                 <input {...register(`images.${index}.captionEn`)} />
+                <span className="admin-help">显示给英语读者看的图片注释。</span>
               </label>
             </div>
 
             <div className="admin-actions">
               <label className="admin-inline-check">
                 <input type="checkbox" {...register(`images.${index}.isCover`)} />
-                Cover image
+                设为封面
               </label>
               <button className="admin-button-secondary" type="button" disabled={index === 0} onClick={() => move(index, index - 1)}>
-                Move up
+                上移
               </button>
               <button
                 className="admin-button-secondary"
@@ -177,10 +187,10 @@ export function AdminWorkImagesForm({ workId, defaultValues }: AdminWorkImagesFo
                 disabled={index === fields.length - 1}
                 onClick={() => move(index, index + 1)}
               >
-                Move down
+                下移
               </button>
               <button className="admin-danger" type="button" onClick={() => removeImage(index)}>
-                Remove
+                移除
               </button>
             </div>
           </article>
@@ -189,7 +199,7 @@ export function AdminWorkImagesForm({ workId, defaultValues }: AdminWorkImagesFo
 
       <div className="admin-actions">
         <button className="admin-button" disabled={submitting} type="submit">
-          {submitting ? "Saving" : "Save images"}
+          {submitting ? "保存中" : "保存图片"}
         </button>
         {message ? <p className="admin-user">{message}</p> : null}
       </div>

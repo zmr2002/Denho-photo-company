@@ -2,24 +2,24 @@ import Link from "next/link";
 import { requireAdminSession } from "@/lib/auth/session";
 
 const adminLinks = [
-  { href: "/studio-tianho", label: "Dashboard" },
-  { href: "/studio-tianho/articles", label: "Articles" },
-  { href: "/studio-tianho/notice", label: "Opening Notice" },
-  { href: "/studio-tianho/works", label: "Works Images" },
+  { href: "/studio-tianho", label: "控制台" },
+  { href: "/studio-tianho/articles", label: "文章管理" },
+  { href: "/studio-tianho/notice", label: "开场通知" },
+  { href: "/studio-tianho/works", label: "作品图片" },
 ];
 
 export async function AdminShell({ children }: { children: React.ReactNode }) {
   const session = await requireAdminSession();
 
   return (
-    <div className="admin-shell">
+    <div className="admin-shell" lang="zh">
       <aside className="admin-sidebar">
         <div>
-          <p className="admin-kicker">Tianho Admin</p>
-          <h1>Studio</h1>
+          <p className="admin-kicker">田豊管理后台</p>
+          <h1>管理中心</h1>
           <p className="admin-user">{session.user?.email}</p>
         </div>
-        <nav aria-label="Admin navigation">
+        <nav aria-label="后台导航">
           {adminLinks.map((link) => (
             <Link key={link.href} href={link.href}>
               {link.label}
@@ -27,7 +27,7 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
         <Link className="admin-muted-link" href="/api/auth/signout">
-          Sign out
+          退出登录
         </Link>
       </aside>
       <main className="admin-main">{children}</main>

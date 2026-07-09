@@ -316,6 +316,30 @@ a {
 	color: #d6d1c9;
 }
 
+.footer-language-links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.45rem 0.8rem;
+	justify-content: flex-start;
+}
+
+.footer-language-links a {
+	color: #d6d1c9;
+	text-decoration: underline;
+	text-decoration-color: transparent;
+	text-underline-offset: 0.35em;
+	transition:
+		color 180ms ease,
+		text-decoration-color 180ms ease;
+}
+
+.footer-language-links a:hover,
+.footer-language-links a:focus-visible,
+.footer-language-links a[aria-current="page"] {
+	color: #fff;
+	text-decoration-color: #a64024;
+}
+
 .button-primary,
 .button-dark,
 .button-light {
@@ -871,6 +895,10 @@ a {
 	font-size: clamp(1.65rem, 3vw, 2.6rem);
 }
 
+.business-field-compact .placeholder-media {
+	min-height: clamp(13.5rem, 34vw, 21rem);
+}
+
 .business-field-grid {
 	display: grid;
 	gap: 2.5rem;
@@ -1021,19 +1049,6 @@ a {
 
 .section-dark .project-description {
 	color: #aaa59d;
-}
-
-.static-controls {
-	display: flex;
-	align-items: center;
-	gap: 1rem;
-	font-size: 0.62rem;
-	letter-spacing: 0.12em;
-}
-
-.static-controls strong {
-	font-weight: 700;
-	color: #a64024;
 }
 
 .contact-band {
@@ -1960,6 +1975,14 @@ a {
 		border-right: 1px solid #aaa59d;
 	}
 
+	.business-field-compact .business-field-grid {
+		gap: 2.35rem;
+	}
+
+	.business-field-compact .placeholder-media {
+		min-height: clamp(16rem, 24vw, 23rem);
+	}
+
 	.business-field-compact:nth-child(2n) {
 		border-right: 0;
 	}
@@ -2033,6 +2056,16 @@ a {
 		grid-template-columns: minmax(20rem, 0.8fr) minmax(0, 1.2fr);
 		align-items: center;
 		gap: 5rem;
+	}
+
+	.business-field-compact .business-field-grid {
+		display: flex;
+	}
+}
+
+@media (min-width: 768px) {
+	.footer-language-links {
+		justify-content: flex-end;
 	}
 }
 

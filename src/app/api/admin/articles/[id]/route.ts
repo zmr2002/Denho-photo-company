@@ -19,7 +19,7 @@ export async function GET(_request: Request, context: RouteContext) {
       include: { blocks: { orderBy: { sortOrder: "asc" } } },
     });
 
-    if (!article) return jsonError("Article not found.", 404);
+    if (!article) return jsonError("文章不存在。", 404);
     return NextResponse.json({ article });
   } catch (error) {
     return handleRouteError(error);

@@ -40,6 +40,19 @@ function jsonList(items: string[]) {
   return JSON.stringify(items);
 }
 
+const tutorialArticle = {
+  locale: "zh",
+  slug: "admin-tutorial-sample",
+  title: "后台教学示例：如何编辑一篇制作案例文章",
+  excerpt: "这是一篇用于后台操作说明的示例文章，展示标题、摘要、图片、正文段落和结尾说明的使用方式。",
+  lead: "您可以参考这篇文章，了解如何填写一篇正式的制作案例或公告文章。",
+  category: "后台教学",
+  heroImagePath: "/placeholders/zh-article-production-planning.svg",
+  heroAlt: "示例主图：拍摄现场或制作项目的代表图片",
+  heroCaption: "主图说明会显示在文章图片附近，用于补充图片背景。",
+  closingNote: "编辑完成后，请先保存草稿并检查页面显示，再切换为发布状态。",
+};
+
 async function main() {
   bootstrapLocalSqlite();
 
@@ -62,6 +75,88 @@ async function main() {
       name: "Local Admin",
       passwordHash,
       role: "admin",
+    },
+  });
+
+  await prisma.article.create({
+    data: {
+      locale: tutorialArticle.locale,
+      slug: tutorialArticle.slug,
+      title: tutorialArticle.title,
+      excerpt: tutorialArticle.excerpt,
+      category: tutorialArticle.category,
+      authorName: "后台教学示例",
+      heroLabel: "教学示例主图",
+      heroImagePath: tutorialArticle.heroImagePath,
+      heroAlt: tutorialArticle.heroAlt,
+      heroTone: "cool",
+      heroCaption: tutorialArticle.heroCaption,
+      closingNote: tutorialArticle.closingNote,
+      status: "draft",
+      publishedAt: null,
+      displayOrder: 0,
+      relatedServices: jsonList(["文章管理", "制作案例", "公告内容"]),
+      seoTitle: tutorialArticle.title,
+      seoDescription: tutorialArticle.excerpt,
+      updatedById: admin.id,
+      blocks: {
+        create: [
+          {
+            type: "paragraph",
+            body: tutorialArticle.lead,
+            sortOrder: 1,
+          },
+          {
+            type: "heading",
+            heading: "1. 文章标题和摘要的写法",
+            sortOrder: 2,
+          },
+          {
+            type: "paragraph",
+            body:
+              "标题是文章最主要的名称，会出现在文章页面和后台列表中。摘要是列表中显示的一小段介绍，适合用一到两句话说明这篇文章的重点。导语可以放在正文第一段，用来告诉读者为什么要继续阅读。",
+            sortOrder: 3,
+          },
+          {
+            type: "image",
+            imagePath: "/placeholders/zh-gallery-test-1.svg",
+            imageAlt: "示例正文图片：制作项目现场的局部画面",
+            imageTone: "warm",
+            caption: "正文图片可以穿插在段落之间，用于补充项目现场、人物或空间信息。",
+            sortOrder: 4,
+          },
+          {
+            type: "heading",
+            heading: "2. 正文段落的写法",
+            sortOrder: 5,
+          },
+          {
+            type: "paragraph",
+            body:
+              "正文段落应该面向读者，而不是写给后台系统。建议每段只说明一个重点，例如项目背景、拍摄内容、交付成果或客户需要注意的信息。不要把太多不同内容塞进同一段。",
+            sortOrder: 6,
+          },
+          {
+            type: "heading",
+            heading: "3. 图片说明的写法",
+            sortOrder: 7,
+          },
+          {
+            type: "paragraph",
+            body:
+              "替代文字是给图片的文字说明，有助于无障碍阅读和搜索理解；图片说明是显示给读者看的注释，可以补充拍摄地点、项目背景或画面内容。当前阶段请使用已有图片路径，正式上传功能将在后续实现。",
+            sortOrder: 8,
+          },
+          {
+            type: "image",
+            imagePath: "/placeholders/zh-gallery-test-2.svg",
+            imageAlt: "示例正文图片：第二张项目说明图片",
+            imageTone: "rust",
+            caption: "如果一篇文章需要多张图片，可以按阅读顺序添加多个图片区块。",
+            sortOrder: 9,
+          },
+        ],
+      },
     },
   });
 

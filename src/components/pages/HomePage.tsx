@@ -177,11 +177,6 @@ export function HomePage({ content, basePath }: HomePageProps) {
             <a className="button-light" href={`${basePath}/works/`}>
               {content.works.linkLabel}
             </a>
-            <div className="static-controls" aria-label="Static carousel preview">
-              <span>{homeLabels.previous}</span>
-              <strong>01 / 03</strong>
-              <span>{homeLabels.next}</span>
-            </div>
           </div>
         </div>
       </section>

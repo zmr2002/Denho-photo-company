@@ -94,6 +94,15 @@
   padding: 1.25rem;
 }
 
+.admin-card p:not(.admin-label):not(.admin-help),
+.admin-guide-card p,
+.admin-info-box p {
+  margin-top: 0.65rem;
+  color: #5f5a54;
+  font-size: 0.9rem;
+  line-height: 1.75;
+}
+
 .admin-grid {
   display: grid;
   gap: 1rem;
@@ -149,6 +158,30 @@
   padding: 1.25rem;
 }
 
+.admin-form-section,
+.admin-guide-card,
+.admin-info-box {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+  border: 1px solid #d6d1c9;
+  background: rgb(255 255 255 / 0.54);
+}
+
+.admin-guide-card {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+}
+
+.admin-info-box {
+  border-color: #d5b08a;
+  background: #fff8ef;
+}
+
+.admin-info-box strong {
+  font-size: 0.92rem;
+}
+
 .admin-field {
   display: grid;
   gap: 0.45rem;
@@ -181,6 +214,27 @@
   font-size: 0.78rem;
 }
 
+.admin-help,
+.admin-empty {
+  color: #766f68;
+  font-size: 0.78rem;
+  line-height: 1.65;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.admin-badge {
+  display: inline-flex;
+  margin-left: 0.65rem;
+  padding: 0.2rem 0.45rem;
+  border: 1px solid #d86645;
+  color: #9f3426;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1;
+  vertical-align: middle;
+}
+
 .admin-list,
 .admin-block-list {
   display: grid;
@@ -199,6 +253,11 @@
 .admin-list-row {
   grid-template-columns: 1fr auto;
   align-items: center;
+}
+
+.admin-list-row-sample {
+  border-color: #d5b08a;
+  background: #fff8ef;
 }
 
 .admin-list-row h3,
@@ -272,7 +331,8 @@
   }
 
   .admin-form-grid,
-  .admin-list-row {
+  .admin-list-row,
+  .admin-guide-card {
     grid-template-columns: 1fr;
   }
 }

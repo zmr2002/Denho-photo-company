@@ -1,4 +1,6 @@
+import Link from "next/link";
 import type { SiteLanguage } from "@/data/navigation";
+import { languageLinks } from "@/data/navigation";
 import { site } from "@/data/site";
 
 interface FooterProps {
@@ -30,7 +32,17 @@ export function Footer({ lang }: FooterProps) {
           </p>
         </div>
         <div className="text-sm leading-7 md:text-right">
-          <p>{site.languages}</p>
+          <nav className="footer-language-links" aria-label="Footer language selection">
+            {languageLinks.map((item) => (
+              <Link
+                key={item.lang}
+                href={item.href}
+                aria-current={lang === item.lang ? "page" : undefined}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
           <p className="mt-2 text-stone-500">© 2026 {site.name}. Demo website.</p>
         </div>
       </div>

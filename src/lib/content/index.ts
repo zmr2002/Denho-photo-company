@@ -381,7 +381,10 @@ const englishWorkCategories: WorkCategory[] = [
     description: "Representative temporary projects that combine multiple production areas.",
     impressionLabel: "Featured production overview",
     impressionTone: "rust",
-    cases: [],
+    cases: [
+      { title: "Conference and Recruiting Story", description: "A combined sample for event coverage and people-focused communications.", scope: "Photo / Film / Editing", mediaLabel: "Integrated production", mediaTone: "rust", mediaType: "gallery" },
+      { title: "Hospitality Brand Assets", description: "A sample covering space, staff, and guest experience materials.", scope: "Space / Short Film", mediaLabel: "Hospitality assets", mediaTone: "warm", mediaType: "gallery" },
+    ],
   },
   {
     id: "event",
@@ -391,7 +394,10 @@ const englishWorkCategories: WorkCategory[] = [
     description: "Capture the venue, speakers, and audience interaction as a full-day production story.",
     impressionLabel: "Live event atmosphere",
     impressionTone: "rust",
-    cases: [],
+    cases: [
+      { title: "Corporate Conference", description: "A full-day sample covering speakers, venue atmosphere, and audience exchange.", scope: "Event Photo / Same-day Delivery", mediaLabel: "Conference coverage", mediaTone: "rust", mediaType: "gallery" },
+      { title: "Launch Highlight", description: "Public-facing photos and short media prepared from one event.", scope: "Photo / Film", mediaLabel: "Launch assets", mediaTone: "cool", mediaType: "photo" },
+    ],
   },
   {
     id: "space",
@@ -401,7 +407,10 @@ const englishWorkCategories: WorkCategory[] = [
     description: "Show design, materials, light, and use cases through local sample media.",
     impressionLabel: "Space and hospitality mood",
     impressionTone: "warm",
-    cases: [],
+    cases: [
+      { title: "Hotel Rooms and Shared Areas", description: "A series showing spatial design, light, and guest movement.", scope: "Space Photo / Retouching", mediaLabel: "Hotel interiors", mediaTone: "warm", mediaType: "gallery" },
+      { title: "Retail Use Scenes", description: "User-view scenes and detail images for commercial spaces.", scope: "Photo / Scene Direction", mediaLabel: "Retail scenes", mediaTone: "neutral", mediaType: "photo" },
+    ],
   },
   {
     id: "interview",
@@ -411,7 +420,10 @@ const englishWorkCategories: WorkCategory[] = [
     description: "Combine spoken content and work scenes to communicate organizational background.",
     impressionLabel: "Voice and workplace detail",
     impressionTone: "cool",
-    cases: [],
+    cases: [
+      { title: "Founder Interview", description: "A brand story sample combining words, expression, and workplace details.", scope: "Direction / Photo / Editing", mediaLabel: "Interview story", mediaTone: "cool", mediaType: "gallery" },
+      { title: "Team Introduction", description: "People and workplace material for recruiting or public communication.", scope: "Portrait / Interview", mediaLabel: "Team story", mediaTone: "neutral", mediaType: "photo" },
+    ],
   },
   {
     id: "portrait",
@@ -487,7 +499,7 @@ const englishAboutPageContent: AboutPageContent = {
   },
   projectTypes: ["Event / Conference", "Space / Stay", "Interview / Brand Story", "Portrait / Profile"],
   languageLabel: "Language Support",
-  languageTitle: lines("Japanese / Simplified Chinese", "/ English"),
+  languageTitle: lines("Production in Japan", "with multilingual support."),
   languageDescription: "Communication can be supported in Japanese, Simplified Chinese, and English.",
   companyInfo: [
     { term: "Company", detail: "Temporary company information" },

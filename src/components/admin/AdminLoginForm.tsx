@@ -30,13 +30,13 @@ export function AdminLoginForm() {
       return;
     }
 
-    setError("Invalid admin email or password.");
+    setError("管理员邮箱或密码不正确。");
   }
 
   return (
     <form className="admin-form" onSubmit={handleSubmit}>
       <label className="admin-field">
-        <span className="admin-label">Email</span>
+        <span className="admin-label">邮箱</span>
         <input
           autoComplete="email"
           name="email"
@@ -47,7 +47,7 @@ export function AdminLoginForm() {
         />
       </label>
       <label className="admin-field">
-        <span className="admin-label">Password</span>
+        <span className="admin-label">密码</span>
         <input
           autoComplete="current-password"
           name="password"
@@ -59,7 +59,7 @@ export function AdminLoginForm() {
       </label>
       {error ? <p className="admin-error">{error}</p> : null}
       <button className="admin-button" disabled={submitting} type="submit">
-        {submitting ? "Signing in" : "Sign in"}
+        {submitting ? "登录中" : "登录"}
       </button>
     </form>
   );

@@ -222,7 +222,10 @@ const jaWorkCategories: WorkCategory[] = [
 		description: '複数の制作領域を組み合わせた代表的なサンプルです。',
 		impressionLabel: '代表的な制作事例',
 		impressionTone: 'rust',
-		cases: [],
+		cases: [
+			{ title: '会議と採用広報の記録', description: 'イベント記録と人物撮影を組み合わせた広報用サンプル。', scope: '写真 / 映像 / 編集', mediaLabel: '複合制作', mediaTone: 'rust', mediaType: 'gallery' },
+			{ title: '宿泊施設のブランド素材', description: '空間、スタッフ、滞在シーンをまとめた制作事例。', scope: '空間撮影 / 短編映像', mediaLabel: '宿泊施設素材', mediaTone: 'warm', mediaType: 'gallery' },
+		],
 	},
 	{
 		id: 'event',
@@ -232,7 +235,10 @@ const jaWorkCategories: WorkCategory[] = [
 		description: '会場全体の空気、登壇者、参加者の交流を一日の流れとして記録します。',
 		impressionLabel: 'イベントの空気感',
 		impressionTone: 'rust',
-		cases: [],
+		cases: [
+			{ title: '企業カンファレンス', description: '登壇、会場、参加者交流を一日の流れとして記録。', scope: 'イベント撮影 / 当日共有', mediaLabel: 'カンファレンス撮影', mediaTone: 'rust', mediaType: 'gallery' },
+			{ title: '発表会ハイライト', description: '公開用写真と短い映像素材を同時に制作。', scope: '写真 / 映像', mediaLabel: '発表会素材', mediaTone: 'cool', mediaType: 'photo' },
+		],
 	},
 	{
 		id: 'space',
@@ -242,7 +248,10 @@ const jaWorkCategories: WorkCategory[] = [
 		description: '設計、素材、光、利用シーンから、その場所で過ごす時間を伝えます。',
 		impressionLabel: '空間と滞在の雰囲気',
 		impressionTone: 'warm',
-		cases: [],
+		cases: [
+			{ title: 'ホテル客室と共用部', description: '空間設計、光、滞在導線を伝える写真シリーズ。', scope: '空間撮影 / レタッチ', mediaLabel: 'ホテル空間', mediaTone: 'warm', mediaType: 'gallery' },
+			{ title: '店舗利用シーン', description: '利用者目線のシーンとディテールを組み合わせて撮影。', scope: '写真 / シーン設計', mediaLabel: '店舗撮影', mediaTone: 'neutral', mediaType: 'photo' },
+		],
 	},
 	{
 		id: 'interview',
@@ -252,7 +261,10 @@ const jaWorkCategories: WorkCategory[] = [
 		description: '人の言葉と仕事の風景を組み合わせ、組織の背景と価値観を伝えます。',
 		impressionLabel: '言葉と仕事の記録',
 		impressionTone: 'cool',
-		cases: [],
+		cases: [
+			{ title: '創業者インタビュー', description: '言葉、表情、仕事場のディテールを組み合わせたブランドストーリー。', scope: '構成 / 写真 / 編集', mediaLabel: 'インタビュー記録', mediaTone: 'cool', mediaType: 'gallery' },
+			{ title: 'チーム紹介コンテンツ', description: '採用や広報に使える人物と現場の紹介素材を制作。', scope: '人物撮影 / 取材', mediaLabel: 'チーム紹介', mediaTone: 'neutral', mediaType: 'photo' },
+		],
 	},
 	{
 		id: 'portrait',
@@ -293,7 +305,10 @@ const zhWorkCategories: WorkCategory[] = [
 		description: '结合多个制作领域的代表性样例。',
 		impressionLabel: '代表性制作案例',
 		impressionTone: 'rust',
-		cases: [],
+		cases: [
+			{ title: '会议与招聘传播记录', description: '结合活动记录与人物拍摄的传播素材样例。', scope: '摄影 / 视频 / 编辑', mediaLabel: '综合制作', mediaTone: 'rust', mediaType: 'gallery' },
+			{ title: '住宿品牌素材', description: '整理空间、工作人员与入住场景的制作案例。', scope: '空间拍摄 / 短视频', mediaLabel: '住宿素材', mediaTone: 'warm', mediaType: 'gallery' },
+		],
 	},
 	{
 		id: 'event',
@@ -303,7 +318,10 @@ const zhWorkCategories: WorkCategory[] = [
 		description: '以完整的一天为单位，记录场地氛围、演讲内容与参与者交流。',
 		impressionLabel: '活动现场氛围',
 		impressionTone: 'rust',
-		cases: [],
+		cases: [
+			{ title: '企业会议', description: '记录演讲、场地与参与者交流，呈现完整活动流程。', scope: '活动摄影 / 现场交付', mediaLabel: '会议拍摄', mediaTone: 'rust', mediaType: 'gallery' },
+			{ title: '发布会亮点', description: '同步制作公开用照片与短视频素材。', scope: '摄影 / 视频', mediaLabel: '发布会素材', mediaTone: 'cool', mediaType: 'photo' },
+		],
 	},
 	{
 		id: 'space',
@@ -313,7 +331,10 @@ const zhWorkCategories: WorkCategory[] = [
 		description: '从设计、材质、光线与使用场景中传达空间体验。',
 		impressionLabel: '空间与住宿氛围',
 		impressionTone: 'warm',
-		cases: [],
+		cases: [
+			{ title: '酒店客房与公共区域', description: '用系列照片呈现空间设计、光线与入住动线。', scope: '空间摄影 / 修图', mediaLabel: '酒店空间', mediaTone: 'warm', mediaType: 'gallery' },
+			{ title: '店铺使用场景', description: '结合顾客视角的场景与细节进行拍摄。', scope: '摄影 / 场景设计', mediaLabel: '店铺拍摄', mediaTone: 'neutral', mediaType: 'photo' },
+		],
 	},
 	{
 		id: 'interview',
@@ -323,7 +344,10 @@ const zhWorkCategories: WorkCategory[] = [
 		description: '结合人物表达与工作现场，传达组织背景和价值观。',
 		impressionLabel: '人物表达与现场',
 		impressionTone: 'cool',
-		cases: [],
+		cases: [
+			{ title: '创始人访谈', description: '结合语言、表情与工作场景细节，形成品牌故事内容。', scope: '内容整理 / 摄影 / 编辑', mediaLabel: '访谈记录', mediaTone: 'cool', mediaType: 'gallery' },
+			{ title: '团队介绍内容', description: '制作适用于招聘与传播的人物和现场介绍素材。', scope: '人物摄影 / 采访', mediaLabel: '团队介绍', mediaTone: 'neutral', mediaType: 'photo' },
+		],
 	},
 	{
 		id: 'portrait',
@@ -379,7 +403,7 @@ export const aboutPageContent: Record<'ja' | 'zh', AboutPageContent> = {
 		hero: { eyebrow: '会社について', title: ['日本を拠点に、', '企画から納品まで支える。'], description: '企業、組織、ブランドのための写真・映像制作会社として、映像がプロジェクトにどう機能するかを考え続けます。' },
 		mediaLabel: '制作チーム',
 		statementLabel: '会社の考え方',
-		statementTitle: ['画を記録するだけでなく、', '何を伝えるべきかを理解する。'],
+		statementTitle: ['画を記録するだけでなく、', '何を伝えるべきかを', '理解する。'],
 		statementParagraphs: [
 			`${site.name}は、イベント、空間、インタビュー、ブランドストーリー、人物撮影を支援します。用途から写真、映像、当日共有、編集を設計します。`,
 			'日本国内での現場実行に加え、企画、方向設計、撮影、編集、最終納品まで一貫して対応します。',
@@ -393,7 +417,7 @@ export const aboutPageContent: Record<'ja' | 'zh', AboutPageContent> = {
 		typesHeading: { label: '対応領域', title: '対応するプロジェクト', description: '企業活動、商業空間、ブランドコンテンツ、人物表現に合わせた制作体制を提供します。' },
 		projectTypes: ['イベント・会議', '空間・宿泊施設', 'インタビュー・ブランド', 'ポートレート'],
 		languageLabel: '多言語対応',
-		languageTitle: '日本語 / 简体中文 / English',
+		languageTitle: ['日本での制作を、', '複数言語で支える。'],
 		languageDescription: '関係者や資料の言語に合わせて、日本語、簡体中文、英語でのプロジェクトコミュニケーションを支援します。',
 		companyInfo: [
 			{ term: '会社名', detail: site.name },
@@ -428,7 +452,7 @@ export const aboutPageContent: Record<'ja' | 'zh', AboutPageContent> = {
 		typesHeading: { label: '项目类型', title: '支持的项目类型', description: '围绕企业活动、商业空间、品牌内容与人物表达，提供适合规模的制作组合。' },
 		projectTypes: ['活动与会议', '空间与住宿', '访谈与品牌故事', '人像与职业形象'],
 		languageLabel: '多语言支持',
-		languageTitle: '日本語 / 简体中文 / English',
+		languageTitle: ['在日本制作，', '以多语言沟通支持。'],
 		languageDescription: '根据项目参与方和资料语言，支持日语、简体中文与英语沟通。',
 		companyInfo: [
 			{ term: '公司名称', detail: site.name },
@@ -449,7 +473,7 @@ export const contactPageContent: Record<'ja' | 'zh', ContactPageContent> = {
 	ja: {
 		metaTitle: `お問い合わせ | ${site.name}`,
 		metaDescription: '日本国内の写真・映像制作プロジェクトに関するお問い合わせページ。',
-		hero: { eyebrow: 'お問い合わせ', title: ['プロジェクトの背景、', '日程、用途からお聞かせください。'], description: '企画段階でも、撮影日が決まっている案件でも、現在わかる範囲から制作内容をご相談ください。' },
+		hero: { eyebrow: 'お問い合わせ', title: ['プロジェクトの背景、', '日程、用途から', 'お聞かせください。'], description: '企画段階でも、撮影日が決まっている案件でも、現在わかる範囲から制作内容をご相談ください。' },
 		guideLabel: 'ご相談前に',
 		guideTitle: 'ご相談時にあると役立つ情報',
 		guideItems: ['プロジェクトの背景と用途', '撮影希望日と所要時間', '都市、会場、地域', '希望する成果物', '納品時期と使用媒体'],
