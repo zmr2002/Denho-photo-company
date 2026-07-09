@@ -10,6 +10,8 @@ import {
   type Locale,
 } from "@/lib/content";
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({
   params,
 }: {

@@ -9,6 +9,8 @@ import {
   type Locale,
 } from "@/lib/content";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Articles",
   description: "Mock CMS articles for local production verification.",

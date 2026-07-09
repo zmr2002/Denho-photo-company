@@ -3,6 +3,8 @@ import { ContactPage } from "@/components/pages/ContactPage";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { getContactPageContent } from "@/lib/content";
 
+export const dynamic = "force-dynamic";
+
 const content = getContactPageContent("en");
 
 export const metadata: Metadata = {

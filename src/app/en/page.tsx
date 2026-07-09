@@ -4,6 +4,8 @@ import { SiteLayout } from "@/components/site/SiteLayout";
 import { getHomePageContent } from "@/lib/content";
 import { site } from "@/data/site";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: `${site.name} | Photography and film production`,
   description: "English mock content for local production verification.",

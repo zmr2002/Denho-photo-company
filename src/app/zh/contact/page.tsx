@@ -3,6 +3,8 @@ import { ContactPage } from "@/components/pages/ContactPage";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { contactPageContent } from "@/data/pages";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: contactPageContent.zh.metaTitle,
   description: contactPageContent.zh.metaDescription,

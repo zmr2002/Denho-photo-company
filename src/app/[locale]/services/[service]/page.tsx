@@ -11,6 +11,8 @@ import {
   type Locale,
 } from "@/lib/content";
 
+export const dynamic = "force-dynamic";
+
 type ServiceSlug = "web-production" | "event-setup";
 
 function isServiceSlug(value: string): value is ServiceSlug {

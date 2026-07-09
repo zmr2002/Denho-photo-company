@@ -3,6 +3,8 @@ import { AboutPage } from "@/components/pages/AboutPage";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { getAboutPageContent } from "@/lib/content";
 
+export const dynamic = "force-dynamic";
+
 const content = getAboutPageContent("en");
 
 export const metadata: Metadata = {

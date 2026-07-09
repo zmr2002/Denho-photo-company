@@ -3,6 +3,8 @@ import { WorksPage } from "@/components/pages/WorksPage";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { getWorksPageContent } from "@/lib/content";
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata(): Promise<Metadata> {
   const content = await getWorksPageContent("en");
   return {

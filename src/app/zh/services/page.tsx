@@ -3,6 +3,8 @@ import { ServicesPage } from "@/components/pages/ServicesPage";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { getServicesPageContent } from "@/lib/content";
 
+export const dynamic = "force-dynamic";
+
 const content = getServicesPageContent("zh");
 
 export const metadata: Metadata = {
