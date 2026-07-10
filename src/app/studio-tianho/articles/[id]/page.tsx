@@ -30,7 +30,7 @@ export default async function EditAdminArticlePage({ params }: PageProps) {
             <h2>编辑文章</h2>
             <p className="admin-help">
               {isTutorialArticle(article)
-                ? "这是后台教学示例。可以查看每个字段的填写方式；如果要练习，请保持草稿状态。"
+                ? "这是后台教学示例。当前作为预上线公开演示样本显示；它不是正式客户案例。"
                 : "保存后后台内容会更新。只有已发布的文章才会作为正式内容显示。"}
             </p>
           </div>

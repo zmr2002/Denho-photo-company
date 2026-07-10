@@ -94,7 +94,7 @@ export function AdminArticleForm({ articleId, defaultValues, isTutorial = false 
       {isTutorial ? (
         <div className="admin-info-box">
           <strong>教学示例</strong>
-          <p>这篇文章用于学习后台字段。它默认是草稿，不会作为正式文章显示；请把它当作填写参考。</p>
+          <p>这篇文章用于学习后台字段。当前作为预上线公开演示样本显示；请保留教学示例标识，避免误认为真实案例。</p>
         </div>
       ) : null}
 

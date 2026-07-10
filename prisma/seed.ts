@@ -50,7 +50,7 @@ const tutorialArticle = {
   heroImagePath: "/placeholders/zh-article-production-planning.svg",
   heroAlt: "示例主图：拍摄现场或制作项目的代表图片",
   heroCaption: "主图说明会显示在文章图片附近，用于补充图片背景。",
-  closingNote: "编辑完成后，请先保存草稿并检查页面显示，再切换为发布状态。",
+  closingNote: "这是公开演示用教学示例，用于说明文章结构；正式上线前可根据需要改回草稿或删除。",
 };
 
 async function main() {
@@ -92,8 +92,8 @@ async function main() {
       heroTone: "cool",
       heroCaption: tutorialArticle.heroCaption,
       closingNote: tutorialArticle.closingNote,
-      status: "draft",
-      publishedAt: null,
+      status: "published",
+      publishedAt: new Date("2026-07-03T00:00:00.000Z"),
       displayOrder: 0,
       relatedServices: jsonList(["文章管理", "制作案例", "公告内容"]),
       seoTitle: tutorialArticle.title,
