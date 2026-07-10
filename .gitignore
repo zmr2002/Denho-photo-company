@@ -13,6 +13,12 @@
 # testing
 /coverage
 
+# local review and private material
+/artifacts/
+/docs/
+/private/
+/.local-tools/
+
 # next.js
 /.next/
 /out/
