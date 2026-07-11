@@ -57,6 +57,8 @@ export function ArticleDetailPage({ article }: ArticleDetailPageProps) {
               label={article.featuredImage.label}
               size="panoramic"
               tone={article.featuredImage.tone}
+              src={article.featuredImage.src}
+              alt={article.featuredImage.alt}
             />
             <div className="mt-10 grid gap-6 text-base leading-8 text-stone-600 md:text-lg">
               {article.body.map((paragraph) => (

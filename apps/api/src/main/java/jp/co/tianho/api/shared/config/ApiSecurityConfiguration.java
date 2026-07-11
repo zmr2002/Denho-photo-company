@@ -47,6 +47,8 @@ public class ApiSecurityConfiguration {
                         .permitAll()
                         .requestMatchers("/api/v1/admin/users/**", "/api/v1/admin/audit-events/**")
                         .hasRole("ADMIN")
+                        .requestMatchers("/api/v1/admin/media/*/purge")
+                        .hasRole("ADMIN")
                         .requestMatchers(
                                 "/api/v1/admin/articles/*/publish",
                                 "/api/v1/admin/articles/*/archive",

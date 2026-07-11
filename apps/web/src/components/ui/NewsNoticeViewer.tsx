@@ -97,6 +97,8 @@ export function NewsNoticeViewer({ items }: NewsNoticeViewerProps) {
                     label={selected.detailImage.label}
                     size="wide"
                     tone={selected.detailImage.tone}
+                    src={selected.detailImage.src}
+                    alt={selected.detailImage.alt}
                   />
                   {selected.detailImage.caption ? (
                     <figcaption>{selected.detailImage.caption}</figcaption>

@@ -1,4 +1,5 @@
 import type { MediaTone } from "@/data/pages";
+import Image from "next/image";
 
 type PlaceholderSize = "small" | "standard" | "wide" | "panoramic" | "hero";
 
@@ -9,6 +10,8 @@ interface PlaceholderMediaProps {
   dark?: boolean;
   tone?: MediaTone;
   showLabel?: boolean;
+  src?: string;
+  alt?: string;
 }
 
 const sizeClasses: Record<PlaceholderSize, string> = {
@@ -26,9 +29,11 @@ export function PlaceholderMedia({
   dark = false,
   tone = "neutral",
   showLabel = true,
+  src,
+  alt,
 }: PlaceholderMediaProps) {
   const className = [
-    "placeholder-media group flex items-end p-5 md:p-8",
+    "placeholder-media group relative flex items-end overflow-hidden p-5 md:p-8",
     sizeClasses[size],
     dark ? "placeholder-media-dark" : "",
     `placeholder-tone-${tone}`,
@@ -37,7 +42,8 @@ export function PlaceholderMedia({
     .join(" ");
 
   return (
-    <div className={className} role="img" aria-label={`${label} placeholder`}>
+    <div className={className} role={src ? undefined : "img"} aria-label={src ? undefined : `${label} placeholder`}>
+      {src ? <Image alt={alt || label} className="object-cover" fill sizes="(max-width: 768px) 100vw, 75vw" src={src} /> : null}
       <div className="placeholder-frame" aria-hidden="true" />
       {video ? (
         <div className="video-mark" aria-hidden="true">

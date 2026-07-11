@@ -18,6 +18,10 @@ spring:
     timeout: 30m
     jdbc:
       initialize-schema: ${SESSION_SCHEMA_INITIALIZATION:never}
+  servlet:
+    multipart:
+      max-file-size: 16MB
+      max-request-size: 16MB
 
 server:
   port: ${PORT:8080}
@@ -63,3 +67,10 @@ tianho:
   content:
     bootstrap:
       enabled: ${CONTENT_BOOTSTRAP_ENABLED:false}
+  media:
+    public-base-url: ${MEDIA_PUBLIC_BASE_URL:/media}
+    endpoint: ${OBJECT_STORAGE_ENDPOINT:http://localhost:9000}
+    region: ${OBJECT_STORAGE_REGION:auto}
+    bucket: ${OBJECT_STORAGE_BUCKET:tianho-media}
+    access-key: ${OBJECT_STORAGE_ACCESS_KEY:tianho-local}
+    secret-key: ${OBJECT_STORAGE_SECRET_KEY:tianho-local-password}

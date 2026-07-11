@@ -157,7 +157,7 @@ export function PortfolioGallery({
           onClick={canOpenGallery ? openGallery : undefined}
           onKeyDown={canOpenGallery ? handleTriggerKeyDown : undefined}
         >
-          <PlaceholderMedia label={mediaLabel} size="panoramic" video={video} tone={mediaTone} />
+          <PlaceholderMedia label={mediaLabel} size="panoramic" video={video} tone={mediaTone} src={images[0]?.src} alt={images[0]?.alt} />
           <div className="project-case-info">
             <div>
               <p className="section-label">{number ? `${number} / ${category}` : category}</p>
@@ -187,6 +187,8 @@ export function PortfolioGallery({
               size="wide"
               tone={mediaTone}
               video={isVideo}
+              src={images[0]?.src}
+              alt={images[0]?.alt}
             />
             <span className="work-media-type">{mediaType.toUpperCase()}</span>
             {canOpenGallery && images.length > 1 ? (
@@ -241,6 +243,8 @@ export function PortfolioGallery({
                 label={activeImage.label}
                 size="panoramic"
                 tone={activeImage.tone}
+                src={activeImage.src}
+                alt={activeImage.alt}
               />
             </div>
             <p className="portfolio-gallery-counter" aria-live="polite">
