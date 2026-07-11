@@ -4,7 +4,7 @@ import { getAdminSession } from "@/lib/auth/session";
 
 export default async function AdminLoginPage() {
   const session = await getAdminSession();
-  if (session?.user?.id) {
+  if (session.authenticated) {
     redirect("/studio-tianho");
   }
 

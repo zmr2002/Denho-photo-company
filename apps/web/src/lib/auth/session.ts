@@ -1,23 +1,14 @@
-import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/lib/auth/options";
+import { getAdminSession as readAdminSession } from "@/lib/api/admin";
 
 export async function getAdminSession() {
-  return getServerSession(authOptions);
+  return readAdminSession();
 }
 
 export async function requireAdminSession() {
   const session = await getAdminSession();
-  if (!session?.user?.id) {
+  if (!session.authenticated || !session.userId) {
     redirect("/studio-tianho/login");
-  }
-  return session;
-}
-
-export async function requireAdminApiSession() {
-  const session = await getAdminSession();
-  if (!session?.user?.id) {
-    return null;
   }
   return session;
 }

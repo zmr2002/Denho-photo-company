@@ -1,4 +1,3 @@
-import { hash } from "bcryptjs";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
@@ -57,26 +56,12 @@ async function main() {
   bootstrapLocalSqlite();
 
   const prisma = new PrismaClient();
-  const email = process.env.ADMIN_SEED_EMAIL || "admin@tianho.local";
-  const password = process.env.ADMIN_SEED_PASSWORD || "local-admin-change-me";
-  const passwordHash = await hash(password, 12);
-
   try {
     await prisma.workImage.deleteMany();
     await prisma.work.deleteMany();
     await prisma.openingNotice.deleteMany();
     await prisma.articleBlock.deleteMany();
     await prisma.article.deleteMany();
-    await prisma.adminUser.deleteMany();
-
-  const admin = await prisma.adminUser.create({
-    data: {
-      email,
-      name: "Local Admin",
-      passwordHash,
-      role: "admin",
-    },
-  });
 
   await prisma.article.create({
     data: {
@@ -98,7 +83,6 @@ async function main() {
       relatedServices: jsonList(["文章管理", "制作案例", "公告内容"]),
       seoTitle: tutorialArticle.title,
       seoDescription: tutorialArticle.excerpt,
-      updatedById: admin.id,
       blocks: {
         create: [
           {
@@ -197,7 +181,6 @@ async function main() {
         relatedServices: jsonList(["local CMS test"]),
         seoTitle: "test",
         seoDescription: "testcontext",
-        updatedById: admin.id,
         blocks: {
           create: [
             {
@@ -229,7 +212,6 @@ async function main() {
         relatedServices: jsonList(["Event Production", "Web Production"]),
         seoTitle: `Local production planning ${locale.toUpperCase()}`,
         seoDescription: "CMS-backed article used for local verification.",
-        updatedById: admin.id,
         blocks: {
           create: [
             {

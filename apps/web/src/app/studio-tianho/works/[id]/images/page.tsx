@@ -3,7 +3,7 @@ import { AdminShell } from "@/components/admin/AdminShell";
 import { AdminWorkImagesForm } from "@/components/admin/AdminWorkImagesForm";
 import { workToImageFormValues } from "@/lib/admin/work-images-form";
 import { localeLabel, mediaTypeLabel } from "@/lib/admin/labels";
-import { prisma } from "@/lib/db/prisma";
+import { getAdminContent, type AdminWork } from "@/lib/api/admin";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -11,10 +11,7 @@ type PageProps = {
 
 export default async function AdminWorkImagesPage({ params }: PageProps) {
   const { id } = await params;
-  const work = await prisma.work.findUnique({
-    where: { id },
-    include: { images: { orderBy: { sortOrder: "asc" } } },
-  });
+  const work = await getAdminContent<AdminWork>("works", id);
 
   if (!work) notFound();
 
@@ -34,7 +31,7 @@ export default async function AdminWorkImagesPage({ params }: PageProps) {
           <strong>作品图片填写说明</strong>
           <p>图片路径：当前阶段填写已有图片路径。排序数字越小越靠前。封面图片会优先作为该作品的代表图。视频类型作品不会作为图片相册打开。</p>
         </div>
-        <AdminWorkImagesForm workId={work.id} defaultValues={workToImageFormValues(work)} />
+        <AdminWorkImagesForm workId={work.id} contentVersion={work.version} defaultValues={workToImageFormValues(work)} />
       </section>
     </AdminShell>
   );

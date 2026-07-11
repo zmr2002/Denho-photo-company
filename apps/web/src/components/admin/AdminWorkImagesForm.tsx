@@ -6,15 +6,17 @@ import { useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { workImagesMutationSchema } from "@/lib/admin/validation";
+import { writeAdminApi } from "@/lib/api/browser";
 
 export type AdminWorkImagesFormValues = z.input<typeof workImagesMutationSchema>;
 
 type AdminWorkImagesFormProps = {
   workId: string;
+  contentVersion: number;
   defaultValues: AdminWorkImagesFormValues;
 };
 
-export function AdminWorkImagesForm({ workId, defaultValues }: AdminWorkImagesFormProps) {
+export function AdminWorkImagesForm({ workId, contentVersion, defaultValues }: AdminWorkImagesFormProps) {
   const router = useRouter();
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -31,15 +33,12 @@ export function AdminWorkImagesForm({ workId, defaultValues }: AdminWorkImagesFo
 
     const payload = {
       ...values,
+      expectedVersion: contentVersion,
       galleryEnabled: values.mediaType === "video" ? false : values.galleryEnabled,
       images: (values.images ?? []).map((image, index) => ({ ...image, sortOrder: index })),
     };
 
-    const response = await fetch(`/api/admin/works/${workId}/images`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    const response = await writeAdminApi(`/api/v1/admin/works/${workId}/images`, "PATCH", payload);
 
     setSubmitting(false);
 

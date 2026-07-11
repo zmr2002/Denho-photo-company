@@ -16,11 +16,8 @@ jobs:
     timeout-minutes: 20
     env:
       DATABASE_URL: file:./dev.db
-      AUTH_SECRET: local-build-secret-with-at-least-32-characters
-      NEXTAUTH_URL: http://localhost:3000
       CONTENT_PROVIDER: db
-      ADMIN_SEED_EMAIL: admin@tianho.local
-      ADMIN_SEED_PASSWORD: local-admin-change-me
+      API_INTERNAL_URL: http://127.0.0.1:8080
     steps:
       - name: Check out repository
         uses: actions/checkout@v4

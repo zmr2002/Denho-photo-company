@@ -1,13 +1,10 @@
 import Link from "next/link";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { localeLabel, mediaTypeLabel, statusLabel } from "@/lib/admin/labels";
-import { prisma } from "@/lib/db/prisma";
+import { getAdminCollection, type AdminWork } from "@/lib/api/admin";
 
 export default async function AdminWorksPage() {
-  const works = await prisma.work.findMany({
-    include: { images: true },
-    orderBy: [{ locale: "asc" }, { featuredOrder: "asc" }, { updatedAt: "desc" }],
-  });
+  const works = await getAdminCollection<AdminWork>("works");
 
   return (
     <AdminShell>

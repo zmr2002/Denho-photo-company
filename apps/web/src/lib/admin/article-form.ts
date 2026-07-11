@@ -16,9 +16,9 @@ type ArticleForForm = {
   ctaLabel: string | null;
   ctaHref: string | null;
   status: string;
-  publishedAt: Date | null;
+  publishedAt: Date | string | null;
   displayOrder: number;
-  relatedServices: string;
+  relatedServices: string[] | string;
   seoTitle: string | null;
   seoDescription: string | null;
   youtubeUrl: string | null;
@@ -78,7 +78,7 @@ export function articleToFormValues(article: ArticleForForm): AdminArticleFormVa
     ctaLabel: article.ctaLabel || "",
     ctaHref: article.ctaHref || "",
     status: article.status as AdminArticleFormValues["status"],
-    publishedAt: article.publishedAt ? article.publishedAt.toISOString().slice(0, 10) : "",
+    publishedAt: article.publishedAt ? new Date(article.publishedAt).toISOString().slice(0, 10) : "",
     displayOrder: article.displayOrder,
     relatedServicesText: parseList(article.relatedServices).join("\n"),
     seoTitle: article.seoTitle || "",
@@ -97,7 +97,8 @@ export function articleToFormValues(article: ArticleForForm): AdminArticleFormVa
   };
 }
 
-function parseList(value: string) {
+function parseList(value: string[] | string) {
+  if (Array.isArray(value)) return value;
   try {
     const parsed = JSON.parse(value);
     return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === "string") : [];

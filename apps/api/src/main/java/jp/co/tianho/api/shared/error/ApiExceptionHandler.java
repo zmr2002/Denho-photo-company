@@ -2,6 +2,10 @@ package jp.co.tianho.api.shared.error;
 
 import jakarta.validation.ConstraintViolationException;
 import jp.co.tianho.api.content.publicapi.ContentNotFoundException;
+import jp.co.tianho.api.content.admin.ContentRevisionException;
+import jp.co.tianho.api.auth.AuthenticationFailedException;
+import jp.co.tianho.api.auth.AdministratorUserManagementException;
+import jp.co.tianho.api.auth.MfaVerificationException;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -13,6 +17,43 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+
+    @ExceptionHandler(ContentRevisionException.class)
+    ResponseEntity<ProblemDetail> handleContentRevision(ContentRevisionException exception) {
+        HttpStatus status = exception.reason() == ContentRevisionException.Reason.NOT_FOUND
+                ? HttpStatus.NOT_FOUND
+                : HttpStatus.CONFLICT;
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, exception.getMessage());
+        problem.setTitle(status == HttpStatus.NOT_FOUND ? "Content not found" : "Content revision conflict");
+        problem.setType(URI.create(status == HttpStatus.NOT_FOUND
+                ? "/problems/content-not-found"
+                : "/problems/content-revision-conflict"));
+        return ResponseEntity.status(status).body(problem);
+    }
+
+    @ExceptionHandler(MfaVerificationException.class)
+    ResponseEntity<ProblemDetail> handleMfaVerification(MfaVerificationException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, exception.getMessage());
+        problem.setTitle("Account verification failed");
+        problem.setType(URI.create("/problems/account-verification-failed"));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problem);
+    }
+
+    @ExceptionHandler(AdministratorUserManagementException.class)
+    ResponseEntity<ProblemDetail> handleUserManagement(AdministratorUserManagementException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+        problem.setTitle("User management conflict");
+        problem.setType(URI.create("/problems/user-management-conflict"));
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
+    }
+
+    @ExceptionHandler(AuthenticationFailedException.class)
+    ResponseEntity<ProblemDetail> handleAuthenticationFailed(AuthenticationFailedException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, exception.getMessage());
+        problem.setTitle("Authentication failed");
+        problem.setType(URI.create("/problems/authentication-failed"));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problem);
+    }
 
     @ExceptionHandler(ContentNotFoundException.class)
     ResponseEntity<ProblemDetail> handleContentNotFound(ContentNotFoundException exception) {

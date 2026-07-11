@@ -3,7 +3,7 @@ import { AdminArticleForm } from "@/components/admin/AdminArticleForm";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { articleToFormValues } from "@/lib/admin/article-form";
 import { isTutorialArticle, localeLabel, statusLabel } from "@/lib/admin/labels";
-import { prisma } from "@/lib/db/prisma";
+import { getAdminContent, type AdminArticle } from "@/lib/api/admin";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -11,10 +11,7 @@ type PageProps = {
 
 export default async function EditAdminArticlePage({ params }: PageProps) {
   const { id } = await params;
-  const article = await prisma.article.findUnique({
-    where: { id },
-    include: { blocks: { orderBy: { sortOrder: "asc" } } },
-  });
+  const article = await getAdminContent<AdminArticle>("articles", id);
 
   if (!article) notFound();
 
@@ -35,7 +32,7 @@ export default async function EditAdminArticlePage({ params }: PageProps) {
             </p>
           </div>
         </header>
-        <AdminArticleForm articleId={article.id} defaultValues={articleToFormValues(article)} isTutorial={isTutorialArticle(article)} />
+        <AdminArticleForm articleId={article.id} contentVersion={article.version} defaultValues={articleToFormValues(article)} isTutorial={isTutorialArticle(article)} />
       </section>
     </AdminShell>
   );
