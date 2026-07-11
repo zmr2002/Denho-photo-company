@@ -3,6 +3,7 @@ package jp.co.tianho.api.shared.error;
 import jakarta.validation.ConstraintViolationException;
 import jp.co.tianho.api.content.publicapi.ContentNotFoundException;
 import jp.co.tianho.api.auth.AuthenticationFailedException;
+import jp.co.tianho.api.auth.AdministratorUserManagementException;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+
+    @ExceptionHandler(AdministratorUserManagementException.class)
+    ResponseEntity<ProblemDetail> handleUserManagement(AdministratorUserManagementException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+        problem.setTitle("User management conflict");
+        problem.setType(URI.create("/problems/user-management-conflict"));
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
+    }
 
     @ExceptionHandler(AuthenticationFailedException.class)
     ResponseEntity<ProblemDetail> handleAuthenticationFailed(AuthenticationFailedException exception) {

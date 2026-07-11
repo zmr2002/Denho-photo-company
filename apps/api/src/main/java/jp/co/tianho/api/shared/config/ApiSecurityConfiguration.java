@@ -42,6 +42,21 @@ public class ApiSecurityConfiguration {
                                 "/api/v1/auth/session",
                                 "/api/v1/auth/csrf")
                         .permitAll()
+                        .requestMatchers("/api/v1/admin/users/**", "/api/v1/admin/audit-events/**")
+                        .hasRole("ADMIN")
+                        .requestMatchers(
+                                "/api/v1/admin/articles/*/publish",
+                                "/api/v1/admin/articles/*/archive",
+                                "/api/v1/admin/articles/*/restore",
+                                "/api/v1/admin/works/*/publish",
+                                "/api/v1/admin/works/*/archive",
+                                "/api/v1/admin/works/*/restore",
+                                "/api/v1/admin/notices/*/publish",
+                                "/api/v1/admin/notices/*/archive",
+                                "/api/v1/admin/notices/*/restore")
+                        .hasRole("ADMIN")
+                        .requestMatchers("/api/v1/admin/**")
+                        .hasAnyRole("ADMIN", "EDITOR")
                         .anyRequest()
                         .authenticated())
                 .securityContext(context -> context
