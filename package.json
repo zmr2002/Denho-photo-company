@@ -13,6 +13,8 @@
     "prisma:generate": "npm run prisma:generate --workspace @tianho/web",
     "prisma:migrate": "npm run prisma:migrate --workspace @tianho/web",
     "prisma:seed": "npm run prisma:seed --workspace @tianho/web",
-    "prisma:studio": "npm run prisma:studio --workspace @tianho/web"
+    "prisma:studio": "npm run prisma:studio --workspace @tianho/web",
+    "services:up": "docker compose -f infra/compose.yml up -d",
+    "services:down": "docker compose -f infra/compose.yml down"
   }
 }

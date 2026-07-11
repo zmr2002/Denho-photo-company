@@ -42,6 +42,14 @@ Install dependencies:
 npm install
 ```
 
+Start PostgreSQL, local object storage, and the local mail viewer:
+
+```bash
+npm run services:up
+```
+
+The service configuration can be overridden with values from `infra/.env.example`.
+
 Create `apps/web/.env` from `apps/web/.env.example`, then replace the example secret and administrator password.
 
 Prepare the local database:
