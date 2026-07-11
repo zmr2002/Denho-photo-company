@@ -54,3 +54,91 @@ jobs:
       - name: Build and test API
         working-directory: apps/api
         run: ./gradlew build --no-daemon
+
+  browser:
+    name: Verify browser and security flows
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17.5-alpine
+        env:
+          POSTGRES_DB: tianho
+          POSTGRES_USER: tianho
+          POSTGRES_PASSWORD: tianho-test-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U tianho -d tianho"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      API_TEST_DATABASE_URL: jdbc:postgresql://127.0.0.1:5432/tianho
+      API_TEST_DATABASE_USERNAME: tianho
+      API_TEST_DATABASE_PASSWORD: tianho-test-password
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+          cache: gradle
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run browser checks
+        working-directory: apps/web
+        run: npm run test:e2e
+  security:
+    name: Verify production security
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Scan repository secrets
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+      - name: Check high severity dependencies
+        run: npm audit --audit-level=high
+      - name: Build production images
+        run: |
+          docker build --file apps/web/Dockerfile --tag tianho-web-check .
+          docker build --file apps/api/Dockerfile --tag tianho-api-check .
+      - name: Scan Web image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
+        with:
+          scan-type: image
+          image-ref: tianho-web-check
+          format: table
+          exit-code: "1"
+          severity: CRITICAL,HIGH
+      - name: Scan API image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
+        with:
+          scan-type: image
+          image-ref: tianho-api-check
+          format: table
+          exit-code: "1"
+          severity: CRITICAL,HIGH
