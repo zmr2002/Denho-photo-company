@@ -36,11 +36,14 @@ class PublicContentApiTests {
     void migrationChecksumMatchesContent() throws Exception {
         byte[] content = new ClassPathResource("content-migration/current-content.json")
                 .getInputStream().readAllBytes();
+        byte[] canonicalContent = new String(content, StandardCharsets.UTF_8)
+                .replace("\r\n", "\n")
+                .getBytes(StandardCharsets.UTF_8);
         String expected = new String(
                 new ClassPathResource("content-migration/current-content.sha256")
                         .getInputStream().readAllBytes(),
                 StandardCharsets.UTF_8).trim();
-        String actual = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(content));
+        String actual = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(canonicalContent));
 
         org.assertj.core.api.Assertions.assertThat(actual).isEqualTo(expected);
     }

@@ -35,16 +35,20 @@ public class ContentBootstrapImporter implements ApplicationRunner {
     @Transactional
     public void run(ApplicationArguments arguments) throws Exception {
         byte[] content = CONTENT_RESOURCE.getInputStream().readAllBytes();
+        byte[] canonicalContent = new String(content, StandardCharsets.UTF_8)
+                .replace("\r\n", "\n")
+                .getBytes(StandardCharsets.UTF_8);
         String expectedChecksum = new String(
                 CHECKSUM_RESOURCE.getInputStream().readAllBytes(), StandardCharsets.UTF_8).trim();
-        String actualChecksum = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(content));
+        String actualChecksum = HexFormat.of().formatHex(
+                MessageDigest.getInstance("SHA-256").digest(canonicalContent));
         if (!MessageDigest.isEqual(
                 expectedChecksum.getBytes(StandardCharsets.US_ASCII),
                 actualChecksum.getBytes(StandardCharsets.US_ASCII))) {
             throw new IllegalStateException("Content migration checksum does not match");
         }
 
-        ContentMigrationDocument document = objectMapper.readValue(content, ContentMigrationDocument.class);
+        ContentMigrationDocument document = objectMapper.readValue(canonicalContent, ContentMigrationDocument.class);
         if (document.schemaVersion() != 1) {
             throw new IllegalStateException("Unsupported content migration schema version");
         }
