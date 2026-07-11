@@ -63,7 +63,7 @@ class AdministratorRoleTests {
                         .with(csrf()))
                 .andExpect(status().isForbidden());
         mockMvc.perform(get("/api/v1/admin/media").with(authentication(editor)))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isOk());
     }
 
     @Test

@@ -63,3 +63,5 @@ tianho:
   content:
     bootstrap:
       enabled: ${CONTENT_BOOTSTRAP_ENABLED:false}
+  media:
+    public-base-url: ${MEDIA_PUBLIC_BASE_URL:/media}

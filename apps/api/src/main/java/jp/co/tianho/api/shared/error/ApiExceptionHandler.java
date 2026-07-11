@@ -6,6 +6,7 @@ import jp.co.tianho.api.content.admin.ContentRevisionException;
 import jp.co.tianho.api.auth.AuthenticationFailedException;
 import jp.co.tianho.api.auth.AdministratorUserManagementException;
 import jp.co.tianho.api.auth.MfaVerificationException;
+import jp.co.tianho.api.media.MediaAssetNotFoundException;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+
+    @ExceptionHandler(MediaAssetNotFoundException.class)
+    ResponseEntity<ProblemDetail> handleMediaNotFound(MediaAssetNotFoundException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+        problem.setTitle("Media asset not found");
+        problem.setType(URI.create("/problems/media-asset-not-found"));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
+    }
 
     @ExceptionHandler(ContentRevisionException.class)
     ResponseEntity<ProblemDetail> handleContentRevision(ContentRevisionException exception) {
