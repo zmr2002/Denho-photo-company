@@ -1,0 +1,34 @@
+name: Verify public availability
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SITE_URL: ${{ vars.SITE_URL }}
+    steps:
+      - name: Check configured public routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$SITE_URL" ]; then
+            echo "Repository variable SITE_URL is not configured; availability check skipped."
+            exit 0
+          fi
+          base_url="${SITE_URL%/}"
+          for path in /ja/ /zh/ /en/ /actuator/health/readiness; do
+            curl --fail --silent --show-error \
+              --connect-timeout 5 \
+              --max-time 15 \
+              --retry 2 \
+              --retry-all-errors \
+              "$base_url$path" >/dev/null
+          done

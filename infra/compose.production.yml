@@ -39,6 +39,12 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/ja/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   api:
     build:
@@ -66,6 +72,11 @@ services:
       SES_REGION: ${SES_REGION:-ap-northeast-1}
       SES_FROM_ADDRESS: ${SES_FROM_ADDRESS:-}
       SES_TO_ADDRESS: ${SES_TO_ADDRESS:-}
+      CONSOLE_LOG_STRUCTURED_FORMAT: logstash
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-production}
+      SENTRY_RELEASE: ${SENTRY_RELEASE:-unknown}
+      SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-0.05}
     read_only: true
     tmpfs:
       - /tmp:size=128m,mode=1777
