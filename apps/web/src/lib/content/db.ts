@@ -65,6 +65,7 @@ export async function getDbNotices(locale: Locale): Promise<Notice[]> {
             alt: imageBlock.imageAlt || article.title,
             tone: tone(imageBlock.imageTone),
             caption: imageBlock.caption || undefined,
+            src: managedImagePath(imageBlock.imagePath),
           }
         : undefined,
       detailSections,
@@ -122,6 +123,7 @@ export async function getDbWorks(locale: Locale): Promise<Work[]> {
           label: cover.label,
           alt: localizedAlt(locale, cover) || cover.label,
           tone: tone(cover.tone),
+          src: managedImagePath(cover.path),
         }
       : { label: work.title, alt: work.title, tone: "neutral" };
 
@@ -148,6 +150,7 @@ export async function getDbWorks(locale: Locale): Promise<Work[]> {
         label: image.label,
         alt: localizedAlt(locale, image) || image.label,
         tone: tone(image.tone),
+        src: managedImagePath(image.path),
       })),
       mediaType: work.mediaType as Work["mediaType"],
       seoTitle: work.seoTitle || work.title,
@@ -162,12 +165,18 @@ function imageFromArticle(article: {
   heroLabel: string | null;
   heroAlt: string | null;
   heroTone: string;
+  heroImagePath: string | null;
 }): MockImage {
   return {
     label: article.heroLabel || article.title,
     alt: article.heroAlt || article.title,
     tone: tone(article.heroTone),
+    src: managedImagePath(article.heroImagePath),
   };
+}
+
+function managedImagePath(path: string | null) {
+  return path?.startsWith("/media/original/") ? path : undefined;
 }
 
 function localizedAlt(locale: Locale, image: { altJa: string | null; altZh: string | null; altEn: string | null }) {

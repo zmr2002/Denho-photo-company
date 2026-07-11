@@ -56,6 +56,8 @@ export function WorkDetailPage({ work }: WorkDetailPageProps) {
             size="panoramic"
             tone={work.featuredImage.tone}
             video={work.mediaType === "video"}
+            src={work.featuredImage.src}
+            alt={work.featuredImage.alt}
           />
 
           <div className="mt-14 grid gap-12 lg:grid-cols-12">

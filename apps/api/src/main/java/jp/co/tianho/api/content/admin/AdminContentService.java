@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.UUID;
 import jp.co.tianho.api.auth.AdministratorPrincipal;
 import jp.co.tianho.api.content.admin.ContentRevisionService.ResourceType;
+import jp.co.tianho.api.media.MediaReferenceService;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,14 +25,17 @@ public class AdminContentService {
     private final JdbcClient jdbcClient;
     private final ObjectMapper objectMapper;
     private final ContentRevisionService revisionService;
+    private final MediaReferenceService mediaReferenceService;
 
     public AdminContentService(
             JdbcClient jdbcClient,
             ObjectMapper objectMapper,
-            ContentRevisionService revisionService) {
+            ContentRevisionService revisionService,
+            MediaReferenceService mediaReferenceService) {
         this.jdbcClient = jdbcClient;
         this.objectMapper = objectMapper;
         this.revisionService = revisionService;
+        this.mediaReferenceService = mediaReferenceService;
     }
 
     @Transactional(readOnly = true)
@@ -122,6 +126,7 @@ public class AdminContentService {
                 .param("demo", input.demo())
                 .update();
         replaceArticleBlocks(id, input.blocks());
+        replaceArticleMediaReferences(id, input);
         revisionService.recordChange(ResourceType.ARTICLE, id, "CREATED", actor, ipAddress);
         return findOne(ResourceType.ARTICLE, id);
     }
@@ -171,6 +176,7 @@ public class AdminContentService {
                 .update();
         requireUpdated(updated);
         replaceArticleBlocks(id, input.blocks());
+        replaceArticleMediaReferences(id, input);
         revisionService.recordChange(ResourceType.ARTICLE, id, "UPDATED", actor, ipAddress);
         return findOne(ResourceType.ARTICLE, id);
     }
@@ -291,6 +297,11 @@ public class AdminContentService {
                     .param("sortOrder", image.sortOrder())
                     .update();
         }
+        java.util.Map<String, String> imageReferences = new java.util.LinkedHashMap<>();
+        for (int index = 0; index < input.images().size(); index++) {
+            imageReferences.put("image:" + index, input.images().get(index).path());
+        }
+        mediaReferenceService.replaceReferences("WORK", id, imageReferences);
         revisionService.recordChange(ResourceType.WORK, id, "UPDATED", actor, ipAddress);
         return findOne(ResourceType.WORK, id);
     }
@@ -320,6 +331,15 @@ public class AdminContentService {
                     .param("sortOrder", block.sortOrder())
                     .update();
         }
+    }
+
+    private void replaceArticleMediaReferences(UUID articleId, ArticleInput input) {
+        java.util.Map<String, String> references = new java.util.LinkedHashMap<>();
+        references.put("hero", input.heroImagePath());
+        for (int index = 0; index < input.blocks().size(); index++) {
+            references.put("block:" + index, input.blocks().get(index).imagePath());
+        }
+        mediaReferenceService.replaceReferences("ARTICLE", articleId, references);
     }
 
     private void requireEditable(ResourceType type, UUID id, long expectedVersion, AdministratorPrincipal actor) {

@@ -38,6 +38,12 @@ export type AdminNotice = {
   dismissalMode: string; status: string; startAt: string | null; endAt: string | null; version: number;
 };
 
+export type MediaAsset = {
+  id: string; originalFilename: string; contentType: string; byteSize: number; width: number; height: number;
+  sha256: string; status: "ACTIVE" | "TRASHED"; url: string; thumbnailUrl: string; referenceCount: number;
+  trashedAt: string | null; purgeAfter: string | null; createdAt: string;
+};
+
 export async function getAdminSession(): Promise<AdminSession> {
   const response = await adminApiFetch("/api/v1/auth/session", false);
   if (!response.ok) {
@@ -56,6 +62,11 @@ export async function getAdminContent<T>(collection: "articles" | "works", id: s
   if (response.status === 404) return null;
   if (!response.ok) throw new Error(`Administration API returned ${response.status}`);
   return normalizeContent(await response.json()) as T;
+}
+
+export async function getMediaAssets(status: "ACTIVE" | "TRASHED") {
+  const response = await adminApiFetch(`/api/v1/admin/media?status=${status}`);
+  return response.json() as Promise<MediaAsset[]>;
 }
 
 async function adminApiFetch(path: string, requireSuccess = true) {

@@ -95,6 +95,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/media": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["findAssets"];
+        put?: never;
+        post: operations["upload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/media/{id}/trash": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["trash"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/media/{id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["restore"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/media/{id}/purge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["purge"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/articles": {
         parameters: {
             query?: never;
@@ -239,6 +303,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/public/media/{variant}/{filename}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["read"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/public/articles": {
         parameters: {
             query?: never;
@@ -351,6 +431,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/media/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["findAsset"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -437,6 +533,31 @@ export interface components {
             /** Format: date-time */
             createdAt?: string;
         };
+        MediaAssetResponse: {
+            /** Format: uuid */
+            id?: string;
+            originalFilename?: string;
+            contentType?: string;
+            /** Format: int64 */
+            byteSize?: number;
+            /** Format: int32 */
+            width?: number;
+            /** Format: int32 */
+            height?: number;
+            sha256?: string;
+            /** @enum {string} */
+            status?: "ACTIVE" | "TRASHED" | "DELETED";
+            url?: string;
+            thumbnailUrl?: string;
+            /** Format: int64 */
+            referenceCount?: number;
+            /** Format: date-time */
+            trashedAt?: string;
+            /** Format: date-time */
+            purgeAfter?: string;
+            /** Format: date-time */
+            createdAt?: string;
+        };
         ArticleBlockInput: {
             type: string;
             heading?: string;
@@ -479,25 +600,25 @@ export interface components {
             object?: boolean;
             float?: boolean;
             number?: boolean;
-            valueNode?: boolean;
-            missingNode?: boolean;
-            container?: boolean;
-            integralNumber?: boolean;
-            /** @enum {string} */
-            nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
-            floatingPointNumber?: boolean;
-            bigDecimal?: boolean;
-            bigInteger?: boolean;
-            boolean?: boolean;
             int?: boolean;
-            pojo?: boolean;
             binary?: boolean;
-            long?: boolean;
+            string?: boolean;
+            pojo?: boolean;
             double?: boolean;
+            boolean?: boolean;
+            short?: boolean;
+            long?: boolean;
             /** @deprecated */
             textual?: boolean;
-            short?: boolean;
-            string?: boolean;
+            missingNode?: boolean;
+            container?: boolean;
+            bigInteger?: boolean;
+            valueNode?: boolean;
+            floatingPointNumber?: boolean;
+            integralNumber?: boolean;
+            bigDecimal?: boolean;
+            /** @enum {string} */
+            nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
             embeddedValue?: boolean;
         };
         WorkImageInput: {
@@ -890,6 +1011,119 @@ export interface operations {
             };
         };
     };
+    findAssets: {
+        parameters: {
+            query?: {
+                status?: "ACTIVE" | "TRASHED" | "DELETED";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MediaAssetResponse"][];
+                };
+            };
+        };
+    };
+    upload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MediaAssetResponse"];
+                };
+            };
+        };
+    };
+    trash: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MediaAssetResponse"];
+                };
+            };
+        };
+    };
+    restore: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MediaAssetResponse"];
+                };
+            };
+        };
+    };
+    purge: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     articles: {
         parameters: {
             query?: never;
@@ -1172,6 +1406,29 @@ export interface operations {
             };
         };
     };
+    read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                variant: string;
+                filename: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": string;
+                };
+            };
+        };
+    };
     articles_1: {
         parameters: {
             query?: {
@@ -1319,6 +1576,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["JsonNode"];
+                };
+            };
+        };
+    };
+    findAsset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MediaAssetResponse"];
                 };
             };
         };

@@ -6,6 +6,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 
 @Component
 public class MediaObjectStorage {
@@ -30,5 +31,9 @@ public class MediaObjectStorage {
 
     public void delete(String objectKey) {
         s3Client.deleteObject(DeleteObjectRequest.builder().bucket(bucket).key(objectKey).build());
+    }
+
+    public byte[] get(String objectKey) {
+        return s3Client.getObjectAsBytes(GetObjectRequest.builder().bucket(bucket).key(objectKey).build()).asByteArray();
     }
 }

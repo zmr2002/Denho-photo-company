@@ -22,6 +22,7 @@ export interface GalleryImage {
 	label: string;
 	alt: string;
 	tone: MediaTone;
+	src?: string;
 }
 
 export interface WorkCase {

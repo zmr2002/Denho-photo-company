@@ -9,6 +9,7 @@ export interface MockImage {
   label: string;
   alt: string;
   tone: MediaTone;
+  src?: string;
 }
 
 export interface ArticleImageBlock extends MockImage {

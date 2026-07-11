@@ -7,6 +7,7 @@ const adminLinks = [
   { href: "/studio-tianho/articles", label: "文章管理" },
   { href: "/studio-tianho/notice", label: "开场通知" },
   { href: "/studio-tianho/works", label: "作品图片" },
+  { href: "/studio-tianho/media", label: "媒体库" },
 ];
 
 export async function AdminShell({ children }: { children: React.ReactNode }) {
