@@ -17,7 +17,7 @@ spring:
   session:
     timeout: 30m
     jdbc:
-      initialize-schema: ${SESSION_SCHEMA_INITIALIZATION:always}
+      initialize-schema: ${SESSION_SCHEMA_INITIALIZATION:never}
 
 server:
   port: ${PORT:8080}
@@ -48,6 +48,14 @@ springdoc:
     path: /swagger-ui.html
 
 tianho:
+  auth:
+    bootstrap:
+      enabled: ${ADMIN_BOOTSTRAP_ENABLED:false}
+      email: ${ADMIN_BOOTSTRAP_EMAIL:}
+      password: ${ADMIN_BOOTSTRAP_PASSWORD:}
+      display-name: ${ADMIN_BOOTSTRAP_DISPLAY_NAME:Administrator}
+    session:
+      absolute-timeout: 8h
   content:
     bootstrap:
       enabled: ${CONTENT_BOOTSTRAP_ENABLED:false}

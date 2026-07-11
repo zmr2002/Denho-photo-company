@@ -7,13 +7,26 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextHolderFilter;
+import org.springframework.security.web.context.SecurityContextRepository;
+import jp.co.tianho.api.auth.AbsoluteSessionExpirationFilter;
 
 @Configuration
 @EnableMethodSecurity
 public class ApiSecurityConfiguration {
 
     @Bean
-    SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
+    SecurityContextRepository securityContextRepository() {
+        return new HttpSessionSecurityContextRepository();
+    }
+
+    @Bean
+    SecurityFilterChain apiSecurityFilterChain(
+            HttpSecurity http,
+            SecurityContextRepository securityContextRepository,
+            AbsoluteSessionExpirationFilter absoluteSessionExpirationFilter) throws Exception {
         return http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.GET,
@@ -24,8 +37,25 @@ public class ApiSecurityConfiguration {
                         .permitAll()
                         .requestMatchers("/api/v1/public/**")
                         .permitAll()
+                        .requestMatchers(
+                                "/api/v1/auth/login",
+                                "/api/v1/auth/session",
+                                "/api/v1/auth/csrf")
+                        .permitAll()
                         .anyRequest()
                         .authenticated())
+                .securityContext(context -> context
+                        .securityContextRepository(securityContextRepository)
+                        .requireExplicitSave(true))
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(new HttpStatusEntryPoint(org.springframework.http.HttpStatus.UNAUTHORIZED)))
+                .logout(logout -> logout
+                        .logoutUrl("/api/v1/auth/logout")
+                        .logoutSuccessHandler((request, response, authentication) ->
+                                response.setStatus(org.springframework.http.HttpStatus.NO_CONTENT.value()))
+                        .invalidateHttpSession(true)
+                        .clearAuthentication(true))
+                .addFilterAfter(absoluteSessionExpirationFilter, SecurityContextHolderFilter.class)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .build();

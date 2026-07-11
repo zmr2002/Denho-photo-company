@@ -41,7 +41,7 @@ class ApiApplicationTests {
     @Test
     void administrationEndpointsRequireAuthentication() throws Exception {
         mockMvc.perform(get("/api/v1/admin/audit-events"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

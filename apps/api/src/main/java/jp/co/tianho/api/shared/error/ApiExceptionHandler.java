@@ -2,6 +2,7 @@ package jp.co.tianho.api.shared.error;
 
 import jakarta.validation.ConstraintViolationException;
 import jp.co.tianho.api.content.publicapi.ContentNotFoundException;
+import jp.co.tianho.api.auth.AuthenticationFailedException;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+
+    @ExceptionHandler(AuthenticationFailedException.class)
+    ResponseEntity<ProblemDetail> handleAuthenticationFailed(AuthenticationFailedException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, exception.getMessage());
+        problem.setTitle("Authentication failed");
+        problem.setType(URI.create("/problems/authentication-failed"));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problem);
+    }
 
     @ExceptionHandler(ContentNotFoundException.class)
     ResponseEntity<ProblemDetail> handleContentNotFound(ContentNotFoundException exception) {
