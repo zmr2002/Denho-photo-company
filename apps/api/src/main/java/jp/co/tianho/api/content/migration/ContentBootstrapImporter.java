@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.OffsetDateTime;
 import java.util.HexFormat;
+import java.util.UUID;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -69,8 +70,8 @@ public class ContentBootstrapImporter implements ApplicationRunner {
                         )
                         ON CONFLICT (id) DO NOTHING
                         """)
-                .param("id", article.id())
-                .param("translationGroupId", article.translationGroupId())
+                .param("id", uuid(article.id()))
+                .param("translationGroupId", uuid(article.translationGroupId()))
                 .param("locale", article.locale())
                 .param("slug", article.slug())
                 .param("title", article.title())
@@ -111,8 +112,8 @@ public class ContentBootstrapImporter implements ApplicationRunner {
                         )
                         ON CONFLICT (id) DO NOTHING
                         """)
-                .param("id", block.id())
-                .param("articleId", articleId)
+                .param("id", uuid(block.id()))
+                .param("articleId", uuid(articleId))
                 .param("blockType", block.blockType())
                 .param("heading", block.heading())
                 .param("body", block.body())
@@ -142,8 +143,8 @@ public class ContentBootstrapImporter implements ApplicationRunner {
                         )
                         ON CONFLICT (id) DO NOTHING
                         """)
-                .param("id", work.id())
-                .param("translationGroupId", work.translationGroupId())
+                .param("id", uuid(work.id()))
+                .param("translationGroupId", uuid(work.translationGroupId()))
                 .param("locale", work.locale())
                 .param("slug", work.slug())
                 .param("title", work.title())
@@ -183,8 +184,8 @@ public class ContentBootstrapImporter implements ApplicationRunner {
                         )
                         ON CONFLICT (id) DO NOTHING
                         """)
-                .param("id", image.id())
-                .param("workId", workId)
+                .param("id", uuid(image.id()))
+                .param("workId", uuid(workId))
                 .param("path", image.path())
                 .param("label", image.label())
                 .param("tone", image.tone())
@@ -214,8 +215,8 @@ public class ContentBootstrapImporter implements ApplicationRunner {
                         )
                         ON CONFLICT (id) DO NOTHING
                         """)
-                .param("id", notice.id())
-                .param("translationGroupId", notice.translationGroupId())
+                .param("id", uuid(notice.id()))
+                .param("translationGroupId", uuid(notice.translationGroupId()))
                 .param("locale", notice.locale())
                 .param("enabled", notice.enabled())
                 .param("label", notice.label())
@@ -240,5 +241,9 @@ public class ContentBootstrapImporter implements ApplicationRunner {
 
     private OffsetDateTime timestamp(String value) {
         return value == null ? null : OffsetDateTime.parse(value);
+    }
+
+    private UUID uuid(String value) {
+        return UUID.fromString(value);
     }
 }
