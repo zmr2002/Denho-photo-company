@@ -7,6 +7,8 @@ import jp.co.tianho.api.auth.AuthenticationFailedException;
 import jp.co.tianho.api.auth.AdministratorUserManagementException;
 import jp.co.tianho.api.auth.MfaVerificationException;
 import jp.co.tianho.api.media.MediaAssetNotFoundException;
+import jp.co.tianho.api.media.DuplicateMediaException;
+import jp.co.tianho.api.media.ImageValidationException;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,22 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+
+    @ExceptionHandler(ImageValidationException.class)
+    ResponseEntity<ProblemDetail> handleImageValidation(ImageValidationException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, exception.getMessage());
+        problem.setTitle("Image validation failed");
+        problem.setType(URI.create("/problems/image-validation-failed"));
+        return ResponseEntity.unprocessableContent().body(problem);
+    }
+
+    @ExceptionHandler(DuplicateMediaException.class)
+    ResponseEntity<ProblemDetail> handleDuplicateMedia(DuplicateMediaException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+        problem.setTitle("Duplicate media asset");
+        problem.setType(URI.create("/problems/duplicate-media-asset"));
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
+    }
 
     @ExceptionHandler(MediaAssetNotFoundException.class)
     ResponseEntity<ProblemDetail> handleMediaNotFound(MediaAssetNotFoundException exception) {
