@@ -38,14 +38,14 @@ Install dependencies:
 npm install
 ```
 
-Create the local environment file from `.env.example`, then replace the example secret and administrator password.
+Create `apps/web/.env` from `apps/web/.env.example`, then replace the example secret and administrator password.
 
 Prepare the local database:
 
 ```bash
-npx prisma generate
-npx prisma migrate dev
-npx prisma db seed
+npm run prisma:generate
+npm run prisma:migrate
+npm run prisma:seed
 ```
 
 Start the development server:
@@ -55,6 +55,11 @@ npm run dev
 ```
 
 Open `http://localhost:3000`.
+
+## Project structure
+
+- `apps/web` contains the Next.js public site and administration pages.
+- Root npm commands run the corresponding web application command.
 
 ## Verification
 
