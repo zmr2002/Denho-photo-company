@@ -68,6 +68,22 @@ npm run dev
 
 Open `http://localhost:3000`.
 
+Create the API environment from `apps/api/.env.example`. Start the API from `apps/api`:
+
+```bash
+./gradlew bootRun
+```
+
+Set `CONTENT_BOOTSTRAP_ENABLED=true` for one start to verify and import the checked SQLite content export. The import is idempotent and stops if the SHA-256 checksum does not match.
+
+The public API is available under `/api/v1/public`:
+
+- `/articles` and `/articles/{slug}`
+- `/works` and `/works/{slug}`
+- `/notices/current`
+
+Use the `locale` query parameter with `ja`, `zh`, or `en`. OpenAPI JSON is available at `/v3/api-docs`.
+
 ## Project structure
 
 - `apps/web` contains the Next.js public site and administration pages.

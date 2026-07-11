@@ -46,3 +46,8 @@ springdoc:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
+
+tianho:
+  content:
+    bootstrap:
+      enabled: ${CONTENT_BOOTSTRAP_ENABLED:false}
