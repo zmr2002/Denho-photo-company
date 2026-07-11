@@ -22,10 +22,15 @@ public class MediaLibraryController {
 
     private final MediaLibraryService mediaLibraryService;
     private final MediaUploadService mediaUploadService;
+    private final MediaLifecycleService mediaLifecycleService;
 
-    public MediaLibraryController(MediaLibraryService mediaLibraryService, MediaUploadService mediaUploadService) {
+    public MediaLibraryController(
+            MediaLibraryService mediaLibraryService,
+            MediaUploadService mediaUploadService,
+            MediaLifecycleService mediaLifecycleService) {
         this.mediaLibraryService = mediaLibraryService;
         this.mediaUploadService = mediaUploadService;
+        this.mediaLifecycleService = mediaLifecycleService;
     }
 
     @GetMapping
@@ -46,5 +51,30 @@ public class MediaLibraryController {
             @AuthenticationPrincipal AdministratorPrincipal actor,
             HttpServletRequest request) {
         return mediaUploadService.upload(file, actor, request.getRemoteAddr());
+    }
+
+    @PostMapping("/{id}/trash")
+    MediaAssetResponse trash(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal AdministratorPrincipal actor,
+            HttpServletRequest request) {
+        return mediaLifecycleService.trash(id, actor, request.getRemoteAddr());
+    }
+
+    @PostMapping("/{id}/restore")
+    MediaAssetResponse restore(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal AdministratorPrincipal actor,
+            HttpServletRequest request) {
+        return mediaLifecycleService.restore(id, actor, request.getRemoteAddr());
+    }
+
+    @PostMapping("/{id}/purge")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void purge(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal AdministratorPrincipal actor,
+            HttpServletRequest request) {
+        mediaLifecycleService.purge(id, actor, request.getRemoteAddr());
     }
 }

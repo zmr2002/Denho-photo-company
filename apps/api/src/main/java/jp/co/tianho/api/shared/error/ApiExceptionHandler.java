@@ -9,6 +9,7 @@ import jp.co.tianho.api.auth.MfaVerificationException;
 import jp.co.tianho.api.media.MediaAssetNotFoundException;
 import jp.co.tianho.api.media.DuplicateMediaException;
 import jp.co.tianho.api.media.ImageValidationException;
+import jp.co.tianho.api.media.MediaLifecycleException;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+
+    @ExceptionHandler(MediaLifecycleException.class)
+    ResponseEntity<ProblemDetail> handleMediaLifecycle(MediaLifecycleException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+        problem.setTitle("Media lifecycle conflict");
+        problem.setType(URI.create("/problems/media-lifecycle-conflict"));
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
+    }
 
     @ExceptionHandler(ImageValidationException.class)
     ResponseEntity<ProblemDetail> handleImageValidation(ImageValidationException exception) {
