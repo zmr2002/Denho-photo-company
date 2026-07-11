@@ -4,6 +4,7 @@ import jakarta.validation.ConstraintViolationException;
 import jp.co.tianho.api.content.publicapi.ContentNotFoundException;
 import jp.co.tianho.api.auth.AuthenticationFailedException;
 import jp.co.tianho.api.auth.AdministratorUserManagementException;
+import jp.co.tianho.api.auth.MfaVerificationException;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+
+    @ExceptionHandler(MfaVerificationException.class)
+    ResponseEntity<ProblemDetail> handleMfaVerification(MfaVerificationException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, exception.getMessage());
+        problem.setTitle("Account verification failed");
+        problem.setType(URI.create("/problems/account-verification-failed"));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problem);
+    }
 
     @ExceptionHandler(AdministratorUserManagementException.class)
     ResponseEntity<ProblemDetail> handleUserManagement(AdministratorUserManagementException exception) {

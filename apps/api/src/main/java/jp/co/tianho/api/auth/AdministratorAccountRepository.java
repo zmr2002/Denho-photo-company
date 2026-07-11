@@ -21,7 +21,7 @@ class AdministratorAccountRepository {
     Optional<AdministratorAccount> findByEmail(String email) {
         return jdbcClient.sql("""
                         SELECT id, email, display_name, password_hash, password_scheme, role, active,
-                               verified_at, failed_login_count, locked_until
+                               verified_at, mfa_enabled, failed_login_count, locked_until
                         FROM administrator_users
                         WHERE email = :email
                         """)
@@ -121,6 +121,7 @@ class AdministratorAccountRepository {
                 resultSet.getString("role"),
                 resultSet.getBoolean("active"),
                 resultSet.getObject("verified_at", OffsetDateTime.class),
+                resultSet.getBoolean("mfa_enabled"),
                 resultSet.getInt("failed_login_count"),
                 resultSet.getObject("locked_until", OffsetDateTime.class));
     }

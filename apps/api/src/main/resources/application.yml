@@ -56,6 +56,10 @@ tianho:
       display-name: ${ADMIN_BOOTSTRAP_DISPLAY_NAME:Administrator}
     session:
       absolute-timeout: 8h
+    mfa:
+      encryption-key: ${MFA_ENCRYPTION_KEY:}
+      issuer: Tianho
+      challenge-timeout: 5m
   content:
     bootstrap:
       enabled: ${CONTENT_BOOTSTRAP_ENABLED:false}

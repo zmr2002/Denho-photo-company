@@ -40,7 +40,10 @@ public class ApiSecurityConfiguration {
                         .requestMatchers(
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/session",
-                                "/api/v1/auth/csrf")
+                                "/api/v1/auth/csrf",
+                                "/api/v1/auth/mfa/bind",
+                                "/api/v1/auth/mfa/verify",
+                                "/api/v1/auth/mfa/recovery")
                         .permitAll()
                         .requestMatchers("/api/v1/admin/users/**", "/api/v1/admin/audit-events/**")
                         .hasRole("ADMIN")
