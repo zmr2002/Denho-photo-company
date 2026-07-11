@@ -18,7 +18,8 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
-RUN addgroup --system --gid 10001 web && adduser --system --uid 10001 --ingroup web web
+RUN apk upgrade --no-cache && npm uninstall --global npm \
+    && addgroup --system --gid 10001 web && adduser --system --uid 10001 --ingroup web web
 COPY --from=build --chown=web:web /workspace/apps/web/.next/standalone ./
 COPY --from=build --chown=web:web /workspace/apps/web/.next/static ./apps/web/.next/static
 COPY --from=build --chown=web:web /workspace/apps/web/public ./apps/web/public

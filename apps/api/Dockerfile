@@ -3,9 +3,10 @@ WORKDIR /workspace
 COPY apps/api ./
 RUN sed -i 's/\r$//' gradlew && chmod +x gradlew && ./gradlew bootJar --no-daemon
 
-FROM eclipse-temurin:25-jre AS runtime
+FROM eclipse-temurin:25-jre-alpine AS runtime
 WORKDIR /app
-RUN groupadd --system --gid 10001 api && useradd --system --uid 10001 --gid api --home-dir /app api
+RUN apk upgrade --no-cache && addgroup --system --gid 10001 api \
+    && adduser --system --uid 10001 --ingroup api --home /app api
 COPY --from=build --chown=api:api /workspace/build/libs/*.jar /app/application.jar
 USER api
 EXPOSE 8080
