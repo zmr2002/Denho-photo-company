@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+**/node_modules
 /.pnp
 .pnp.*
 .yarn/*
@@ -12,6 +13,7 @@
 
 # testing
 /coverage
+**/coverage
 
 # local review and private material
 /artifacts/
@@ -21,17 +23,26 @@
 
 # next.js
 /.next/
+**/.next/
 /out/
 
 # production
 /build
+**/build/
+
+# java
+**/.gradle/
+*.class
 
 # misc
 .DS_Store
 *.pem
+.idea/
+*.iml
 
 # debug
 npm-debug.log*
+*.log
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
@@ -41,7 +52,7 @@ yarn-error.log*
 !.env.example
 
 # local sqlite databases
-/prisma/dev.db
+**/prisma/dev.db
 
 # vercel
 .vercel
