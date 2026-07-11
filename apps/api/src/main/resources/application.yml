@@ -77,6 +77,8 @@ tianho:
     secret-key: ${OBJECT_STORAGE_SECRET_KEY:tianho-local-password}
   inquiry:
     ip-hash-key: ${INQUIRY_IP_HASH_KEY:tianho-local-inquiry-ip-key}
+    retention-period: ${INQUIRY_RETENTION_PERIOD:180d}
+    retention-cron: ${INQUIRY_RETENTION_CRON:0 35 3 * * *}
     turnstile:
       enabled: ${TURNSTILE_ENABLED:false}
       secret: ${TURNSTILE_SECRET_KEY:}
