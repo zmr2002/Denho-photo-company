@@ -11,6 +11,9 @@ Pre-launch multilingual website for 田豊株式会社. The project includes the
 - Prisma with SQLite for local development
 - NextAuth credentials sessions
 - Zod and React Hook Form
+- Java 25 and Spring Boot 4.1
+- Spring Security, Spring Data JPA, Flyway, and PostgreSQL
+- OpenAPI 3 and S3-compatible object storage support
 
 ## Languages and routes
 
@@ -31,6 +34,7 @@ Requirements:
 
 - Node.js 20 or later
 - npm
+- Java 25
 
 Install dependencies:
 
@@ -59,7 +63,14 @@ Open `http://localhost:3000`.
 ## Project structure
 
 - `apps/web` contains the Next.js public site and administration pages.
+- `apps/api` contains the Spring Boot HTTP API.
 - Root npm commands run the corresponding web application command.
+
+Run the API verification build from `apps/api`:
+
+```bash
+./gradlew build
+```
 
 ## Verification
 
