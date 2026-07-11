@@ -10,6 +10,7 @@ import jp.co.tianho.api.media.MediaAssetNotFoundException;
 import jp.co.tianho.api.media.DuplicateMediaException;
 import jp.co.tianho.api.media.ImageValidationException;
 import jp.co.tianho.api.media.MediaLifecycleException;
+import jp.co.tianho.api.inquiry.InquiryNotFoundException;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+
+    @ExceptionHandler(InquiryNotFoundException.class)
+    ResponseEntity<ProblemDetail> handleInquiryNotFound(InquiryNotFoundException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+        problem.setTitle("Inquiry not found");
+        problem.setType(URI.create("/problems/inquiry-not-found"));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
+    }
 
     @ExceptionHandler(MediaLifecycleException.class)
     ResponseEntity<ProblemDetail> handleMediaLifecycle(MediaLifecycleException exception) {

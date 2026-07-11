@@ -6,9 +6,10 @@ import { LineBreakText } from "@/components/ui/LineBreakText";
 
 interface ContactPageProps {
   content: ContactPageContent;
+  locale: "ja" | "zh" | "en";
 }
 
-export function ContactPage({ content }: ContactPageProps) {
+export function ContactPage({ content, locale }: ContactPageProps) {
   return (
     <>
       <PageHero {...content.hero} />
@@ -41,7 +42,7 @@ export function ContactPage({ content }: ContactPageProps) {
               <p>{content.formHeading}</p>
               <span>{content.formStatus}</span>
             </div>
-            <InquiryForm content={content.form} />
+            <InquiryForm content={content.form} locale={locale} />
           </div>
         </div>
       </section>
