@@ -299,6 +299,37 @@
   line-height: 1.6;
 }
 
+.admin-inquiry {
+  display: grid;
+  gap: 1rem;
+}
+
+.admin-inquiry header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.admin-inquiry-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.admin-inquiry-details dt {
+  color: #766f68;
+  font-size: 0.72rem;
+}
+
+.admin-inquiry-details dd {
+  margin-top: 0.3rem;
+}
+
+.admin-inquiry-message {
+  white-space: pre-wrap;
+}
+
 .admin-login-page {
   min-height: 100vh;
   display: grid;

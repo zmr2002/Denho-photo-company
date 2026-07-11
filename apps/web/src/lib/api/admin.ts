@@ -44,6 +44,22 @@ export type MediaAsset = {
   trashedAt: string | null; purgeAfter: string | null; createdAt: string;
 };
 
+export type Inquiry = {
+  id: string;
+  nameCompany: string;
+  email: string;
+  projectType: string;
+  requestedDate: string | null;
+  location: string | null;
+  message: string;
+  locale: string;
+  status: "NEW" | "IN_PROGRESS" | "CLOSED" | "SPAM" | "ANONYMIZED";
+  consentVersion: string;
+  consentedAt: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export async function getAdminSession(): Promise<AdminSession> {
   const response = await adminApiFetch("/api/v1/auth/session", false);
   if (!response.ok) {
@@ -67,6 +83,11 @@ export async function getAdminContent<T>(collection: "articles" | "works", id: s
 export async function getMediaAssets(status: "ACTIVE" | "TRASHED") {
   const response = await adminApiFetch(`/api/v1/admin/media?status=${status}`);
   return response.json() as Promise<MediaAsset[]>;
+}
+
+export async function getInquiries(status: Inquiry["status"]) {
+  const response = await adminApiFetch(`/api/v1/admin/inquiries?status=${status}`);
+  return response.json() as Promise<Inquiry[]>;
 }
 
 async function adminApiFetch(path: string, requireSuccess = true) {

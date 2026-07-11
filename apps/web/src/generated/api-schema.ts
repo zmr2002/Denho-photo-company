@@ -1,4 +1,20 @@
 export interface paths {
+    "/api/v1/public/inquiries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/mfa/verify": {
         parameters: {
             query?: never;
@@ -239,6 +255,22 @@ export interface paths {
         patch: operations["saveNotice"];
         trace?: never;
     };
+    "/api/v1/admin/inquiries/{id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["changeStatus_1"];
+        trace?: never;
+    };
     "/api/v1/admin/articles/{id}": {
         parameters: {
             query?: never;
@@ -447,10 +479,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/inquiries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["findAll"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        PublicInquiryRequest: {
+            /** Format: uuid */
+            idempotencyKey: string;
+            nameCompany: string;
+            /** Format: email */
+            email: string;
+            projectType: string;
+            requestedDate?: string;
+            location?: string;
+            message: string;
+            locale: string;
+            consentVersion: string;
+            consented?: boolean;
+            turnstileToken?: string;
+            companyWebsite?: string;
+        };
+        PublicInquiryResponse: {
+            /** Format: uuid */
+            id?: string;
+            /** @enum {string} */
+            status?: "NEW" | "IN_PROGRESS" | "CLOSED" | "SPAM" | "ANONYMIZED";
+            /** Format: date-time */
+            receivedAt?: string;
+        };
         VerifyRequest: {
             /** Format: uuid */
             challengeId: string;
@@ -600,25 +672,25 @@ export interface components {
             object?: boolean;
             float?: boolean;
             number?: boolean;
-            int?: boolean;
-            binary?: boolean;
-            string?: boolean;
-            pojo?: boolean;
-            double?: boolean;
             boolean?: boolean;
-            short?: boolean;
+            string?: boolean;
+            int?: boolean;
+            double?: boolean;
+            pojo?: boolean;
             long?: boolean;
             /** @deprecated */
             textual?: boolean;
-            missingNode?: boolean;
-            container?: boolean;
-            bigInteger?: boolean;
-            valueNode?: boolean;
-            floatingPointNumber?: boolean;
-            integralNumber?: boolean;
-            bigDecimal?: boolean;
+            binary?: boolean;
+            short?: boolean;
             /** @enum {string} */
             nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
+            valueNode?: boolean;
+            container?: boolean;
+            bigDecimal?: boolean;
+            integralNumber?: boolean;
+            bigInteger?: boolean;
+            floatingPointNumber?: boolean;
+            missingNode?: boolean;
             embeddedValue?: boolean;
         };
         WorkImageInput: {
@@ -666,6 +738,30 @@ export interface components {
             endAt?: string;
             /** Format: int64 */
             expectedVersion?: number;
+        };
+        StatusRequest: {
+            /** @enum {string} */
+            status: "NEW" | "IN_PROGRESS" | "CLOSED" | "SPAM" | "ANONYMIZED";
+        };
+        InquiryResponse: {
+            /** Format: uuid */
+            id?: string;
+            nameCompany?: string;
+            email?: string;
+            projectType?: string;
+            requestedDate?: string;
+            location?: string;
+            message?: string;
+            locale?: string;
+            /** @enum {string} */
+            status?: "NEW" | "IN_PROGRESS" | "CLOSED" | "SPAM" | "ANONYMIZED";
+            consentVersion?: string;
+            /** Format: date-time */
+            consentedAt?: string;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            updatedAt?: string;
         };
         ArticleUpdateRequest: {
             /** Format: int64 */
@@ -843,6 +939,30 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PublicInquiryRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PublicInquiryResponse"];
+                };
+            };
+        };
+    };
     verify: {
         parameters: {
             query?: never;
@@ -1290,6 +1410,32 @@ export interface operations {
             };
         };
     };
+    changeStatus_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StatusRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["InquiryResponse"];
+                };
+            };
+        };
+    };
     article: {
         parameters: {
             query?: never;
@@ -1598,6 +1744,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["MediaAssetResponse"];
+                };
+            };
+        };
+    };
+    findAll: {
+        parameters: {
+            query?: {
+                status?: "NEW" | "IN_PROGRESS" | "CLOSED" | "SPAM" | "ANONYMIZED";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["InquiryResponse"][];
                 };
             };
         };

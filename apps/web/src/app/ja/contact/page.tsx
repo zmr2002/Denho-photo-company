@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <SiteLayout lang="ja" page="contact" currentPath="/ja/contact/">
-      <ContactPage content={contactPageContent.ja} />
+      <ContactPage content={contactPageContent.ja} locale="ja" />
     </SiteLayout>
   );
 }
