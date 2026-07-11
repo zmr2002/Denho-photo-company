@@ -1,18 +1,18 @@
 import Link from "next/link";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { tutorialArticleSlug } from "@/lib/admin/labels";
-import { prisma } from "@/lib/db/prisma";
+import { getAdminCollection, type AdminArticle, type AdminNotice, type AdminWork } from "@/lib/api/admin";
 
 export default async function AdminDashboardPage() {
-  const [articleCount, noticeCount, workCount] = await Promise.all([
-    prisma.article.count(),
-    prisma.openingNotice.count(),
-    prisma.work.count(),
+  const [articles, notices, works] = await Promise.all([
+    getAdminCollection<AdminArticle>("articles"),
+    getAdminCollection<AdminNotice>("notices"),
+    getAdminCollection<AdminWork>("works"),
   ]);
-  const tutorialArticle = await prisma.article.findUnique({
-    where: { locale_slug: { locale: "zh", slug: tutorialArticleSlug } },
-    select: { id: true },
-  });
+  const tutorialArticle = articles.find((article) => article.locale === "zh" && article.slug === tutorialArticleSlug);
+  const articleCount = articles.length;
+  const noticeCount = notices.length;
+  const workCount = works.length;
 
   return (
     <AdminShell>

@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import io.swagger.v3.oas.annotations.Parameter;
 import java.time.Instant;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
@@ -44,7 +45,7 @@ public class AdministratorSessionController {
     }
 
     @GetMapping("/csrf")
-    CsrfResponse csrf(CsrfToken csrfToken) {
+    CsrfResponse csrf(@Parameter(hidden = true) CsrfToken csrfToken) {
         return new CsrfResponse(csrfToken.getHeaderName(), csrfToken.getParameterName(), csrfToken.getToken());
     }
 

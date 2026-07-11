@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { articleMutationSchema } from "@/lib/admin/validation";
+import { writeAdminApi } from "@/lib/api/browser";
 
 const articleFormSchema = articleMutationSchema.omit({ relatedServices: true }).extend({
   relatedServicesText: z.string().optional(),
@@ -15,11 +16,12 @@ export type AdminArticleFormValues = z.input<typeof articleFormSchema>;
 
 type AdminArticleFormProps = {
   articleId?: string;
+  contentVersion?: number;
   defaultValues: AdminArticleFormValues;
   isTutorial?: boolean;
 };
 
-export function AdminArticleForm({ articleId, defaultValues, isTutorial = false }: AdminArticleFormProps) {
+export function AdminArticleForm({ articleId, contentVersion = 0, defaultValues, isTutorial = false }: AdminArticleFormProps) {
   const router = useRouter();
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -42,13 +44,17 @@ export function AdminArticleForm({ articleId, defaultValues, isTutorial = false 
       ...values,
       relatedServices: splitLines(values.relatedServicesText),
       blocks: values.blocks.map((block, index) => ({ ...block, sortOrder: index })),
+      demo: isTutorial,
     };
+    delete (payload as Partial<typeof payload>).relatedServicesText;
+    delete (payload as Partial<typeof payload>).publishedAt;
+    delete (payload as Partial<typeof payload>).status;
 
-    const response = await fetch(articleId ? `/api/admin/articles/${articleId}` : "/api/admin/articles", {
-      method: articleId ? "PATCH" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    const response = await writeAdminApi(
+      articleId ? `/api/v1/admin/articles/${articleId}` : "/api/v1/admin/articles",
+      articleId ? "PATCH" : "POST",
+      articleId ? { expectedVersion: contentVersion, article: payload } : payload,
+    );
 
     setSubmitting(false);
 
@@ -57,12 +63,41 @@ export function AdminArticleForm({ articleId, defaultValues, isTutorial = false 
       return;
     }
 
-    const result = (await response.json()) as { article?: { id: string } };
+    const result = (await response.json()) as { id: string; version: number; status: string };
+    if (values.status === "published" && result.status === "DRAFT") {
+      const publishResponse = await writeAdminApi(`/api/v1/admin/articles/${result.id}/publish`, "POST", {
+        expectedVersion: result.version,
+      });
+      if (!publishResponse.ok) {
+        setMessage("内容已保存为草稿，但当前账号无权发布或内容版本已变化。");
+        router.refresh();
+        return;
+      }
+    }
+    if (values.status === "draft" && result.status === "PUBLISHED") {
+      const archiveResponse = await writeAdminApi(`/api/v1/admin/articles/${result.id}/archive`, "POST", {
+        expectedVersion: result.version,
+      });
+      if (!archiveResponse.ok) {
+        setMessage("内容已保存，但无法撤下当前发布版本。");
+        router.refresh();
+        return;
+      }
+      const archived = (await archiveResponse.json()) as { version: number };
+      const restoreResponse = await writeAdminApi(`/api/v1/admin/articles/${result.id}/restore`, "POST", {
+        expectedVersion: archived.version,
+      });
+      if (!restoreResponse.ok) {
+        setMessage("内容已归档，但无法恢复为草稿。");
+        router.refresh();
+        return;
+      }
+    }
     setMessage("已保存。");
     router.refresh();
 
-    if (!articleId && result.article?.id) {
-      router.push(`/studio-tianho/articles/${result.article.id}`);
+    if (!articleId && result.id) {
+      router.push(`/studio-tianho/articles/${result.id}`);
     }
   }
 
@@ -74,8 +109,8 @@ export function AdminArticleForm({ articleId, defaultValues, isTutorial = false 
     setSubmitting(true);
     setMessage("");
 
-    const response = await fetch(`/api/admin/articles/${articleId}`, {
-      method: "DELETE",
+    const response = await writeAdminApi(`/api/v1/admin/articles/${articleId}/archive`, "POST", {
+      expectedVersion: contentVersion,
     });
 
     setSubmitting(false);

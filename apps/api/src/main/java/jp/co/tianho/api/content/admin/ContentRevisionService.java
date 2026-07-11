@@ -96,6 +96,33 @@ public class ContentRevisionService {
                 resourceType, resourceId, changed.state(), changed.version(), changed.archivedAt(), changed.updatedAt());
     }
 
+    public void recordChange(
+            ResourceType resourceType,
+            UUID resourceId,
+            String action,
+            AdministratorPrincipal actor,
+            String ipAddress) {
+        CurrentContent current = requireCurrent(resourceType, resourceId);
+        JsonNode snapshot = readSnapshot(resourceType, resourceId);
+        jdbcClient.sql("""
+                        INSERT INTO content_revisions (
+                            resource_type, resource_id, version, action, snapshot, actor_id
+                        ) VALUES (
+                            :resourceType, :resourceId, :version, :action, CAST(:snapshot AS jsonb), :actorId
+                        )
+                        """)
+                .param("resourceType", resourceType.name())
+                .param("resourceId", resourceId)
+                .param("version", current.version())
+                .param("action", action)
+                .param("snapshot", objectMapper.writeValueAsString(snapshot))
+                .param("actorId", actor.id())
+                .update();
+        auditEventRepository.record(
+                actor.id(), "CONTENT_" + action, resourceType.name(), resourceId,
+                Map.of("version", current.version(), "status", current.state().name()), ipAddress);
+    }
+
     private CurrentContent requireCurrent(ResourceType resourceType, UUID resourceId) {
         return jdbcClient.sql("SELECT status, version, archived_at, updated_at FROM "
                         + resourceType.tableName() + " WHERE id = :id")
@@ -111,8 +138,26 @@ public class ContentRevisionService {
     }
 
     private JsonNode readSnapshot(ResourceType resourceType, UUID resourceId) {
-        String snapshot = jdbcClient.sql("SELECT to_jsonb(item) FROM (SELECT * FROM "
-                        + resourceType.tableName() + " WHERE id = :id) item")
+        String statement = switch (resourceType) {
+            case ARTICLE -> """
+                    SELECT to_jsonb(article) || jsonb_build_object(
+                        'blocks', COALESCE((
+                            SELECT jsonb_agg(to_jsonb(block) ORDER BY block.sort_order, block.id)
+                            FROM article_blocks block WHERE block.article_id = article.id
+                        ), '[]'::jsonb)
+                    ) FROM articles article WHERE article.id = :id
+                    """;
+            case WORK -> """
+                    SELECT to_jsonb(work) || jsonb_build_object(
+                        'images', COALESCE((
+                            SELECT jsonb_agg(to_jsonb(image) ORDER BY image.sort_order, image.id)
+                            FROM work_images image WHERE image.work_id = work.id
+                        ), '[]'::jsonb)
+                    ) FROM works work WHERE work.id = :id
+                    """;
+            case NOTICE -> "SELECT to_jsonb(notice) FROM opening_notices notice WHERE notice.id = :id";
+        };
+        String snapshot = jdbcClient.sql(statement)
                 .param("id", resourceId)
                 .query(String.class)
                 .single();

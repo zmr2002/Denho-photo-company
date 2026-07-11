@@ -1,14 +1,12 @@
 import { AdminNoticeForm, type AdminNoticeFormValues } from "@/components/admin/AdminNoticeForm";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { localeLabel } from "@/lib/admin/labels";
-import { prisma } from "@/lib/db/prisma";
+import { getAdminCollection, type AdminNotice } from "@/lib/api/admin";
 
 const locales = ["ja", "zh", "en"] as const;
 
 export default async function AdminNoticePage() {
-  const notices = await prisma.openingNotice.findMany({
-    orderBy: { locale: "asc" },
-  });
+  const notices = await getAdminCollection<AdminNotice>("notices");
 
   return (
     <AdminShell>
@@ -30,7 +28,7 @@ export default async function AdminNoticePage() {
             return (
               <article className="admin-card" key={locale}>
                 <p className="admin-label">{localeLabel(locale)}</p>
-                <AdminNoticeForm defaultValues={noticeToFormValues(locale, notice)} />
+                <AdminNoticeForm contentVersion={notice?.version ?? 0} defaultValues={noticeToFormValues(locale, notice)} />
               </article>
             );
           })}
@@ -40,7 +38,7 @@ export default async function AdminNoticePage() {
   );
 }
 
-function noticeToFormValues(locale: (typeof locales)[number], notice?: Awaited<ReturnType<typeof prisma.openingNotice.findMany>>[number]): AdminNoticeFormValues {
+function noticeToFormValues(locale: (typeof locales)[number], notice?: AdminNotice): AdminNoticeFormValues {
   return {
     locale,
     enabled: notice?.enabled ?? true,
@@ -53,7 +51,7 @@ function noticeToFormValues(locale: (typeof locales)[number], notice?: Awaited<R
     storageKey: notice?.storageKey || `tianho-opening-notice-${locale}-local`,
     dismissalMode: (notice?.dismissalMode as AdminNoticeFormValues["dismissalMode"]) || "session",
     status: (notice?.status as AdminNoticeFormValues["status"]) || "published",
-    startAt: notice?.startAt ? notice.startAt.toISOString().slice(0, 10) : "",
-    endAt: notice?.endAt ? notice.endAt.toISOString().slice(0, 10) : "",
+    startAt: notice?.startAt ? new Date(notice.startAt).toISOString().slice(0, 10) : "",
+    endAt: notice?.endAt ? new Date(notice.endAt).toISOString().slice(0, 10) : "",
   };
 }

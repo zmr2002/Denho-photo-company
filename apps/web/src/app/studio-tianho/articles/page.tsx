@@ -1,12 +1,10 @@
 import Link from "next/link";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { isTutorialArticle, localeLabel, statusLabel } from "@/lib/admin/labels";
-import { prisma } from "@/lib/db/prisma";
+import { getAdminCollection, type AdminArticle } from "@/lib/api/admin";
 
 export default async function AdminArticlesPage() {
-  const articles = await prisma.article.findMany({
-    orderBy: [{ locale: "asc" }, { displayOrder: "asc" }, { updatedAt: "desc" }],
-  });
+  const articles = await getAdminCollection<AdminArticle>("articles");
 
   return (
     <AdminShell>

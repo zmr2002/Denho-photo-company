@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireAdminSession } from "@/lib/auth/session";
+import { AdminLogoutButton } from "@/components/admin/AdminLogoutButton";
 
 const adminLinks = [
   { href: "/studio-tianho", label: "控制台" },
@@ -17,7 +18,7 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
         <div>
           <p className="admin-kicker">田豊管理后台</p>
           <h1>管理中心</h1>
-          <p className="admin-user">{session.user?.email}</p>
+          <p className="admin-user">{session.email}</p>
         </div>
         <nav aria-label="后台导航">
           {adminLinks.map((link) => (
@@ -26,9 +27,7 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
             </Link>
           ))}
         </nav>
-        <Link className="admin-muted-link" href="/api/auth/signout">
-          退出登录
-        </Link>
+        <AdminLogoutButton />
       </aside>
       <main className="admin-main">{children}</main>
     </div>
