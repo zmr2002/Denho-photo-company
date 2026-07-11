@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Script from "next/script";
 import type { InquiryFormContent } from "@/data/pages";
 import { getCsrfHeaders } from "@/lib/api/browser";
 
@@ -22,6 +23,7 @@ const successText = {
 };
 
 export function InquiryForm({ content, locale }: InquiryFormProps) {
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const [idempotencyKey, setIdempotencyKey] = useState(() => crypto.randomUUID());
   const [status, setStatus] = useState(content.statusText);
   const [submitting, setSubmitting] = useState(false);
@@ -52,6 +54,8 @@ export function InquiryForm({ content, locale }: InquiryFormProps) {
         locale,
         consentVersion: "2026-07",
         consented: data.get("consented") === "on",
+        turnstileToken: data.get("cf-turnstile-response") || "",
+        companyWebsite: data.get("companyWebsite") || "",
       }),
     });
     setSubmitting(false);
@@ -66,6 +70,7 @@ export function InquiryForm({ content, locale }: InquiryFormProps) {
 
   return (
     <form className="inquiry-form" aria-label={content.ariaLabel} onSubmit={submit}>
+      {turnstileSiteKey ? <Script async defer src="https://challenges.cloudflare.com/turnstile/v0/api.js" /> : null}
       <div className="form-row">
         <label htmlFor="name-company">{content.nameLabel} <span>{content.nameEnglish}</span></label>
         <input id="name-company" name="nameCompany" type="text" placeholder={content.namePlaceholder} maxLength={240} required />
@@ -98,6 +103,11 @@ export function InquiryForm({ content, locale }: InquiryFormProps) {
       <div className="form-row">
         <label><input name="consented" type="checkbox" required /> {consentText[locale]}</label>
       </div>
+      <div aria-hidden="true" className="sr-only">
+        <label htmlFor="company-website">Website</label>
+        <input autoComplete="off" id="company-website" name="companyWebsite" tabIndex={-1} type="text" />
+      </div>
+      {turnstileSiteKey ? <div className="cf-turnstile" data-sitekey={turnstileSiteKey} /> : null}
       <div className="form-actions">
         <button type="submit" disabled={submitting}>{submitting ? "…" : content.buttonLabel}</button>
         <p aria-live="polite">{status}</p>

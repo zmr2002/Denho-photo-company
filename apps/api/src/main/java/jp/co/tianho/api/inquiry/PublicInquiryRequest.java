@@ -18,5 +18,7 @@ public record PublicInquiryRequest(
         @NotBlank @Size(min = 20, max = 5000) String message,
         @NotBlank @Pattern(regexp = "ja|zh|en") String locale,
         @NotBlank @Pattern(regexp = "2026-07") String consentVersion,
-        @AssertTrue boolean consented) {
+        @AssertTrue boolean consented,
+        @Size(max = 2048) String turnstileToken,
+        @Size(max = 240) String companyWebsite) {
 }

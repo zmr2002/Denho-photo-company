@@ -26,15 +26,25 @@ import org.springframework.web.bind.annotation.RestController;
 public class InquiryController {
 
     private final InquiryService inquiryService;
+    private final InquiryProtectionService protectionService;
 
-    public InquiryController(InquiryService inquiryService) {
+    public InquiryController(InquiryService inquiryService, InquiryProtectionService protectionService) {
         this.inquiryService = inquiryService;
+        this.protectionService = protectionService;
     }
 
     @PostMapping("/api/v1/public/inquiries")
     @ResponseStatus(HttpStatus.CREATED)
-    PublicInquiryResponse create(@Valid @RequestBody PublicInquiryRequest request) {
-        return inquiryService.create(request);
+    PublicInquiryResponse create(
+            @Valid @RequestBody PublicInquiryRequest request,
+            HttpServletRequest servletRequest) {
+        java.util.Optional<PublicInquiryResponse> existing = inquiryService.findExisting(request.idempotencyKey());
+        if (existing.isPresent()) return existing.get();
+        if (request.companyWebsite() != null && !request.companyWebsite().isBlank()) {
+            return new PublicInquiryResponse(UUID.randomUUID(), InquiryStatus.NEW, java.time.OffsetDateTime.now());
+        }
+        String ipHash = protectionService.verify(servletRequest.getRemoteAddr(), request.turnstileToken());
+        return inquiryService.create(request, ipHash);
     }
 
     @GetMapping("/api/v1/admin/inquiries")

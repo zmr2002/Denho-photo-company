@@ -11,6 +11,8 @@ import jp.co.tianho.api.media.DuplicateMediaException;
 import jp.co.tianho.api.media.ImageValidationException;
 import jp.co.tianho.api.media.MediaLifecycleException;
 import jp.co.tianho.api.inquiry.InquiryNotFoundException;
+import jp.co.tianho.api.inquiry.InquiryRateLimitException;
+import jp.co.tianho.api.inquiry.InquiryVerificationException;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -22,6 +24,24 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+
+    @ExceptionHandler(InquiryRateLimitException.class)
+    ResponseEntity<ProblemDetail> handleInquiryRateLimit(InquiryRateLimitException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS, exception.getMessage());
+        problem.setTitle("Inquiry rate limit exceeded");
+        problem.setType(URI.create("/problems/inquiry-rate-limit"));
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header("Retry-After", "900")
+                .body(problem);
+    }
+
+    @ExceptionHandler(InquiryVerificationException.class)
+    ResponseEntity<ProblemDetail> handleInquiryVerification(InquiryVerificationException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+        problem.setTitle("Inquiry verification failed");
+        problem.setType(URI.create("/problems/inquiry-verification-failed"));
+        return ResponseEntity.badRequest().body(problem);
+    }
 
     @ExceptionHandler(InquiryNotFoundException.class)
     ResponseEntity<ProblemDetail> handleInquiryNotFound(InquiryNotFoundException exception) {

@@ -26,15 +26,15 @@ public class InquiryService {
     }
 
     @Transactional
-    public PublicInquiryResponse create(PublicInquiryRequest request) {
+    public PublicInquiryResponse create(PublicInquiryRequest request, String ipHash) {
         UUID id = UUID.randomUUID();
         int inserted = jdbcClient.sql("""
                         INSERT INTO inquiries (
                             id, idempotency_key, name_company, email, project_type, requested_date,
-                            location, message, locale, consent_version, consented_at
+                            location, message, locale, consent_version, consented_at, ip_hash
                         ) VALUES (
                             :id, :idempotencyKey, :nameCompany, :email, :projectType, :requestedDate,
-                            :location, :message, :locale, :consentVersion, CURRENT_TIMESTAMP
+                            :location, :message, :locale, :consentVersion, CURRENT_TIMESTAMP, :ipHash
                         ) ON CONFLICT (idempotency_key) DO NOTHING
                         """)
                 .param("id", id)
@@ -47,6 +47,7 @@ public class InquiryService {
                 .param("message", request.message().strip())
                 .param("locale", request.locale())
                 .param("consentVersion", request.consentVersion())
+                .param("ipHash", ipHash)
                 .update();
         if (inserted == 1) {
             jdbcClient.sql("INSERT INTO inquiry_outbox (inquiry_id) VALUES (:inquiryId)")
@@ -92,7 +93,7 @@ public class InquiryService {
         return findOne(id);
     }
 
-    private PublicInquiryResponse findPublic(UUID idempotencyKey) {
+    public java.util.Optional<PublicInquiryResponse> findExisting(UUID idempotencyKey) {
         return jdbcClient.sql("""
                         SELECT id, status, created_at FROM inquiries WHERE idempotency_key = :idempotencyKey
                         """)
@@ -101,7 +102,11 @@ public class InquiryService {
                         resultSet.getObject("id", UUID.class),
                         InquiryStatus.valueOf(resultSet.getString("status")),
                         resultSet.getObject("created_at", OffsetDateTime.class)))
-                .single();
+                .optional();
+    }
+
+    private PublicInquiryResponse findPublic(UUID idempotencyKey) {
+        return findExisting(idempotencyKey).orElseThrow(InquiryNotFoundException::new);
     }
 
     private InquiryResponse findOne(UUID id) {

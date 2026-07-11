@@ -25,6 +25,7 @@ spring:
 
 server:
   port: ${PORT:8080}
+  forward-headers-strategy: framework
   servlet:
     session:
       cookie:
@@ -75,9 +76,16 @@ tianho:
     access-key: ${OBJECT_STORAGE_ACCESS_KEY:tianho-local}
     secret-key: ${OBJECT_STORAGE_SECRET_KEY:tianho-local-password}
   inquiry:
+    ip-hash-key: ${INQUIRY_IP_HASH_KEY:tianho-local-inquiry-ip-key}
+    turnstile:
+      enabled: ${TURNSTILE_ENABLED:false}
+      secret: ${TURNSTILE_SECRET_KEY:}
     notifications:
       enabled: ${INQUIRY_NOTIFICATIONS_ENABLED:false}
       region: ${SES_REGION:ap-northeast-1}
       from-address: ${SES_FROM_ADDRESS:}
       to-address: ${SES_TO_ADDRESS:}
       poll-delay: 5000
+  security:
+    origin-validation-enabled: ${ORIGIN_VALIDATION_ENABLED:false}
+    allowed-origins: ${ALLOWED_ORIGINS:http://localhost:3000}
