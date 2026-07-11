@@ -28,7 +28,7 @@ public class InquiryService {
     @Transactional
     public PublicInquiryResponse create(PublicInquiryRequest request) {
         UUID id = UUID.randomUUID();
-        jdbcClient.sql("""
+        int inserted = jdbcClient.sql("""
                         INSERT INTO inquiries (
                             id, idempotency_key, name_company, email, project_type, requested_date,
                             location, message, locale, consent_version, consented_at
@@ -48,6 +48,11 @@ public class InquiryService {
                 .param("locale", request.locale())
                 .param("consentVersion", request.consentVersion())
                 .update();
+        if (inserted == 1) {
+            jdbcClient.sql("INSERT INTO inquiry_outbox (inquiry_id) VALUES (:inquiryId)")
+                    .param("inquiryId", id)
+                    .update();
+        }
         return findPublic(request.idempotencyKey());
     }
 

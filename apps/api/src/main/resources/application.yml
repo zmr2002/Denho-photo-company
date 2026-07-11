@@ -74,3 +74,10 @@ tianho:
     bucket: ${OBJECT_STORAGE_BUCKET:tianho-media}
     access-key: ${OBJECT_STORAGE_ACCESS_KEY:tianho-local}
     secret-key: ${OBJECT_STORAGE_SECRET_KEY:tianho-local-password}
+  inquiry:
+    notifications:
+      enabled: ${INQUIRY_NOTIFICATIONS_ENABLED:false}
+      region: ${SES_REGION:ap-northeast-1}
+      from-address: ${SES_FROM_ADDRESS:}
+      to-address: ${SES_TO_ADDRESS:}
+      poll-delay: 5000
