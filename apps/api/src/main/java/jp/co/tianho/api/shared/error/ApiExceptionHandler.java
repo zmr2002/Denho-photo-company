@@ -1,6 +1,7 @@
 package jp.co.tianho.api.shared.error;
 
 import jakarta.validation.ConstraintViolationException;
+import jp.co.tianho.api.content.publicapi.ContentNotFoundException;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+
+    @ExceptionHandler(ContentNotFoundException.class)
+    ResponseEntity<ProblemDetail> handleContentNotFound(ContentNotFoundException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+        problem.setTitle("Content not found");
+        problem.setType(URI.create("/problems/content-not-found"));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ResponseEntity<ProblemDetail> handleInvalidBody(MethodArgumentNotValidException exception) {

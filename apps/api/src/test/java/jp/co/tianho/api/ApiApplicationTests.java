@@ -45,8 +45,9 @@ class ApiApplicationTests {
     }
 
     @Test
-    void publicApiNamespaceDoesNotRequireAuthentication() throws Exception {
+    void publicArticleListDoesNotRequireAuthentication() throws Exception {
         mockMvc.perform(get("/api/v1/public/articles"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
     }
 }
