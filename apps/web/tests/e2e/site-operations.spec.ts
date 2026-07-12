@@ -11,7 +11,7 @@ async function dismissOpeningNotice(page: Page) {
   if (appeared) await dismissButton.click();
 }
 
-test("serves all public language routes with security headers", async ({ page }) => {
+test("serves all public language routes with security headers", async ({ page, request }) => {
   for (const locale of ["ja", "zh", "en"]) {
     const response = await page.goto(`/${locale}/`);
     expect(response?.ok()).toBeTruthy();
@@ -20,7 +20,16 @@ test("serves all public language routes with security headers", async ({ page })
 
   const response = await page.goto("/ja/");
   expect(response?.headers()["x-content-type-options"]).toBe("nosniff");
-  expect(response?.headers()["content-security-policy-report-only"]).toContain("default-src 'self'");
+  expect(response?.headers()["content-security-policy"]).toContain("default-src 'self'");
+  expect(response?.headers()["content-security-policy"]).toMatch(/'nonce-[^']+'/);
+  expect(response?.headers()["content-security-policy"]).not.toMatch(/script-src [^;]*'unsafe-inline'/);
+  expect(response?.headers()["content-security-policy"]).not.toContain("upgrade-insecure-requests");
+  expect(response?.headers()["content-security-policy-report-only"]).toBeUndefined();
+
+  const secureResponse = await request.get("/ja/", {
+    headers: { "x-forwarded-proto": "https" },
+  });
+  expect(secureResponse.headers()["content-security-policy"]).toContain("upgrade-insecure-requests");
 });
 
 test("preserves the services to works link", async ({ page }) => {

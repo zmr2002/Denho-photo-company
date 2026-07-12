@@ -173,7 +173,8 @@ class InquiryProtectionTests {
                 .andExpect(status().isOk())
                 .andExpect(header().string("X-Content-Type-Options", "nosniff"))
                 .andExpect(header().string("X-Frame-Options", "DENY"))
-                .andExpect(header().exists("Content-Security-Policy-Report-Only"));
+                .andExpect(header().string("Content-Security-Policy", containsString("default-src 'self'")))
+                .andExpect(header().doesNotExist("Content-Security-Policy-Report-Only"));
 
         mockMvc.perform(get("/api/v1/admin/inquiries"))
                 .andExpect(status().isUnauthorized())
