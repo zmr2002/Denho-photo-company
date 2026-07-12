@@ -8,7 +8,6 @@ Pre-launch multilingual website for 田豊株式会社. The project includes the
 - React 19
 - TypeScript
 - Tailwind CSS 4
-- Prisma with SQLite for the temporary public-content compatibility layer
 - Zod and React Hook Form
 - Java 25 and Spring Boot 4.1
 - Spring Security, server-side JDBC sessions, Spring Data JPA, Flyway, and PostgreSQL

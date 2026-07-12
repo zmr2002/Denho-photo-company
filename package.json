@@ -10,12 +10,7 @@
     "build": "npm run build --workspace @tianho/web",
     "start": "npm run start --workspace @tianho/web",
     "lint": "npm run lint --workspace @tianho/web",
-    "prisma:generate": "npm run prisma:generate --workspace @tianho/web",
     "test:unit": "npm run test:unit --workspace @tianho/web",
-    "prisma:migrate": "npm run prisma:migrate --workspace @tianho/web",
-    "prisma:seed": "npm run prisma:seed --workspace @tianho/web",
-    "prisma:studio": "npm run prisma:studio --workspace @tianho/web",
-    "content:export": "npm run content:export --workspace @tianho/web",
     "services:up": "docker compose -f infra/compose.yml up -d",
     "services:down": "docker compose -f infra/compose.yml down"
   }
