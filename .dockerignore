@@ -1,0 +1,14 @@
+.git
+.github
+node_modules
+**/node_modules
+**/.next
+**/build
+**/.gradle
+**/.env
+**/.env.*
+!**/.env.example
+*.db
+*.db-journal
+artifacts
+docs

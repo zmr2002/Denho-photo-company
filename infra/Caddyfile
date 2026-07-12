@@ -1,0 +1,41 @@
+{$SITE_DOMAIN} {
+	encode zstd gzip
+
+	@api path /api/* /media/* /actuator/health/*
+	handle @api {
+		reverse_proxy api:8080 {
+			health_uri /actuator/health/readiness
+			health_interval 15s
+			health_timeout 3s
+			health_fails 3
+			health_passes 2
+			fail_duration 30s
+			max_fails 3
+		}
+	}
+
+	handle {
+		reverse_proxy web:3000 {
+			health_uri /ja/
+			health_interval 15s
+			health_timeout 3s
+			health_fails 3
+			health_passes 2
+			fail_duration 30s
+			max_fails 3
+		}
+	}
+
+	header {
+		-Server
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+	}
+
+	log {
+		output stdout
+		format json
+	}
+}

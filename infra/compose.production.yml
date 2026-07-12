@@ -1,0 +1,121 @@
+name: tianho-production
+
+services:
+  gateway:
+    build:
+      context: caddy
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - web
+      - api
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:?SITE_DOMAIN is required}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    security_opt:
+      - no-new-privileges:true
+
+  web:
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+    restart: unless-stopped
+    environment:
+      API_INTERNAL_URL: http://api:8080
+      NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${TURNSTILE_SITE_KEY:-}
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/ja/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  api:
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+      DATABASE_USERNAME: ${DATABASE_USERNAME:?DATABASE_USERNAME is required}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:?DATABASE_PASSWORD is required}
+      SESSION_SCHEMA_INITIALIZATION: never
+      OBJECT_STORAGE_ENDPOINT: ${OBJECT_STORAGE_ENDPOINT:?OBJECT_STORAGE_ENDPOINT is required}
+      OBJECT_STORAGE_REGION: ${OBJECT_STORAGE_REGION:-auto}
+      OBJECT_STORAGE_BUCKET: ${OBJECT_STORAGE_BUCKET:?OBJECT_STORAGE_BUCKET is required}
+      OBJECT_STORAGE_ACCESS_KEY: ${OBJECT_STORAGE_ACCESS_KEY:?OBJECT_STORAGE_ACCESS_KEY is required}
+      OBJECT_STORAGE_SECRET_KEY: ${OBJECT_STORAGE_SECRET_KEY:?OBJECT_STORAGE_SECRET_KEY is required}
+      MEDIA_PUBLIC_BASE_URL: /media
+      MFA_ENCRYPTION_KEY: ${MFA_ENCRYPTION_KEY:?MFA_ENCRYPTION_KEY is required}
+      INQUIRY_IP_HASH_KEY: ${INQUIRY_IP_HASH_KEY:?INQUIRY_IP_HASH_KEY is required}
+      TURNSTILE_ENABLED: "true"
+      TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:?TURNSTILE_SECRET_KEY is required}
+      ORIGIN_VALIDATION_ENABLED: "true"
+      ALLOWED_ORIGINS: https://${SITE_DOMAIN:?SITE_DOMAIN is required}
+      INQUIRY_NOTIFICATIONS_ENABLED: ${INQUIRY_NOTIFICATIONS_ENABLED:-false}
+      SES_REGION: ${SES_REGION:-ap-northeast-1}
+      SES_FROM_ADDRESS: ${SES_FROM_ADDRESS:-}
+      SES_TO_ADDRESS: ${SES_TO_ADDRESS:-}
+      CONSOLE_LOG_STRUCTURED_FORMAT: logstash
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-production}
+      SENTRY_RELEASE: ${SENTRY_RELEASE:-unknown}
+      SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-0.05}
+    read_only: true
+    tmpfs:
+      - /tmp:size=128m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  database-backup:
+    profiles:
+      - operations
+    build:
+      context: backup
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      BACKUP_DB_HOST: ${BACKUP_DB_HOST:?BACKUP_DB_HOST is required}
+      BACKUP_DB_PORT: ${BACKUP_DB_PORT:-5432}
+      BACKUP_DB_NAME: ${BACKUP_DB_NAME:-tianho}
+      BACKUP_DB_SSL_MODE: ${BACKUP_DB_SSL_MODE:-require}
+      DATABASE_USERNAME: ${DATABASE_USERNAME:?DATABASE_USERNAME is required}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:?DATABASE_PASSWORD is required}
+      BACKUP_ENCRYPTION_PASSWORD: ${BACKUP_ENCRYPTION_PASSWORD:?BACKUP_ENCRYPTION_PASSWORD is required}
+      BACKUP_AUTHENTICATION_KEY: ${BACKUP_AUTHENTICATION_KEY:?BACKUP_AUTHENTICATION_KEY is required}
+      BACKUP_BUCKET: ${BACKUP_BUCKET:?BACKUP_BUCKET is required}
+      BACKUP_ENDPOINT: ${BACKUP_ENDPOINT:?BACKUP_ENDPOINT is required}
+      BACKUP_ACCESS_KEY: ${BACKUP_ACCESS_KEY:?BACKUP_ACCESS_KEY is required}
+      BACKUP_SECRET_KEY: ${BACKUP_SECRET_KEY:?BACKUP_SECRET_KEY is required}
+      BACKUP_REGION: ${BACKUP_REGION:-auto}
+    read_only: true
+    tmpfs:
+      - /tmp:size=2g,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  caddy-data:
+  caddy-config:
