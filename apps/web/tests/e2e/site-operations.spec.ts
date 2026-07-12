@@ -44,6 +44,17 @@ test("submits a validated contact inquiry", async ({ page }) => {
   await expect(page.getByText("Your inquiry has been received.")).toBeVisible();
 });
 
+test("renders published content from the public API", async ({ page, request }) => {
+  const response = await request.get(`${apiBaseUrl}/api/v1/public/articles?locale=zh`);
+  expect(response.ok()).toBeTruthy();
+  const articles = await response.json() as Array<{ slug: string }>;
+  expect(articles.some((article) => article.slug === "admin-tutorial-sample")).toBeTruthy();
+
+  const pageResponse = await page.goto("/zh/articles/admin-tutorial-sample/");
+  expect(pageResponse?.ok()).toBeTruthy();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("后台教学示例");
+});
+
 test("protects administration and exposes readiness", async ({ page, request }) => {
   const readiness = await request.get(apiReadinessUrl);
   expect(readiness.ok()).toBeTruthy();
