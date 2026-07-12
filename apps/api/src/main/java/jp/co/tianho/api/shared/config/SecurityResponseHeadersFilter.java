@@ -37,7 +37,7 @@ public class SecurityResponseHeadersFilter extends OncePerRequestFilter {
         response.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()");
         response.setHeader("Cross-Origin-Resource-Policy", "same-origin");
         response.setHeader("Cross-Origin-Opener-Policy", "same-origin");
-        response.setHeader("Content-Security-Policy-Report-Only", CONTENT_SECURITY_POLICY);
+        response.setHeader("Content-Security-Policy", CONTENT_SECURITY_POLICY);
         if (containsPrivateData(request)) {
             response.setHeader("Cache-Control", "no-store");
         }
