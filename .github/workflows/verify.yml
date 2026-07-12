@@ -29,6 +29,8 @@ jobs:
         run: npm ci --ignore-scripts
       - name: Check source
         run: npm run lint
+      - name: Run unit tests
+        run: npm run test:unit
       - name: Build web application
         run: npm run build
 
