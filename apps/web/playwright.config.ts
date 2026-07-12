@@ -1,5 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const apiPort = process.env.API_TEST_PORT || "8080";
+const apiBaseUrl = `http://127.0.0.1:${apiPort}`;
 const isWindows = process.platform === "win32";
 
 export default defineConfig({
@@ -25,10 +27,11 @@ export default defineConfig({
       env: {
         DATABASE_URL: process.env.API_TEST_DATABASE_URL || "jdbc:postgresql://127.0.0.1:5432/tianho",
         DATABASE_USERNAME: process.env.API_TEST_DATABASE_USERNAME || "tianho",
+        SERVER_PORT: apiPort,
         DATABASE_PASSWORD: process.env.API_TEST_DATABASE_PASSWORD || "tianho-local",
         SESSION_SCHEMA_INITIALIZATION: "never",
       },
-      url: "http://127.0.0.1:8080/actuator/health/readiness",
+      url: `${apiBaseUrl}/actuator/health/readiness`,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },
@@ -38,7 +41,7 @@ export default defineConfig({
       env: {
         DATABASE_URL: "file:./e2e.db",
         CONTENT_PROVIDER: "mock",
-        API_INTERNAL_URL: "http://127.0.0.1:8080",
+        API_INTERNAL_URL: apiBaseUrl,
       },
       url: "http://127.0.0.1:3000/ja/",
       reuseExistingServer: !process.env.CI,

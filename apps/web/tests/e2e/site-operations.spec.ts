@@ -1,5 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
 
+const apiPort = process.env.API_TEST_PORT || "8080";
+const apiBaseUrl = `http://127.0.0.1:${apiPort}`;
+const apiReadinessUrl = `${apiBaseUrl}/actuator/health/readiness`;
 async function dismissOpeningNotice(page: Page) {
   const dismissButton = page.locator(".site-opening-notice-dismiss");
   const appeared = await dismissButton.waitFor({ state: "visible", timeout: 3_000 })
@@ -42,11 +45,11 @@ test("submits a validated contact inquiry", async ({ page }) => {
 });
 
 test("protects administration and exposes readiness", async ({ page, request }) => {
-  const readiness = await request.get("http://127.0.0.1:8080/actuator/health/readiness");
+  const readiness = await request.get(apiReadinessUrl);
   expect(readiness.ok()).toBeTruthy();
   expect((await readiness.json()).status).toBe("UP");
 
-  const unauthorized = await request.get("http://127.0.0.1:8080/api/v1/admin/inquiries");
+  const unauthorized = await request.get(`${apiBaseUrl}/api/v1/admin/inquiries`);
   expect(unauthorized.status()).toBe(401);
   expect(unauthorized.headers()["cache-control"]).toContain("no-store");
 
