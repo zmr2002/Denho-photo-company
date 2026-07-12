@@ -1,4 +1,4 @@
-FROM golang:1.26.4-alpine3.23 AS build
+FROM golang:1.26.5-alpine3.23 AS build
 WORKDIR /src
 COPY s3_backup_client.go .
 RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/s3-backup-client s3_backup_client.go
