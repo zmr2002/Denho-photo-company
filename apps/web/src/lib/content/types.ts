@@ -3,7 +3,7 @@ import type { DisplayText } from "@/lib/text/display-text";
 
 export type Locale = "ja" | "zh" | "en";
 export type PublishStatus = "draft" | "published";
-export type ContentSource = "mock" | "db" | "sanity";
+export type ContentSource = "mock" | "api";
 
 export interface MockImage {
   label: string;

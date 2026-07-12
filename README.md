@@ -50,15 +50,7 @@ npm run services:up
 
 The service configuration can be overridden with values from `infra/.env.example`.
 
-Create `apps/web/.env` from `apps/web/.env.example`. `API_INTERNAL_URL` points server-rendered administration pages to the Spring API.
-
-Prepare the temporary SQLite public-content database:
-
-```bash
-npm run prisma:generate
-npm run prisma:migrate
-npm run prisma:seed
-```
+Create `apps/web/.env` from `apps/web/.env.example`. `CONTENT_PROVIDER=api` loads public and administration content from the Spring API, and `API_INTERNAL_URL` sets its server-side address.
 
 Start the API from `apps/api` before starting the web development server:
 

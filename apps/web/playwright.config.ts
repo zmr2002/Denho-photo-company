@@ -3,6 +3,9 @@ import { defineConfig, devices } from "@playwright/test";
 const apiPort = process.env.API_TEST_PORT || "8080";
 const apiBaseUrl = `http://127.0.0.1:${apiPort}`;
 const isWindows = process.platform === "win32";
+const webCommand = isWindows
+  ? "set CONTENT_PROVIDER=mock&& npm run build && set CONTENT_PROVIDER=api&& npm run start"
+  : "CONTENT_PROVIDER=mock npm run build && CONTENT_PROVIDER=api npm run start";
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -30,17 +33,16 @@ export default defineConfig({
         SERVER_PORT: apiPort,
         DATABASE_PASSWORD: process.env.API_TEST_DATABASE_PASSWORD || "tianho-local",
         SESSION_SCHEMA_INITIALIZATION: "never",
+        CONTENT_BOOTSTRAP_ENABLED: "true",
       },
       url: `${apiBaseUrl}/actuator/health/readiness`,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },
     {
-      command: "npm run build && npm run start",
+      command: webCommand,
       cwd: ".",
       env: {
-        DATABASE_URL: "file:./e2e.db",
-        CONTENT_PROVIDER: "mock",
         API_INTERNAL_URL: apiBaseUrl,
       },
       url: "http://127.0.0.1:3000/ja/",
