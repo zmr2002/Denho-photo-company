@@ -126,6 +126,8 @@ jobs:
         run: |
           docker build --file apps/web/Dockerfile --tag tianho-web-check .
           docker build --file apps/api/Dockerfile --tag tianho-api-check .
+          docker build --file infra/backup/Dockerfile --tag tianho-backup-check infra/backup
+          docker build --file infra/caddy/Dockerfile --tag tianho-gateway-check infra/caddy
       - name: Scan Web image
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
         with:
@@ -139,6 +141,22 @@ jobs:
         with:
           scan-type: image
           image-ref: tianho-api-check
+          format: table
+          exit-code: "1"
+          severity: CRITICAL,HIGH
+      - name: Scan backup image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
+        with:
+          scan-type: image
+          image-ref: tianho-backup-check
+          format: table
+          exit-code: "1"
+          severity: CRITICAL,HIGH
+      - name: Scan gateway image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
+        with:
+          scan-type: image
+          image-ref: tianho-gateway-check
           format: table
           exit-code: "1"
           severity: CRITICAL,HIGH
