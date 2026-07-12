@@ -17,6 +17,7 @@ import {
   worksPageContent,
 } from "@/data/pages";
 import type { Locale } from "@/lib/content/types";
+import { resolveContentSource } from "@/lib/content/source";
 import {
   mockArticles,
   mockNotices,
@@ -35,7 +36,7 @@ import {
 
 export type { Article, Locale, Notice, ServiceDetail, SiteNotice, Work } from "@/lib/content/types";
 
-export const contentSource = process.env.CONTENT_PROVIDER === "api" ? "api" : "mock";
+export const contentSource = resolveContentSource(process.env.CONTENT_PROVIDER);
 
 const supportedLocales: Locale[] = ["ja", "zh", "en"];
 

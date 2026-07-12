@@ -7,6 +7,7 @@ RUN npm ci --ignore-scripts
 FROM node:24.13.1-alpine AS build
 WORKDIR /workspace
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV CONTENT_PROVIDER=mock
 COPY --from=dependencies /workspace/node_modules ./node_modules
 COPY package.json package-lock.json ./
 COPY apps/web ./apps/web

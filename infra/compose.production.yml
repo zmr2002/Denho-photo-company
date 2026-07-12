@@ -33,6 +33,7 @@ services:
     restart: unless-stopped
     environment:
       API_INTERNAL_URL: http://api:8080
+      CONTENT_PROVIDER: api
       NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${TURNSTILE_SITE_KEY:-}
     read_only: true
     tmpfs:
