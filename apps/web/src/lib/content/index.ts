@@ -25,15 +25,17 @@ import {
   mockWorks,
 } from "@/lib/content/mock";
 import {
-  getDbArticles,
-  getDbNotices,
-  getDbOpeningNotice,
-  getDbWorks,
-} from "@/lib/content/db";
+  getApiArticle,
+  getApiArticles,
+  getApiNotices,
+  getApiOpeningNotice,
+  getApiWork,
+  getApiWorks,
+} from "@/lib/api/public-content";
 
 export type { Article, Locale, Notice, ServiceDetail, SiteNotice, Work } from "@/lib/content/types";
 
-export const contentSource = process.env.CONTENT_PROVIDER === "db" ? "db" : "mock";
+export const contentSource = process.env.CONTENT_PROVIDER === "api" ? "api" : "mock";
 
 const supportedLocales: Locale[] = ["ja", "zh", "en"];
 
@@ -46,27 +48,12 @@ export function isSupportedLocale(value: string): value is Locale {
 }
 
 export async function getNotices(locale: Locale) {
-  if (contentSource === "db") {
-    try {
-      return await getDbNotices(locale);
-    } catch (error) {
-      console.error("Falling back to mock notices.", error);
-    }
-  }
-
+  if (contentSource === "api") return getApiNotices(locale);
   return getMockNotices(locale);
 }
 
 export async function getSiteOpeningNotice(locale: Locale) {
-  if (contentSource === "db") {
-    try {
-      const notice = await getDbOpeningNotice(locale);
-      if (notice) return notice;
-    } catch (error) {
-      console.error("Falling back to mock opening notice.", error);
-    }
-  }
-
+  if (contentSource === "api") return getApiOpeningNotice(locale);
   return getMockSiteOpeningNotice(locale);
 }
 
@@ -86,18 +73,12 @@ function getMockSiteOpeningNotice(locale: Locale) {
 }
 
 export async function getArticles(locale: Locale) {
-  if (contentSource === "db") {
-    try {
-      return await getDbArticles(locale);
-    } catch (error) {
-      console.error("Falling back to mock articles.", error);
-    }
-  }
-
+  if (contentSource === "api") return getApiArticles(locale);
   return getMockArticles(locale);
 }
 
 export async function getArticle(locale: Locale, slug: string) {
+  if (contentSource === "api") return getApiArticle(locale, slug);
   return (await getArticles(locale)).find((article) => article.slug === slug);
 }
 
@@ -106,18 +87,12 @@ function getMockArticles(locale: Locale) {
 }
 
 export async function getWorks(locale: Locale) {
-  if (contentSource === "db") {
-    try {
-      return await getDbWorks(locale);
-    } catch (error) {
-      console.error("Falling back to mock works.", error);
-    }
-  }
-
+  if (contentSource === "api") return getApiWorks(locale);
   return getMockWorks(locale);
 }
 
 export async function getWork(locale: Locale, slug: string) {
+  if (contentSource === "api") return getApiWork(locale, slug);
   return (await getWorks(locale)).find((work) => work.slug === slug);
 }
 
