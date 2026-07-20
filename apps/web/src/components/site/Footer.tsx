@@ -24,7 +24,10 @@ export function Footer({ lang }: FooterProps) {
     <footer className="site-footer">
       <div className="wide-container grid gap-12 py-16 md:grid-cols-2 md:items-end md:py-20">
         <div>
-          <p className="text-xl font-semibold tracking-[0.08em] text-white">{site.name}</p>
+          <p className="text-xl font-semibold tracking-[0.08em] text-white">
+            <span aria-hidden="true">{site.name}</span>
+            <span className="sr-only">{site.accessibleName}</span>
+          </p>
           <p className="mt-5 max-w-lg text-sm leading-7 text-stone-400">
             {mediaText[lang]}
             <br />
@@ -43,7 +46,10 @@ export function Footer({ lang }: FooterProps) {
               </Link>
             ))}
           </nav>
-          <p className="mt-2 text-stone-500">© 2026 {site.name}. Demo website.</p>
+          <p className="mt-2 text-stone-500">
+            <span aria-hidden="true">© 2026 {site.name}. Demo website.</span>
+            <span className="sr-only">© 2026 {site.accessibleName}. Demo website.</span>
+          </p>
         </div>
       </div>
     </footer>

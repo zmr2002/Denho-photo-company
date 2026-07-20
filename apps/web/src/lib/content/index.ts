@@ -1,5 +1,6 @@
 import type { HomeContent } from "@/data/home";
 import { homeContent } from "@/data/home";
+import { site } from "@/data/site";
 import type { DisplayText } from "@/lib/text/display-text";
 import type {
   AboutPageContent,
@@ -478,7 +479,8 @@ const englishAboutPageContent: AboutPageContent = {
   languageTitle: lines("Production in Japan", "with multilingual support."),
   languageDescription: "Communication can be supported in Japanese, Simplified Chinese, and English.",
   companyInfo: [
-    { term: "Company", detail: "Temporary company information" },
+    { term: "Company", detail: site.name },
+    { term: "Pronunciation", detail: `${site.romanizedName} / ${site.reading}` },
     { term: "Location", detail: "Japan / details to be confirmed" },
     { term: "Business", detail: "Photography, film, editing, and delivery" },
   ],
