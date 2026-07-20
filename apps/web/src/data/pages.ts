@@ -422,6 +422,7 @@ export const aboutPageContent: Record<'ja' | 'zh', AboutPageContent> = {
 		languageDescription: '関係者や資料の言語に合わせて、日本語、簡体中文、英語でのプロジェクトコミュニケーションを支援します。',
 		companyInfo: [
 			{ term: '会社名', detail: site.name },
+			{ term: '読み方', detail: site.reading },
 			{ term: '所在地', detail: '日本 / 詳細確認中' },
 			{ term: '事業内容', detail: '写真撮影、映像制作、編集、納品' },
 			{ term: '備考', detail: '会社情報は仮の表示です' },
@@ -457,6 +458,7 @@ export const aboutPageContent: Record<'ja' | 'zh', AboutPageContent> = {
 		languageDescription: '根据项目参与方和资料语言，支持日语、简体中文与英语沟通。',
 		companyInfo: [
 			{ term: '公司名称', detail: site.name },
+			{ term: '日语读音', detail: site.reading },
 			{ term: '所在地', detail: '日本 / 详细信息待确认' },
 			{ term: '业务内容', detail: '摄影、视频制作、编辑、交付' },
 			{ term: '备注', detail: '公司信息为临时显示' },

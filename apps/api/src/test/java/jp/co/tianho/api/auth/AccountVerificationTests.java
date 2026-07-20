@@ -65,6 +65,8 @@ class AccountVerificationTests {
                 .andExpect(jsonPath("$.secret").isNotEmpty())
                 .andExpect(jsonPath("$.provisioningUri").value(
                         org.hamcrest.Matchers.startsWith("otpauth://totp/")))
+                .andExpect(jsonPath("$.provisioningUri").value(
+                        org.hamcrest.Matchers.containsString("issuer=Denho")))
                 .andReturn();
         String secret = json(bindingResult).get("secret").stringValue();
         String code = totpService.currentCode(secret, Instant.now());

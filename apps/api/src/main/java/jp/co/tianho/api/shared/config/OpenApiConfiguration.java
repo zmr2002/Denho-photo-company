@@ -11,7 +11,7 @@ public class OpenApiConfiguration {
     @Bean
     OpenAPI tianhoOpenApi() {
         return new OpenAPI().info(new Info()
-                .title("Tianho Website API")
+                .title("Denho Website API")
                 .version("v1")
                 .description("HTTP contract for the public website and administration area."));
     }

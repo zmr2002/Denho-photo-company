@@ -34,7 +34,7 @@ class ApiApplicationTests {
     void openApiContractIsPublic() throws Exception {
         mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.info.title").value("Tianho Website API"))
+                .andExpect(jsonPath("$.info.title").value("Denho Website API"))
                 .andExpect(jsonPath("$.info.version").value("v1"));
     }
 

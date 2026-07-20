@@ -26,7 +26,7 @@ export function Header({ lang, currentPath }: HeaderProps) {
   return (
     <header className="site-header">
       <div className="header-grid wide-container">
-        <Link className="site-wordmark" href="/">
+        <Link aria-label={site.accessibleName} className="site-wordmark" href="/">
           {site.name}
         </Link>
 

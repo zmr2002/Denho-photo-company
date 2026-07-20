@@ -36,7 +36,7 @@ class MfaService {
             TotpService totpService,
             AuditEventRepository auditEventRepository,
             @Value("${tianho.auth.mfa.challenge-timeout:5m}") Duration challengeTimeout,
-            @Value("${tianho.auth.mfa.issuer:Tianho}") String issuer) {
+            @Value("${tianho.auth.mfa.issuer:Denho}") String issuer) {
         this.challengeRepository = challengeRepository;
         this.encryption = encryption;
         this.totpService = totpService;
