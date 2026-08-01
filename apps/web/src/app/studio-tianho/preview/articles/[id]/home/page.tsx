@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { HomePage } from "@/components/pages/HomePage";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { adminArticleToHomeNewsItem, adminArticleToPreview, selectAdminArticlesForPlacement } from "@/lib/admin/article-preview";
-import { getAdminCollection, type AdminArticle } from "@/lib/api/admin";
+import { getAdminCollection, getAdminContent, type AdminArticle } from "@/lib/api/admin";
 import { requireAdminSession } from "@/lib/auth/session";
 import { getHomePageContent } from "@/lib/content";
 
@@ -27,11 +27,16 @@ export default async function ArticleHomePreviewPage({ params }: PreviewPageProp
 
   const locale = adminArticleToPreview(target).language;
   const baseContent = await getHomePageContent(locale);
+  const detailedRecords = await Promise.all(
+    records.slice(0, 3).map(async (article) =>
+      (await getAdminContent<AdminArticle>("articles", article.id)) ?? article,
+    ),
+  );
   const content = {
     ...baseContent,
     news: {
       ...baseContent.news,
-      items: records.slice(0, 3).map(adminArticleToHomeNewsItem),
+      items: detailedRecords.map(adminArticleToHomeNewsItem),
     },
   };
 

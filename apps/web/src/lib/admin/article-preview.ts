@@ -11,6 +11,7 @@ import type { AdminArticle } from "@/lib/api/admin";
 
 export function adminArticleToPreview(article: AdminArticle): Article {
   const locale = previewLocale(article.locale);
+  const blocks = article.blocks ?? [];
   const publishedAt = article.publishedAt ? dateOnly(article.publishedAt) : draftDateLabel(locale);
   const updatedAt = article.updatedAt
     ? dateOnly(article.updatedAt)
@@ -35,10 +36,10 @@ export function adminArticleToPreview(article: AdminArticle): Article {
       tone: articleImageTone(article.heroTone),
       src: managedArticleImagePath(article.heroImagePath),
     },
-    body: [...article.blocks]
+    body: [...blocks]
       .sort((left, right) => left.sortOrder - right.sortOrder)
       .flatMap((block) => [block.heading, block.body].filter((value): value is string => Boolean(value))),
-    contentBlocks: mapArticleContentBlocks(article.blocks, article.title),
+    contentBlocks: mapArticleContentBlocks(blocks, article.title),
     relatedServices: article.relatedServices,
     seoTitle: article.seoTitle || article.title,
     seoDescription: article.seoDescription || article.excerpt,
@@ -59,7 +60,7 @@ export function selectAdminArticlesForPlacement(articles: AdminArticle[], target
 
 export function adminArticleToHomeNewsItem(article: AdminArticle): HomeNewsItem {
   const locale = previewLocale(article.locale);
-  const blocks = [...article.blocks].sort((left, right) => left.sortOrder - right.sortOrder);
+  const blocks = [...(article.blocks ?? [])].sort((left, right) => left.sortOrder - right.sortOrder);
   const paragraphs = blocks.map((block) => block.body).filter((value): value is string => Boolean(value));
   const imageBlock = blocks.find((block) => block.imagePath);
 

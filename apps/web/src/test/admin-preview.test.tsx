@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SiteOpeningNotice } from "@/components/ui/SiteOpeningNotice";
 import {
   adminArticleToHomeNewsItem,
+  adminArticleToPreview,
   selectAdminArticlesForPlacement,
 } from "@/lib/admin/article-preview";
 import { adminNoticeToPreview } from "@/lib/admin/notice-preview";
@@ -35,6 +36,17 @@ describe("administration previews", () => {
         target.id,
       ).map((item) => item.id),
     ).toEqual(["target", "published-first", "published-later"]);
+  });
+
+  it("renders an article list summary when the collection omits content blocks", () => {
+    const summary = article({ id: "summary-only" });
+    delete (summary as Partial<AdminArticle>).blocks;
+
+    expect(adminArticleToPreview(summary)).toMatchObject({
+      id: "summary-only",
+      body: [],
+      contentBlocks: [],
+    });
   });
 
   it("maps ordered article blocks to the homepage article viewer", () => {
