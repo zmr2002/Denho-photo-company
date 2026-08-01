@@ -16,6 +16,7 @@ const article: Article = {
   status: "published",
   featuredImage: { label: "封面", alt: "封面", tone: "warm" },
   body: [],
+  contentBlocks: [],
   relatedServices: [],
   seoTitle: "公开文章",
   seoDescription: "文章摘要",

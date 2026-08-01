@@ -5,6 +5,7 @@ import { z } from "zod";
 import type { paths } from "@/generated/api-schema";
 import type {
   Article,
+  ArticleContentBlock,
   ArticleSection,
   Locale,
   MockImage,
@@ -289,6 +290,7 @@ function mapArticleSummary(article: ArticleSummaryContract): Article {
       src: managedImagePath(article.heroImagePath),
     },
     body: [],
+    contentBlocks: [],
     relatedServices: [],
     seoTitle: article.title,
     seoDescription: article.excerpt,
@@ -315,11 +317,32 @@ function mapArticleDetail(article: ArticleDetailContract): Article {
       src: managedImagePath(article.heroImagePath),
     },
     body: blocks.flatMap((block) => [block.heading, block.body].filter((value): value is string => Boolean(value))),
+    contentBlocks: mapArticleContentBlocks(blocks, article.title),
     relatedServices: article.relatedServices,
     seoTitle: article.seoTitle || article.title,
     seoDescription: article.seoDescription || article.excerpt,
     youtubeUrl: article.youtubeUrl ?? undefined,
   };
+}
+
+function mapArticleContentBlocks(blocks: ArticleBlockContract[], fallback: string): ArticleContentBlock[] {
+  return blocks.flatMap((block) => {
+    if (block.type === "heading" && block.heading) {
+      return [{ type: "heading" as const, text: block.heading }];
+    }
+    if (block.type === "paragraph" && block.body) {
+      return [{ type: "paragraph" as const, text: block.body }];
+    }
+    if (block.type === "image" && block.imagePath) {
+      return [{ type: "image" as const, image: blockImage(block, fallback) }];
+    }
+
+    const compatibleBlocks: ArticleContentBlock[] = [];
+    if (block.heading) compatibleBlocks.push({ type: "heading", text: block.heading });
+    if (block.body) compatibleBlocks.push({ type: "paragraph", text: block.body });
+    if (block.imagePath) compatibleBlocks.push({ type: "image", image: blockImage(block, fallback) });
+    return compatibleBlocks;
+  });
 }
 
 function mapArticleNotice(article: ArticleDetailContract): Notice {

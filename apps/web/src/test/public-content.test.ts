@@ -43,6 +43,17 @@ const articleDetail = {
       sortOrder: 1,
     },
     {
+      id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      type: "image",
+      heading: null,
+      body: null,
+      imagePath: "/media/original/article-inline.jpg",
+      imageAlt: "正文图片",
+      imageTone: "cool",
+      caption: "图片说明",
+      sortOrder: 2,
+    },
+    {
       id: "44444444-4444-4444-8444-444444444444",
       type: "paragraph",
       heading: null,
@@ -51,7 +62,7 @@ const articleDetail = {
       imageAlt: null,
       imageTone: "neutral",
       caption: null,
-      sortOrder: 2,
+      sortOrder: 3,
     },
   ],
 };
@@ -136,7 +147,22 @@ describe("public content API adapter", () => {
     const works = await getApiWorks("zh");
 
     expect(articles[0]).toMatchObject({ slug: "public-article", publishedAt: "2026-07-12" });
-    expect(article).toMatchObject({ body: ["第一节", "正文内容"], seoTitle: "文章 SEO" });
+    expect(article).toMatchObject({
+      body: ["第一节", "正文内容"],
+      contentBlocks: [
+        { type: "heading", text: "第一节" },
+        {
+          type: "image",
+          image: {
+            src: "/media/original/article-inline.jpg",
+            alt: "正文图片",
+            caption: "图片说明",
+          },
+        },
+        { type: "paragraph", text: "正文内容" },
+      ],
+      seoTitle: "文章 SEO",
+    });
     expect(notices[0]).toMatchObject({ detailClosing: "文章结尾", closeLabel: "关闭" });
     expect(works[0]).toMatchObject({ scope: "摄影", galleryImages: [{ src: "/media/original/work.jpg" }] });
     await expect(getApiOpeningNotice("zh")).resolves.toBeUndefined();
