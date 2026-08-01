@@ -1,24 +1,34 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { articleMutationSchema } from "@/lib/admin/validation";
 import { writeAdminApi } from "@/lib/api/browser";
 
-const articleFormSchema = articleMutationSchema.omit({ relatedServices: true }).extend({
+const articleFormSchema = articleMutationSchema.omit({ excerpt: true, relatedServices: true }).extend({
+  excerpt: z.string().trim().optional(),
   relatedServicesText: z.string().optional(),
 });
 
 export type AdminArticleFormValues = z.input<typeof articleFormSchema>;
+
+type ArticleBlock = AdminArticleFormValues["blocks"][number];
 
 type AdminArticleFormProps = {
   articleId?: string;
   contentVersion?: number;
   defaultValues: AdminArticleFormValues;
   isTutorial?: boolean;
+};
+
+const blockLabels: Record<ArticleBlock["type"], string> = {
+  heading: "小标题",
+  paragraph: "正文",
+  image: "图片",
 };
 
 export function AdminArticleForm({ articleId, contentVersion = 0, defaultValues, isTutorial = false }: AdminArticleFormProps) {
@@ -35,6 +45,7 @@ export function AdminArticleForm({ articleId, contentVersion = 0, defaultValues,
     defaultValues,
   });
   const { fields, append, remove, move } = useFieldArray({ control, name: "blocks" });
+  const blocks = useWatch({ control, name: "blocks" });
 
   async function onSubmit(values: AdminArticleFormValues) {
     setSubmitting(true);
@@ -42,6 +53,7 @@ export function AdminArticleForm({ articleId, contentVersion = 0, defaultValues,
 
     const payload = {
       ...values,
+      excerpt: resolveArticleExcerpt(values.excerpt, values.blocks, values.title),
       relatedServices: splitLines(values.relatedServicesText),
       blocks: values.blocks.map((block, index) => ({ ...block, sortOrder: index })),
       demo: isTutorial,
@@ -124,8 +136,12 @@ export function AdminArticleForm({ articleId, contentVersion = 0, defaultValues,
     router.refresh();
   }
 
+  function addBlock(type: ArticleBlock["type"]) {
+    append(createBlock(type, fields.length));
+  }
+
   return (
-    <form className="admin-form" onSubmit={handleSubmit(onSubmit)}>
+    <form className="admin-form admin-article-editor" onSubmit={handleSubmit(onSubmit)}>
       {isTutorial ? (
         <div className="admin-info-box">
           <strong>教学示例</strong>
@@ -133,231 +149,290 @@ export function AdminArticleForm({ articleId, contentVersion = 0, defaultValues,
         </div>
       ) : null}
 
-      <section className="admin-form-section" aria-labelledby="article-basic-title">
-        <div>
-          <p className="admin-kicker">基本信息</p>
-          <h3 id="article-basic-title">告诉网站这篇文章是什么</h3>
-        </div>
-        <div className="admin-form-grid">
-          <label className="admin-field">
-            <span className="admin-label">语言页面</span>
-            <select {...register("locale")}>
-              <option value="ja">日语页面（ja）</option>
-              <option value="zh">中文页面（zh）</option>
-              <option value="en">英语页面（en）</option>
-            </select>
-            <span className="admin-help">选择这篇文章属于哪个语言版本。</span>
-          </label>
-          <label className="admin-field">
-            <span className="admin-label">发布状态</span>
-            <select {...register("status")}>
-              <option value="draft">草稿（不会作为正式文章显示）</option>
-              <option value="published">已发布（允许在前台显示）</option>
-            </select>
-            <span className="admin-help">不确定时请先选择草稿。</span>
-          </label>
-          <label className="admin-field">
-            <span className="admin-label">显示顺序</span>
-            <input type="number" min="0" {...register("displayOrder", { valueAsNumber: true })} />
-            <span className="admin-help">数字越小越靠前。普通文章可保持默认。</span>
-          </label>
-        </div>
-
-        <div className="admin-form-grid">
-          <label className="admin-field">
-            <span className="admin-label">标题</span>
-            <input {...register("title")} />
-            <span className="admin-help">文章最主要的名称，会显示在文章页面和后台列表中。</span>
-            {errors.title ? <span className="admin-error">{errors.title.message}</span> : null}
-          </label>
-          <label className="admin-field">
-            <span className="admin-label">网址标识</span>
-            <input {...register("slug")} />
-            <span className="admin-help">用于生成网址。请使用小写英文、数字和连字符，例如 production-story。</span>
-            {errors.slug ? <span className="admin-error">{errors.slug.message}</span> : null}
-          </label>
-          <label className="admin-field">
-            <span className="admin-label">分类</span>
-            <input {...register("category")} />
-            <span className="admin-help">例如：公告、制作案例、后台教学。</span>
-          </label>
-        </div>
-
-        <label className="admin-field">
-          <span className="admin-label">作者 / 显示名称</span>
-          <input {...register("authorName")} />
-          <span className="admin-help">显示为文章的发布者或编辑团队名称。</span>
-        </label>
-      </section>
-
-      <section className="admin-form-section" aria-labelledby="article-list-title">
-        <div>
-          <p className="admin-kicker">列表显示内容</p>
-          <h3 id="article-list-title">写给读者的简短介绍</h3>
-        </div>
-        <label className="admin-field">
-          <span className="admin-label">摘要</span>
-          <textarea {...register("excerpt")} />
-          <span className="admin-help">列表中显示的一小段介绍。建议一到两句话说明文章重点。</span>
-        </label>
-        <label className="admin-field">
-          <span className="admin-label">相关服务</span>
-          <textarea {...register("relatedServicesText")} />
-          <span className="admin-help">每行填写一个相关服务，例如：活动拍摄。没有需要可留空。</span>
-        </label>
-      </section>
-
-      <section className="admin-form-section" aria-labelledby="article-hero-title">
-        <div>
-          <p className="admin-kicker">主图设置</p>
-          <h3 id="article-hero-title">文章顶部使用的代表图片</h3>
-        </div>
-        <div className="admin-form-grid">
-          <label className="admin-field">
-            <span className="admin-label">主图路径</span>
-            <input placeholder="/placeholders/article.svg" {...register("heroImagePath")} />
-            <span className="admin-help">当前阶段使用已有图片路径。正式上传功能会在后续实现。</span>
-          </label>
-          <label className="admin-field">
-            <span className="admin-label">替代文字</span>
-            <input {...register("heroAlt")} />
-            <span className="admin-help">给图片的文字说明，有助于无障碍和搜索理解。</span>
-          </label>
-          <label className="admin-field">
-            <span className="admin-label">图片说明</span>
-            <input {...register("heroCaption")} />
-            <span className="admin-help">显示给读者看的图片注释。</span>
-          </label>
-        </div>
-
-        <div className="admin-form-grid">
-          <label className="admin-field">
-            <span className="admin-label">主图内部标签</span>
-            <input {...register("heroLabel")} />
-            <span className="admin-help">占位图上的短标签。真实图片上线后可少用。</span>
-          </label>
-          <label className="admin-field">
-            <span className="admin-label">主图色调</span>
-            <select {...register("heroTone")}>
-              <option value="neutral">中性</option>
-              <option value="warm">暖色</option>
-              <option value="cool">冷色</option>
-              <option value="rust">砖红</option>
-            </select>
-          </label>
-          <label className="admin-field">
-            <span className="admin-label">发布日期</span>
-            <input type="date" {...register("publishedAt")} />
-            <span className="admin-help">发布状态为已发布时使用；草稿可留空。</span>
-          </label>
-        </div>
-      </section>
-
-      <section className="admin-block-list admin-form-section" aria-label="文章内容区块">
-        <div className="admin-page-header">
+      <section className="admin-form-section admin-editor-primary" aria-labelledby="article-content-title">
+        <div className="admin-editor-heading">
           <div>
-            <p className="admin-kicker">正文内容</p>
-            <h3>正文区块</h3>
-            <p className="admin-help">正文区块是文章内部的小标题、正文段落和图片。显示顺序就是下面的排列顺序。</p>
+            <p className="admin-kicker">文章内容</p>
+            <h3 id="article-content-title">写作与排列</h3>
           </div>
-          <button
-            className="admin-button-secondary"
-            type="button"
-            onClick={() => append({ type: "paragraph", body: "", sortOrder: fields.length, imageTone: "neutral" })}
-          >
-            添加区块
+          <label className="admin-field admin-status-field">
+            <span className="admin-label">状态</span>
+            <select {...register("status")}>
+              <option value="draft">草稿</option>
+              <option value="published">已发布</option>
+            </select>
+          </label>
+        </div>
+
+        <label className="admin-field admin-title-field">
+          <span className="admin-label">文章标题</span>
+          <input autoFocus placeholder="输入文章标题" {...register("title")} />
+          {errors.title ? <span className="admin-error">{errors.title.message}</span> : null}
+        </label>
+
+        <div className="admin-block-toolbar" aria-label="添加文章内容">
+          <span>在末尾添加</span>
+          <button className="admin-button-secondary" type="button" onClick={() => addBlock("paragraph")}>
+            正文
+          </button>
+          <button className="admin-button-secondary" type="button" onClick={() => addBlock("heading")}>
+            小标题
+          </button>
+          <button className="admin-button-secondary" type="button" onClick={() => addBlock("image")}>
+            图片
           </button>
         </div>
-        {fields.map((field, index) => (
-          <article className="admin-block" key={field.id}>
+
+        <div className="admin-block-list" aria-label="文章内容区块">
+          {fields.map((field, index) => {
+            const type = blocks?.[index]?.type ?? field.type;
+            return (
+              <article className={`admin-block admin-block-${type}`} key={field.id}>
+                <div className="admin-block-header">
+                  <span className="admin-block-number">{index + 1}</span>
+                  <strong>{blockLabels[type]}</strong>
+                  <div className="admin-block-actions">
+                    <button type="button" disabled={index === 0} onClick={() => move(index, index - 1)} aria-label={`上移第 ${index + 1} 个区块`}>
+                      上移
+                    </button>
+                    <button
+                      type="button"
+                      disabled={index === fields.length - 1}
+                      onClick={() => move(index, index + 1)}
+                      aria-label={`下移第 ${index + 1} 个区块`}
+                    >
+                      下移
+                    </button>
+                    <button type="button" disabled={fields.length <= 1} onClick={() => remove(index)} aria-label={`移除第 ${index + 1} 个区块`}>
+                      移除
+                    </button>
+                  </div>
+                </div>
+
+                <input type="hidden" {...register(`blocks.${index}.type`)} />
+                {type === "heading" ? (
+                  <label className="admin-field">
+                    <span className="admin-label">小标题</span>
+                    <input placeholder="输入段落小标题" {...register(`blocks.${index}.heading`)} />
+                  </label>
+                ) : null}
+                {type === "paragraph" ? (
+                  <label className="admin-field">
+                    <span className="admin-label">正文</span>
+                    <textarea rows={7} placeholder="输入正文内容" {...register(`blocks.${index}.body`)} />
+                  </label>
+                ) : null}
+                {type === "image" ? (
+                  <div className="admin-image-fields">
+                    <label className="admin-field">
+                      <span className="admin-label">图片路径</span>
+                      <input placeholder="/media/original/example.jpg" {...register(`blocks.${index}.imagePath`)} />
+                    </label>
+                    <div className="admin-form-grid admin-form-grid-compact">
+                      <label className="admin-field">
+                        <span className="admin-label">图片内容说明</span>
+                        <input placeholder="简要说明图片内容" {...register(`blocks.${index}.imageAlt`)} />
+                      </label>
+                      <label className="admin-field">
+                        <span className="admin-label">显示在图片下方的说明</span>
+                        <input {...register(`blocks.${index}.caption`)} />
+                      </label>
+                      <label className="admin-field">
+                        <span className="admin-label">占位色调</span>
+                        <select {...register(`blocks.${index}.imageTone`)}>
+                          <option value="neutral">中性</option>
+                          <option value="warm">暖色</option>
+                          <option value="cool">冷色</option>
+                          <option value="rust">砖红</option>
+                        </select>
+                      </label>
+                    </div>
+                    <Link className="admin-inline-link" href="/studio-tianho/media" target="_blank">
+                      在新窗口打开媒体库
+                    </Link>
+                  </div>
+                ) : null}
+              </article>
+            );
+          })}
+        </div>
+        {errors.blocks?.root ? <span className="admin-error">{errors.blocks.root.message}</span> : null}
+      </section>
+
+      <details className="admin-advanced-settings">
+        <summary>
+          <span>
+            <strong>其他设置</strong>
+            <small>网址、语言、摘要、主图与显示信息</small>
+          </span>
+        </summary>
+        <div className="admin-advanced-content">
+          <section className="admin-form-section" aria-labelledby="article-list-title">
+            <div>
+              <p className="admin-kicker">列表信息</p>
+              <h3 id="article-list-title">摘要与分类</h3>
+            </div>
+            <label className="admin-field">
+              <span className="admin-label">摘要（可选）</span>
+              <textarea rows={3} placeholder="留空时自动使用第一段正文" {...register("excerpt")} />
+              <span className="admin-help">留空时会从第一段正文自动生成，之后仍可随时手动修改。</span>
+            </label>
             <div className="admin-form-grid">
               <label className="admin-field">
-                <span className="admin-label">区块类型</span>
-                <select {...register(`blocks.${index}.type`)}>
-                  <option value="heading">小标题</option>
-                  <option value="paragraph">正文段落</option>
-                  <option value="image">图片</option>
+                <span className="admin-label">语言页面</span>
+                <select {...register("locale")}>
+                  <option value="ja">日语页面（ja）</option>
+                  <option value="zh">中文页面（zh）</option>
+                  <option value="en">英语页面（en）</option>
                 </select>
-                <span className="admin-help">小标题用于分段；正文段落用于说明内容；图片用于插入已有图片。</span>
               </label>
               <label className="admin-field">
-                <span className="admin-label">顺序</span>
-                <input readOnly value={index + 1} />
-                <span className="admin-help">使用上移 / 下移调整阅读顺序。</span>
+                <span className="admin-label">分类</span>
+                <input {...register("category")} />
+              </label>
+              <label className="admin-field">
+                <span className="admin-label">作者 / 显示名称</span>
+                <input {...register("authorName")} />
               </label>
             </div>
             <label className="admin-field">
-              <span className="admin-label">小标题文字</span>
-              <input {...register(`blocks.${index}.heading`)} />
-              <span className="admin-help">只有“小标题”区块需要填写。</span>
+              <span className="admin-label">相关服务</span>
+              <textarea rows={3} placeholder="每行一个服务" {...register("relatedServicesText")} />
             </label>
+          </section>
+
+          <section className="admin-form-section" aria-labelledby="article-address-title">
+            <div>
+              <p className="admin-kicker">网址与排序</p>
+              <h3 id="article-address-title">页面位置</h3>
+            </div>
+            <div className="admin-form-grid">
+              <label className="admin-field">
+                <span className="admin-label">网址标识</span>
+                <input {...register("slug")} />
+                <span className="admin-help">使用小写英文、数字和连字符，例如 production-story。</span>
+                {errors.slug ? <span className="admin-error">{errors.slug.message}</span> : null}
+              </label>
+              <label className="admin-field">
+                <span className="admin-label">显示顺序</span>
+                <input type="number" min="0" {...register("displayOrder", { valueAsNumber: true })} />
+              </label>
+              <label className="admin-field">
+                <span className="admin-label">发布日期</span>
+                <input type="date" {...register("publishedAt")} />
+              </label>
+            </div>
+          </section>
+
+          <section className="admin-form-section" aria-labelledby="article-hero-title">
+            <div>
+              <p className="admin-kicker">主图</p>
+              <h3 id="article-hero-title">文章顶部图片</h3>
+            </div>
             <label className="admin-field">
-              <span className="admin-label">正文段落</span>
-              <textarea {...register(`blocks.${index}.body`)} />
-              <span className="admin-help">用简短、面向读者的语言说明项目或公告内容。</span>
+              <span className="admin-label">主图路径</span>
+              <input placeholder="/placeholders/article.svg" {...register("heroImagePath")} />
             </label>
             <div className="admin-form-grid">
               <label className="admin-field">
-                <span className="admin-label">图片路径</span>
-                <input {...register(`blocks.${index}.imagePath`)} />
-                <span className="admin-help">图片区块使用。当前阶段填写已有图片路径。</span>
-              </label>
-              <label className="admin-field">
-                <span className="admin-label">替代文字</span>
-                <input {...register(`blocks.${index}.imageAlt`)} />
-                <span className="admin-help">说明图片内容，给搜索和无障碍阅读使用。</span>
+                <span className="admin-label">图片内容说明</span>
+                <input {...register("heroAlt")} />
               </label>
               <label className="admin-field">
                 <span className="admin-label">图片说明</span>
-                <input {...register(`blocks.${index}.caption`)} />
-                <span className="admin-help">显示给读者看的图片注释。</span>
+                <input {...register("heroCaption")} />
+              </label>
+              <label className="admin-field">
+                <span className="admin-label">占位色调</span>
+                <select {...register("heroTone")}>
+                  <option value="neutral">中性</option>
+                  <option value="warm">暖色</option>
+                  <option value="cool">冷色</option>
+                  <option value="rust">砖红</option>
+                </select>
               </label>
             </div>
-            <div className="admin-actions">
-              <button className="admin-button-secondary" type="button" disabled={index === 0} onClick={() => move(index, index - 1)}>
-                上移
-              </button>
-              <button
-                className="admin-button-secondary"
-                type="button"
-                disabled={index === fields.length - 1}
-                onClick={() => move(index, index + 1)}
-              >
-                下移
-              </button>
-              <button className="admin-danger" type="button" disabled={fields.length <= 1} onClick={() => remove(index)}>
-                移除
-              </button>
+            <label className="admin-field">
+              <span className="admin-label">主图内部标签</span>
+              <input {...register("heroLabel")} />
+            </label>
+          </section>
+
+          <section className="admin-form-section" aria-labelledby="article-finish-title">
+            <div>
+              <p className="admin-kicker">补充内容</p>
+              <h3 id="article-finish-title">结尾与搜索信息</h3>
             </div>
-          </article>
-        ))}
-      </section>
-
-      <section className="admin-form-section" aria-labelledby="article-publish-title">
-        <div>
-          <p className="admin-kicker">发布设置</p>
-          <h3 id="article-publish-title">保存前最后检查</h3>
+            <label className="admin-field">
+              <span className="admin-label">结尾说明</span>
+              <textarea rows={3} {...register("closingNote")} />
+            </label>
+            <div className="admin-form-grid">
+              <label className="admin-field">
+                <span className="admin-label">搜索标题</span>
+                <input {...register("seoTitle")} />
+              </label>
+              <label className="admin-field">
+                <span className="admin-label">搜索说明</span>
+                <input {...register("seoDescription")} />
+              </label>
+              <label className="admin-field">
+                <span className="admin-label">YouTube 网址</span>
+                <input {...register("youtubeUrl")} />
+              </label>
+            </div>
+            <div className="admin-form-grid">
+              <label className="admin-field">
+                <span className="admin-label">行动按钮文字</span>
+                <input {...register("ctaLabel")} />
+              </label>
+              <label className="admin-field">
+                <span className="admin-label">行动按钮网址</span>
+                <input {...register("ctaHref")} />
+              </label>
+            </div>
+          </section>
         </div>
-        <label className="admin-field">
-          <span className="admin-label">结尾说明</span>
-          <textarea {...register("closingNote")} />
-          <span className="admin-help">显示在文章末尾，可用于提醒读者下一步行动或补充说明。</span>
-        </label>
-      </section>
+      </details>
 
-      <div className="admin-actions">
+      <div className="admin-actions admin-save-bar">
         <button className="admin-button" disabled={submitting} type="submit">
-          {submitting ? "保存中" : "保存文章"}
+          {submitting ? "保存中…" : "保存文章"}
         </button>
         {articleId ? (
           <button className="admin-danger" disabled={submitting} type="button" onClick={handleDelete}>
             删除文章
           </button>
         ) : null}
-        {message ? <p className="admin-user">{message}</p> : null}
+        <p className="admin-save-message" aria-live="polite">
+          {message}
+        </p>
       </div>
     </form>
   );
+}
+
+export function resolveArticleExcerpt(excerpt: string | null | undefined, blocks: ArticleBlock[], title: string) {
+  const manualExcerpt = excerpt?.trim();
+  if (manualExcerpt) return manualExcerpt;
+
+  const firstParagraph = blocks.find((block) => block.type === "paragraph" && block.body?.trim())?.body?.trim();
+  const source = firstParagraph || title.trim();
+  if (source.length <= 140) return source;
+  return `${source.slice(0, 139).trimEnd()}…`;
+}
+
+function createBlock(type: ArticleBlock["type"], sortOrder: number): ArticleBlock {
+  return {
+    type,
+    heading: "",
+    body: "",
+    imagePath: "",
+    imageAlt: "",
+    imageTone: "neutral",
+    caption: "",
+    sortOrder,
+  };
 }
 
 function splitLines(value?: string | null) {
