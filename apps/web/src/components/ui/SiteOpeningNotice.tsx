@@ -6,9 +6,10 @@ import type { SiteNotice } from "@/lib/content";
 
 interface SiteOpeningNoticeProps {
   notice?: SiteNotice;
+  ignoreStoredDismissal?: boolean;
 }
 
-export function SiteOpeningNotice({ notice }: SiteOpeningNoticeProps) {
+export function SiteOpeningNotice({ notice, ignoreStoredDismissal = false }: SiteOpeningNoticeProps) {
   const [isVisible, setIsVisible] = useState(false);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const portalRoot = typeof document === "undefined" ? null : document.body;
@@ -16,14 +17,15 @@ export function SiteOpeningNotice({ notice }: SiteOpeningNoticeProps) {
   useEffect(() => {
     if (!notice) return;
 
-    const storage = notice.dismissalMode === "local" ? window.localStorage : window.sessionStorage;
-    const wasDismissed = storage.getItem(notice.storageKey) === "dismissed";
-
-    if (wasDismissed) return;
+    if (!ignoreStoredDismissal) {
+      const storage = notice.dismissalMode === "local" ? window.localStorage : window.sessionStorage;
+      const wasDismissed = storage.getItem(notice.storageKey) === "dismissed";
+      if (wasDismissed) return;
+    }
 
     const frameId = window.requestAnimationFrame(() => setIsVisible(true));
     return () => window.cancelAnimationFrame(frameId);
-  }, [notice]);
+  }, [ignoreStoredDismissal, notice]);
 
   const dismissNotice = useCallback(() => {
     if (notice) {

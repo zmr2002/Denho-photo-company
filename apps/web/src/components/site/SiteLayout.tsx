@@ -3,7 +3,7 @@ import type { SiteLanguage } from "@/data/navigation";
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
 import { SiteOpeningNotice } from "@/components/ui/SiteOpeningNotice";
-import { getSiteOpeningNotice } from "@/lib/content";
+import { getSiteOpeningNotice, type SiteNotice } from "@/lib/content";
 
 type PageTheme = "home" | "services" | "works" | "about" | "contact" | "placeholder";
 
@@ -12,6 +12,8 @@ interface SiteLayoutProps {
   lang: SiteLanguage;
   currentPath: string;
   page?: PageTheme;
+  openingNoticeOverride?: SiteNotice | null;
+  forceOpeningNotice?: boolean;
 }
 
 export async function SiteLayout({
@@ -19,15 +21,19 @@ export async function SiteLayout({
   lang,
   currentPath,
   page = "home",
+  openingNoticeOverride,
+  forceOpeningNotice = false,
 }: SiteLayoutProps) {
-  const openingNotice = await getSiteOpeningNotice(lang);
+  const openingNotice = openingNoticeOverride === undefined
+    ? await getSiteOpeningNotice(lang)
+    : openingNoticeOverride ?? undefined;
 
   return (
     <div className={`site-shell page-theme-${page}`} lang={lang}>
       <Header lang={lang} currentPath={currentPath} />
       <main>{children}</main>
       <Footer lang={lang} />
-      <SiteOpeningNotice notice={openingNotice} />
+      <SiteOpeningNotice notice={openingNotice} ignoreStoredDismissal={forceOpeningNotice} />
     </div>
   );
 }

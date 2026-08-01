@@ -119,6 +119,18 @@
   padding: 1.35rem;
 }
 
+.admin-card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.admin-card-heading .admin-button-secondary {
+  min-height: 2.25rem;
+  padding: 0.4rem 0.75rem;
+}
+
 .admin-card p:not(.admin-label):not(.admin-help),
 .admin-guide-card p,
 .admin-info-box p {
