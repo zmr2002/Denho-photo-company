@@ -39,7 +39,7 @@ My work covers requirements clarification, information architecture, frontend an
 ### Security and Operations
 
 - Argon2id password hashing
-- TOTP account verification
+- Passwords of at least 8 characters with temporary lockout after repeated failures
 - Server-side sessions and authorization checks
 - Form protection with Cloudflare Turnstile, origin validation, and rate limiting
 - Security headers including Content Security Policy

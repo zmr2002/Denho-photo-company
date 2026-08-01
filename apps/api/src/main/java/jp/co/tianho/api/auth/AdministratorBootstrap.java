@@ -36,7 +36,7 @@ class AdministratorBootstrap implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments arguments) {
-        if (!StringUtils.hasText(email) || !StringUtils.hasText(password) || password.length() < 16) {
+        if (!StringUtils.hasText(email) || !StringUtils.hasText(password) || password.length() < 8) {
             throw new IllegalStateException("Administrator bootstrap credentials are incomplete");
         }
         accountRepository.createBootstrapAdministrator(

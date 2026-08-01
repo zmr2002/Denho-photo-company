@@ -5,7 +5,6 @@ import jp.co.tianho.api.content.publicapi.ContentNotFoundException;
 import jp.co.tianho.api.content.admin.ContentRevisionException;
 import jp.co.tianho.api.auth.AuthenticationFailedException;
 import jp.co.tianho.api.auth.AdministratorUserManagementException;
-import jp.co.tianho.api.auth.MfaVerificationException;
 import jp.co.tianho.api.media.MediaAssetNotFoundException;
 import jp.co.tianho.api.media.DuplicateMediaException;
 import jp.co.tianho.api.media.ImageValidationException;
@@ -94,14 +93,6 @@ public class ApiExceptionHandler {
                 ? "/problems/content-not-found"
                 : "/problems/content-revision-conflict"));
         return ResponseEntity.status(status).body(problem);
-    }
-
-    @ExceptionHandler(MfaVerificationException.class)
-    ResponseEntity<ProblemDetail> handleMfaVerification(MfaVerificationException exception) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, exception.getMessage());
-        problem.setTitle("Account verification failed");
-        problem.setType(URI.create("/problems/account-verification-failed"));
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problem);
     }
 
     @ExceptionHandler(AdministratorUserManagementException.class)

@@ -1,5 +1,6 @@
 package jp.co.tianho.api.shared.config;
 
+import jp.co.tianho.api.auth.AbsoluteSessionExpirationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -11,7 +12,8 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.security.web.context.SecurityContextRepository;
-import jp.co.tianho.api.auth.AbsoluteSessionExpirationFilter;
+import org.springframework.session.web.http.CookieSerializer;
+import org.springframework.session.web.http.DefaultCookieSerializer;
 
 @Configuration
 @EnableMethodSecurity
@@ -20,6 +22,17 @@ public class ApiSecurityConfiguration {
     @Bean
     SecurityContextRepository securityContextRepository() {
         return new HttpSessionSecurityContextRepository();
+    }
+
+    @Bean
+    CookieSerializer sessionCookieSerializer() {
+        DefaultCookieSerializer serializer = new DefaultCookieSerializer();
+        serializer.setCookieName("__Host-tianho-session");
+        serializer.setCookiePath("/");
+        serializer.setUseSecureCookie(true);
+        serializer.setUseHttpOnlyCookie(true);
+        serializer.setSameSite("Lax");
+        return serializer;
     }
 
     @Bean
@@ -40,10 +53,7 @@ public class ApiSecurityConfiguration {
                         .requestMatchers(
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/session",
-                                "/api/v1/auth/csrf",
-                                "/api/v1/auth/mfa/bind",
-                                "/api/v1/auth/mfa/verify",
-                                "/api/v1/auth/mfa/recovery")
+                                "/api/v1/auth/csrf")
                         .permitAll()
                         .requestMatchers("/api/v1/admin/users/**", "/api/v1/admin/audit-events/**")
                         .hasRole("ADMIN")
