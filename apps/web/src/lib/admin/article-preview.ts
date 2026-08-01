@@ -1,6 +1,7 @@
 import "server-only";
 
-import type { Article, Locale } from "@/lib/content/types";
+import type { HomeNewsItem } from "@/data/home";
+import type { Article, ArticleImageBlock, ArticleSection, Locale } from "@/lib/content/types";
 import {
   articleImageTone,
   managedArticleImagePath,
@@ -42,6 +43,75 @@ export function adminArticleToPreview(article: AdminArticle): Article {
     seoTitle: article.seoTitle || article.title,
     seoDescription: article.seoDescription || article.excerpt,
     youtubeUrl: article.youtubeUrl ?? undefined,
+  };
+}
+
+export function selectAdminArticlesForPlacement(articles: AdminArticle[], targetId: string) {
+  const target = articles.find((article) => article.id === targetId);
+  if (!target) return [];
+  const locale = previewLocale(target.locale);
+
+  return articles
+    .filter((article) => previewLocale(article.locale) === locale)
+    .filter((article) => article.id === targetId || article.status === "published")
+    .sort(compareArticlePlacement);
+}
+
+export function adminArticleToHomeNewsItem(article: AdminArticle): HomeNewsItem {
+  const locale = previewLocale(article.locale);
+  const blocks = [...article.blocks].sort((left, right) => left.sortOrder - right.sortOrder);
+  const paragraphs = blocks.map((block) => block.body).filter((value): value is string => Boolean(value));
+  const imageBlock = blocks.find((block) => block.imagePath);
+
+  return {
+    date: article.publishedAt ? dateOnly(article.publishedAt) : draftDateLabel(locale),
+    category: article.category,
+    title: article.title,
+    excerpt: article.excerpt,
+    detailTitle: article.title,
+    detailBody: paragraphs.join("\n\n") || article.excerpt,
+    detailLead: article.excerpt,
+    detailSectionTitle: article.category,
+    detailParagraphs: paragraphs.length > 0 ? paragraphs : [article.excerpt],
+    detailImage: imageBlock ? previewBlockImage(imageBlock, article.title) : undefined,
+    detailSections: previewArticleSections(blocks),
+    detailClosing: article.closingNote || "",
+    closeLabel: locale === "ja" ? "閉じる" : locale === "zh" ? "关闭" : "Close",
+  };
+}
+
+function compareArticlePlacement(left: AdminArticle, right: AdminArticle) {
+  const orderDifference = left.displayOrder - right.displayOrder;
+  if (orderDifference !== 0) return orderDifference;
+
+  if (!left.publishedAt && right.publishedAt) return -1;
+  if (left.publishedAt && !right.publishedAt) return 1;
+  const dateDifference = (right.publishedAt || "").localeCompare(left.publishedAt || "");
+  return dateDifference || left.id.localeCompare(right.id);
+}
+
+function previewArticleSections(blocks: AdminArticle["blocks"]): ArticleSection[] {
+  const sections: ArticleSection[] = [];
+  for (const block of blocks) {
+    if (block.heading) {
+      sections.push({ heading: block.heading, paragraphs: [] });
+      continue;
+    }
+    const current = sections.at(-1);
+    if (!current) continue;
+    if (block.body) current.paragraphs.push(block.body);
+    if (block.imagePath && !current.image) current.image = previewBlockImage(block, current.heading);
+  }
+  return sections;
+}
+
+function previewBlockImage(block: AdminArticle["blocks"][number], fallback: string): ArticleImageBlock {
+  return {
+    label: block.heading || fallback,
+    alt: block.imageAlt || fallback,
+    tone: articleImageTone(block.imageTone),
+    caption: block.caption ?? undefined,
+    src: managedArticleImagePath(block.imagePath),
   };
 }
 
