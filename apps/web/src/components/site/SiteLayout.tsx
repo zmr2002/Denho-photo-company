@@ -12,7 +12,6 @@ interface SiteLayoutProps {
   lang: SiteLanguage;
   currentPath: string;
   page?: PageTheme;
-  showOpeningNotice?: boolean;
 }
 
 export async function SiteLayout({
@@ -20,9 +19,8 @@ export async function SiteLayout({
   lang,
   currentPath,
   page = "home",
-  showOpeningNotice = true,
 }: SiteLayoutProps) {
-  const openingNotice = showOpeningNotice ? await getSiteOpeningNotice(lang) : undefined;
+  const openingNotice = await getSiteOpeningNotice(lang);
 
   return (
     <div className={`site-shell page-theme-${page}`} lang={lang}>
