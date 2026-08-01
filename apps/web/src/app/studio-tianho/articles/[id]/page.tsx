@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdminArticleForm } from "@/components/admin/AdminArticleForm";
 import { AdminShell } from "@/components/admin/AdminShell";
@@ -31,6 +32,14 @@ export default async function EditAdminArticlePage({ params }: PageProps) {
                 : "保存后后台内容会更新。只有已发布的文章才会作为正式内容显示。"}
             </p>
           </div>
+          <Link
+            className="admin-button-secondary"
+            href={"/studio-tianho/preview/articles/" + article.id}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            预览文章
+          </Link>
         </header>
         <AdminArticleForm articleId={article.id} contentVersion={article.version} defaultValues={articleToFormValues(article)} isTutorial={isTutorialArticle(article)} />
       </section>

@@ -21,7 +21,7 @@ export type AdminArticle = {
   heroTone: string; heroCaption: string | null; closingNote: string | null; ctaLabel: string | null;
   ctaHref: string | null; status: string; publishedAt: string | null; displayOrder: number;
   relatedServices: string[]; seoTitle: string | null; seoDescription: string | null; youtubeUrl: string | null;
-  demo: boolean; version: number; blocks: Array<{ type: string; heading: string | null; body: string | null;
+  demo: boolean; version: number; createdAt?: string; updatedAt?: string; blocks: Array<{ type: string; heading: string | null; body: string | null;
     imagePath: string | null; imageAlt: string | null; imageTone: string; caption: string | null; sortOrder: number }>;
 };
 

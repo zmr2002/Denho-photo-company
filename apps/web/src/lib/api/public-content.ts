@@ -3,9 +3,9 @@ import "server-only";
 import createClient from "openapi-fetch";
 import { z } from "zod";
 import type { paths } from "@/generated/api-schema";
+import { mapArticleContentBlocks } from "@/lib/content/article-content";
 import type {
   Article,
-  ArticleContentBlock,
   ArticleSection,
   Locale,
   MockImage,
@@ -323,26 +323,6 @@ function mapArticleDetail(article: ArticleDetailContract): Article {
     seoDescription: article.seoDescription || article.excerpt,
     youtubeUrl: article.youtubeUrl ?? undefined,
   };
-}
-
-function mapArticleContentBlocks(blocks: ArticleBlockContract[], fallback: string): ArticleContentBlock[] {
-  return blocks.flatMap((block) => {
-    if (block.type === "heading" && block.heading) {
-      return [{ type: "heading" as const, text: block.heading }];
-    }
-    if (block.type === "paragraph" && block.body) {
-      return [{ type: "paragraph" as const, text: block.body }];
-    }
-    if (block.type === "image" && block.imagePath) {
-      return [{ type: "image" as const, image: blockImage(block, fallback) }];
-    }
-
-    const compatibleBlocks: ArticleContentBlock[] = [];
-    if (block.heading) compatibleBlocks.push({ type: "heading", text: block.heading });
-    if (block.body) compatibleBlocks.push({ type: "paragraph", text: block.body });
-    if (block.imagePath) compatibleBlocks.push({ type: "image", image: blockImage(block, fallback) });
-    return compatibleBlocks;
-  });
 }
 
 function mapArticleNotice(article: ArticleDetailContract): Notice {
