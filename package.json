@@ -13,5 +13,14 @@
     "test:unit": "npm run test:unit --workspace @tianho/web",
     "services:up": "docker compose -f infra/compose.yml up -d",
     "services:down": "docker compose -f infra/compose.yml down"
+  },
+  "devDependencies": {
+    "next": "16.2.12"
+  },
+  "overrides": {
+    "next": {
+      "postcss": "8.5.25",
+      "sharp": "0.35.3"
+    }
   }
 }

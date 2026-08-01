@@ -17,6 +17,9 @@ repositories {
 	mavenCentral()
 }
 
+ext['netty.version'] = '4.2.16.Final'
+ext['postgresql.version'] = '42.7.12'
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 	implementation 'org.springframework.boot:spring-boot-starter-security'

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdminArticleForm } from "@/components/admin/AdminArticleForm";
 import { AdminShell } from "@/components/admin/AdminShell";
@@ -30,6 +31,32 @@ export default async function EditAdminArticlePage({ params }: PageProps) {
                 ? "这是后台教学示例。当前作为预上线公开演示样本显示；它不是正式客户案例。"
                 : "保存后后台内容会更新。只有已发布的文章才会作为正式内容显示。"}
             </p>
+          </div>
+          <div className="admin-actions" aria-label="文章预览">
+            <Link
+              className="admin-button-secondary"
+              href={`/studio-tianho/preview/articles/${article.id}/`}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              文章页预览
+            </Link>
+            <Link
+              className="admin-button-secondary"
+              href={`/studio-tianho/preview/articles/${article.id}/list/`}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              列表预览
+            </Link>
+            <Link
+              className="admin-button-secondary"
+              href={`/studio-tianho/preview/articles/${article.id}/home/`}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              首页栏预览
+            </Link>
           </div>
         </header>
         <AdminArticleForm articleId={article.id} contentVersion={article.version} defaultValues={articleToFormValues(article)} isTutorial={isTutorialArticle(article)} />

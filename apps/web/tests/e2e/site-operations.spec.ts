@@ -73,7 +73,15 @@ test("protects administration and exposes readiness", async ({ page, request }) 
   expect(unauthorized.status()).toBe(401);
   expect(unauthorized.headers()["cache-control"]).toContain("no-store");
 
-  await page.goto("/studio-tianho/login/");
+  for (const path of [
+    "/studio-tianho/preview/articles/example/",
+    "/studio-tianho/preview/articles/example/list/",
+    "/studio-tianho/preview/articles/example/home/",
+    "/studio-tianho/preview/notices/zh/",
+  ]) {
+    await page.goto(path);
+    await expect(page).toHaveURL(/\/studio-tianho\/login\/?$/);
+  }
   await expect(page.locator('input[name="email"]')).toBeVisible();
   await expect(page.locator('input[name="password"]')).toBeVisible();
 });

@@ -3,6 +3,7 @@ import "server-only";
 import createClient from "openapi-fetch";
 import { z } from "zod";
 import type { paths } from "@/generated/api-schema";
+import { mapArticleContentBlocks } from "@/lib/content/article-content";
 import type {
   Article,
   ArticleSection,
@@ -289,6 +290,7 @@ function mapArticleSummary(article: ArticleSummaryContract): Article {
       src: managedImagePath(article.heroImagePath),
     },
     body: [],
+    contentBlocks: [],
     relatedServices: [],
     seoTitle: article.title,
     seoDescription: article.excerpt,
@@ -315,6 +317,7 @@ function mapArticleDetail(article: ArticleDetailContract): Article {
       src: managedImagePath(article.heroImagePath),
     },
     body: blocks.flatMap((block) => [block.heading, block.body].filter((value): value is string => Boolean(value))),
+    contentBlocks: mapArticleContentBlocks(blocks, article.title),
     relatedServices: article.relatedServices,
     seoTitle: article.seoTitle || article.title,
     seoDescription: article.seoDescription || article.excerpt,

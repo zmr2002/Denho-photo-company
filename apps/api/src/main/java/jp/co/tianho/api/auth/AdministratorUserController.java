@@ -74,7 +74,7 @@ public class AdministratorUserController {
     public record CreateUserRequest(
             @NotBlank @Email String email,
             @NotBlank @Size(max = 160) String displayName,
-            @NotBlank @Size(min = 16, max = 200) String password,
+            @NotBlank @Size(min = 8, max = 200) String password,
             @NotNull AdministratorRole role) {
     }
 

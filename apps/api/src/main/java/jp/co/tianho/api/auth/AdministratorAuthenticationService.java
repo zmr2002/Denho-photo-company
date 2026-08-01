@@ -27,7 +27,7 @@ class AdministratorAuthenticationService {
     }
 
     @Transactional(noRollbackFor = AuthenticationFailedException.class)
-    PasswordAuthenticationResult authenticate(String rawEmail, String password, String ipAddress) {
+    AdministratorPrincipal authenticate(String rawEmail, String password, String ipAddress) {
         String email = rawEmail.strip().toLowerCase(Locale.ROOT);
         accountRepository.resetExpiredLock(email);
         AdministratorAccount account = accountRepository.findByEmail(email).orElse(null);
@@ -63,11 +63,6 @@ class AdministratorAuthenticationService {
         }
         accountRepository.recordSuccessfulLogin(account.id());
         accountRepository.recordAttempt(account.id(), email, ipAddress, true, null);
-        return new PasswordAuthenticationResult(
-                new AdministratorPrincipal(account.id(), account.email(), account.displayName(), account.role()),
-                account.mfaEnabled());
-    }
-
-    record PasswordAuthenticationResult(AdministratorPrincipal principal, boolean mfaEnabled) {
+        return new AdministratorPrincipal(account.id(), account.email(), account.displayName(), account.role());
     }
 }

@@ -6,9 +6,10 @@ import { PlaceholderMedia } from "@/components/ui/PlaceholderMedia";
 interface ArticleListPageProps {
   articles: Article[];
   locale: Locale;
+  articleHref?: (article: Article) => string;
 }
 
-export function ArticleListPage({ articles, locale }: ArticleListPageProps) {
+export function ArticleListPage({ articles, locale, articleHref }: ArticleListPageProps) {
   const basePath = `/${locale}`;
   const labels = {
     ja: {
@@ -52,7 +53,7 @@ export function ArticleListPage({ articles, locale }: ArticleListPageProps) {
                   </div>
                   <div>
                     <h3>
-                      <Link href={`${basePath}/articles/${article.slug}/`}>
+                      <Link href={articleHref?.(article) ?? `${basePath}/articles/${article.slug}/`}>
                         {article.title}
                       </Link>
                     </h3>

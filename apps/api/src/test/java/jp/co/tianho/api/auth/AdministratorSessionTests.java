@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Base64;
 import java.util.UUID;
 import jp.co.tianho.api.PostgresTestConfiguration;
 import org.junit.jupiter.api.Test;
@@ -21,8 +20,6 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
 @Import(PostgresTestConfiguration.class)
@@ -34,12 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 })
 @AutoConfigureMockMvc
 class AdministratorSessionTests {
-
-    @DynamicPropertySource
-    static void configureMfaEncryption(DynamicPropertyRegistry registry) {
-        registry.add("tianho.auth.mfa.encryption-key",
-                () -> Base64.getEncoder().encodeToString(new byte[32]));
-    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -70,15 +61,15 @@ class AdministratorSessionTests {
     }
 
     @Test
-    void passwordLoginRequiresMfaBeforeCreatingSession() throws Exception {
+    void passwordLoginCreatesServerSession() throws Exception {
         MvcResult login = mockMvc.perform(post("/api/v1/auth/login")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginJson("admin@example.com", "administrator-test-password")))
-                .andExpect(status().isAccepted())
-                .andExpect(jsonPath("$.mfaRequired").value(true))
-                .andExpect(jsonPath("$.setupRequired").value(true))
-                .andExpect(jsonPath("$.challengeId").isNotEmpty())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.authenticated").value(true))
+                .andExpect(jsonPath("$.email").value("admin@example.com"))
+                .andExpect(jsonPath("$.role").value("ADMIN"))
                 .andReturn();
 
         assertThat(environment.getProperty("server.servlet.session.cookie.name"))
@@ -92,7 +83,23 @@ class AdministratorSessionTests {
                         SELECT count(*) FROM spring_session WHERE principal_name = 'admin@example.com'
                         """)
                 .query(Long.class).single();
-        assertThat(persistedSessions).isZero();
+        assertThat(persistedSessions).isGreaterThanOrEqualTo(1);
+
+        String setCookie = login.getResponse().getHeader(org.springframework.http.HttpHeaders.SET_COOKIE);
+        assertThat(setCookie)
+                .contains("__Host-tianho-session=")
+                .contains("Secure")
+                .contains("HttpOnly")
+                .contains("SameSite=Lax");
+    }
+
+    @Test
+    void rejectsPasswordsShorterThanEightCharacters() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginJson("admin@example.com", "short")))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -149,7 +156,7 @@ class AdministratorSessionTests {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginJson("legacy@example.com", "legacy-password-123")))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isOk());
 
         String scheme = jdbcClient.sql("SELECT password_scheme FROM administrator_users WHERE id = :id")
                 .param("id", id)

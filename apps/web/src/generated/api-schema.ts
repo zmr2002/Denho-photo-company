@@ -15,54 +15,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/auth/mfa/verify": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["verify"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/auth/mfa/recovery": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["recover"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/auth/mfa/bind": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["bind"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/auth/login": {
         parameters: {
             query?: never;
@@ -523,10 +475,10 @@ export interface components {
             /** Format: date-time */
             receivedAt?: string;
         };
-        VerifyRequest: {
-            /** Format: uuid */
-            challengeId: string;
-            code: string;
+        LoginRequest: {
+            /** Format: email */
+            email: string;
+            password: string;
         };
         SessionResponse: {
             authenticated?: boolean;
@@ -535,34 +487,6 @@ export interface components {
             email?: string;
             displayName?: string;
             role?: string;
-        };
-        VerificationResponse: {
-            session?: components["schemas"]["SessionResponse"];
-            recoveryCodes?: string[];
-        };
-        RecoveryRequest: {
-            /** Format: uuid */
-            challengeId: string;
-            recoveryCode: string;
-        };
-        ChallengeRequest: {
-            /** Format: uuid */
-            challengeId: string;
-        };
-        BindingResponse: {
-            secret?: string;
-            provisioningUri?: string;
-        };
-        LoginRequest: {
-            /** Format: email */
-            email: string;
-            password: string;
-        };
-        ChallengeResponse: {
-            /** Format: uuid */
-            challengeId?: string;
-            mfaRequired?: boolean;
-            setupRequired?: boolean;
         };
         VersionRequest: {
             /** Format: int64 */
@@ -672,25 +596,25 @@ export interface components {
             object?: boolean;
             float?: boolean;
             number?: boolean;
-            boolean?: boolean;
-            string?: boolean;
-            int?: boolean;
             double?: boolean;
-            pojo?: boolean;
+            string?: boolean;
             long?: boolean;
             /** @deprecated */
             textual?: boolean;
             binary?: boolean;
+            pojo?: boolean;
+            boolean?: boolean;
+            int?: boolean;
             short?: boolean;
+            container?: boolean;
+            missingNode?: boolean;
+            floatingPointNumber?: boolean;
+            bigDecimal?: boolean;
             /** @enum {string} */
             nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
-            valueNode?: boolean;
-            container?: boolean;
-            bigDecimal?: boolean;
             integralNumber?: boolean;
+            valueNode?: boolean;
             bigInteger?: boolean;
-            floatingPointNumber?: boolean;
-            missingNode?: boolean;
             embeddedValue?: boolean;
         };
         WorkImageInput: {
@@ -963,78 +887,6 @@ export interface operations {
             };
         };
     };
-    verify: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["VerifyRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["VerificationResponse"];
-                };
-            };
-        };
-    };
-    recover: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RecoveryRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["VerificationResponse"];
-                };
-            };
-        };
-    };
-    bind: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ChallengeRequest"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["BindingResponse"];
-                };
-            };
-        };
-    };
     login: {
         parameters: {
             query?: never;
@@ -1054,7 +906,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["ChallengeResponse"];
+                    "*/*": components["schemas"]["SessionResponse"];
                 };
             };
         };

@@ -16,6 +16,11 @@ export interface ArticleImageBlock extends MockImage {
   caption?: string;
 }
 
+export type ArticleContentBlock =
+  | { type: "heading"; text: string }
+  | { type: "paragraph"; text: string }
+  | { type: "image"; image: ArticleImageBlock };
+
 export interface ArticleSection {
   heading: string;
   paragraphs: string[];
@@ -70,6 +75,7 @@ export interface Article {
   status: PublishStatus;
   featuredImage: MockImage;
   body: string[];
+  contentBlocks: ArticleContentBlock[];
   relatedServices: string[];
   seoTitle: string;
   seoDescription: string;
