@@ -1,8 +1,15 @@
 FROM golang:1.26.5-alpine3.23 AS build
 
 ARG CADDY_VERSION=v2.11.4
+ARG X_TEXT_VERSION=v0.39.0
+ARG GRPC_VERSION=v1.82.1
 RUN apk add --no-cache ca-certificates git \
-    && CGO_ENABLED=0 go install github.com/caddyserver/caddy/v2/cmd/caddy@${CADDY_VERSION} \
+    && git clone --depth 1 --branch ${CADDY_VERSION} https://github.com/caddyserver/caddy.git /src/caddy \
+    && cd /src/caddy \
+    && go get golang.org/x/text@${X_TEXT_VERSION} google.golang.org/grpc@${GRPC_VERSION} \
+    && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /go/bin/caddy ./cmd/caddy \
+    && go version -m /go/bin/caddy | grep -E "golang.org/x/text[[:space:]]+${X_TEXT_VERSION}" \
+    && go version -m /go/bin/caddy | grep -E "google.golang.org/grpc[[:space:]]+${GRPC_VERSION}" \
     && mkdir -p /rootfs/etc/caddy /rootfs/data /rootfs/config \
     && chown -R 1000:1000 /rootfs/data /rootfs/config
 
