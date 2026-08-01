@@ -1,4 +1,5 @@
 import type { Article } from "@/lib/content";
+import { ArticleContent } from "@/components/pages/ArticleContent";
 import { PageHero } from "@/components/ui/PageHero";
 import { PlaceholderMedia } from "@/components/ui/PlaceholderMedia";
 
@@ -60,10 +61,8 @@ export function ArticleDetailPage({ article }: ArticleDetailPageProps) {
               src={article.featuredImage.src}
               alt={article.featuredImage.alt}
             />
-            <div className="mt-10 grid gap-6 text-base leading-8 text-stone-600 md:text-lg">
-              {article.body.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
-              ))}
+            <div className="mt-10">
+              <ArticleContent blocks={article.contentBlocks} />
             </div>
             <div className="mt-10 border-t border-stone-300 pt-6">
               <p className="section-label">{labels.related}</p>
