@@ -6,6 +6,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -128,6 +129,32 @@ class AdminContentTests {
                                 {"expectedVersion":1,"article":%s}
                                 """.formatted(articleBody("Blocked title", "Blocked body"))))
                 .andExpect(status().isConflict());
+    }
+
+    @Test
+    void rejectsOversizedAndIncompleteArticleContent() throws Exception {
+        mockMvc.perform(post("/api/v1/admin/articles")
+                        .with(authentication(authenticationFor(AdministratorRole.EDITOR)))
+                        .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(articleBody("x".repeat(241), "Body")))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON));
+
+        mockMvc.perform(post("/api/v1/admin/articles")
+                        .with(authentication(authenticationFor(AdministratorRole.EDITOR)))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "locale":"ja","slug":"empty-image","title":"Image","excerpt":"Excerpt",
+                                  "category":"Test","authorName":"Editorial Team","heroTone":"neutral",
+                                  "displayOrder":0,"relatedServices":[],"demo":false,
+                                  "blocks":[{"type":"image","imageTone":"neutral","sortOrder":0}]
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON));
     }
 
     @Test
