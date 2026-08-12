@@ -1,7 +1,6 @@
-import Link from "next/link";
-import { AdminNoticeForm, type AdminNoticeFormValues } from "@/components/admin/AdminNoticeForm";
 import { AdminShell } from "@/components/admin/AdminShell";
-import { localeLabel } from "@/lib/admin/labels";
+import { NoticeWorkspace } from "@/components/admin/NoticeWorkspace";
+import type { AdminNoticeFormValues } from "@/components/admin/AdminNoticeForm";
 import { getAdminCollection, type AdminNotice } from "@/lib/api/admin";
 import { formatSiteDate } from "@/lib/site-date";
 
@@ -22,36 +21,33 @@ export default async function AdminNoticePage() {
         </header>
         <div className="admin-info-box">
           <strong>适合使用通知的情况</strong>
-          <p>临时公告、休假通知、活动提醒、重要营业信息。通知内容应短，避免放复杂文章。</p>
+          <p>临时公告、休假通知、活动提醒、重要营业信息。先选择语言，再编辑并确认“当前访客状态”。</p>
         </div>
-        <div className="admin-grid">
-          {locales.map((locale) => {
+        <NoticeWorkspace
+          entries={locales.map((locale) => {
             const notice = notices.find((item) => item.locale === locale);
-            return (
-              <article className="admin-card" key={locale}>
-                <div className="admin-card-heading">
-                  <p className="admin-label">{localeLabel(locale)}</p>
-                  {notice ? (
-                    <Link
-                      className="admin-button-secondary"
-                      href={`/studio-tianho/preview/notices/${locale}/`}
-                      rel="noopener noreferrer"
-                      target="_blank"
-                    >
-                      预览通知
-                    </Link>
-                  ) : (
-                    <span className="admin-help">保存后可预览</span>
-                  )}
-                </div>
-                <AdminNoticeForm contentVersion={notice?.version ?? 0} defaultValues={noticeToFormValues(locale, notice)} />
-              </article>
-            );
+            return {
+              locale,
+              noticeId: notice?.id ?? null,
+              version: notice?.version ?? 0,
+              visitorState: noticeVisitorState(notice),
+              defaultValues: noticeToFormValues(locale, notice),
+            };
           })}
-        </div>
+        />
       </section>
     </AdminShell>
   );
+}
+
+function noticeVisitorState(notice?: AdminNotice) {
+  if (!notice) return "尚未保存";
+  if (notice.status.toUpperCase() !== "PUBLISHED") return "草稿，不向访客显示";
+  if (!notice.enabled) return "已关闭，不向访客显示";
+  const now = Date.now();
+  if (notice.startAt && new Date(notice.startAt).getTime() > now) return "尚未到开始时间";
+  if (notice.endAt && new Date(notice.endAt).getTime() < now) return "已经超过结束时间";
+  return "当前访客可以看到";
 }
 
 function noticeToFormValues(locale: (typeof locales)[number], notice?: AdminNotice): AdminNoticeFormValues {

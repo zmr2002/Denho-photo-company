@@ -162,6 +162,59 @@
   padding: 0.4rem 0.75rem;
 }
 
+.admin-notice-workspace {
+  display: grid;
+  gap: 1rem;
+}
+
+.admin-language-tabs {
+  display: flex;
+  gap: 0.35rem;
+  padding: 0.35rem;
+  border-radius: 0.85rem;
+  background: var(--admin-soft, #f8f7f5);
+}
+
+.admin-language-tab {
+  flex: 1;
+  min-height: 2.75rem;
+  border: 0;
+  border-radius: 0.65rem;
+  background: transparent;
+  color: var(--admin-muted, #77736d);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+.admin-language-tab[aria-selected="true"] {
+  background: #fff;
+  color: #222;
+  box-shadow: 0 0.25rem 0.9rem rgb(31 27 22 / 0.08);
+}
+
+.admin-notice-panel[hidden] {
+  display: none;
+}
+
+.admin-notice-visibility {
+  width: fit-content;
+  margin-top: 0.45rem;
+  border-radius: 999px;
+  background: #eeeae4;
+  padding: 0.3rem 0.6rem;
+  color: #625d57;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.admin-notice-visibility[data-visible="true"] {
+  background: #e6f1e4;
+  color: #3f663e;
+}
+
 .admin-card p:not(.admin-label):not(.admin-help),
 .admin-guide-card p,
 .admin-info-box p {
