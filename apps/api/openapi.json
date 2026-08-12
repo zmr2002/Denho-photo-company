@@ -301,6 +301,71 @@
         }
       }
     },
+    "/api/v1/admin/inquiries/{id}/notes" : {
+      "get" : {
+        "tags" : [ "inquiry-controller" ],
+        "operationId" : "notes",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/InquiryNoteResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "inquiry-controller" ],
+        "operationId" : "addNote",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/NoteRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InquiryNoteResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/admin/articles" : {
       "get" : {
         "tags" : [ "admin-content-controller" ],
@@ -1253,6 +1318,36 @@
           }
         }
       },
+      "NoteRequest" : {
+        "type" : "object",
+        "properties" : {
+          "body" : {
+            "type" : "string",
+            "maxLength" : 2000,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "body" ]
+      },
+      "InquiryNoteResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "body" : {
+            "type" : "string"
+          },
+          "actorDisplayName" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
       "ArticleBlockInput" : {
         "type" : "object",
         "properties" : {
@@ -1444,32 +1539,16 @@
           "container" : {
             "type" : "boolean"
           },
-          "number" : {
+          "string" : {
             "type" : "boolean"
           },
-          "nodeType" : {
-            "type" : "string",
-            "enum" : [ "ARRAY", "BINARY", "BOOLEAN", "MISSING", "NULL", "NUMBER", "OBJECT", "POJO", "STRING" ]
-          },
-          "bigInteger" : {
-            "type" : "boolean"
-          },
-          "missingNode" : {
-            "type" : "boolean"
-          },
-          "valueNode" : {
-            "type" : "boolean"
-          },
-          "integralNumber" : {
-            "type" : "boolean"
-          },
-          "floatingPointNumber" : {
-            "type" : "boolean"
-          },
-          "bigDecimal" : {
+          "pojo" : {
             "type" : "boolean"
           },
           "int" : {
+            "type" : "boolean"
+          },
+          "short" : {
             "type" : "boolean"
           },
           "long" : {
@@ -1478,23 +1557,39 @@
           "double" : {
             "type" : "boolean"
           },
-          "short" : {
-            "type" : "boolean"
-          },
           "textual" : {
             "type" : "boolean",
             "deprecated" : true
           },
-          "binary" : {
-            "type" : "boolean"
-          },
           "boolean" : {
             "type" : "boolean"
           },
-          "string" : {
+          "binary" : {
             "type" : "boolean"
           },
-          "pojo" : {
+          "floatingPointNumber" : {
+            "type" : "boolean"
+          },
+          "missingNode" : {
+            "type" : "boolean"
+          },
+          "integralNumber" : {
+            "type" : "boolean"
+          },
+          "bigDecimal" : {
+            "type" : "boolean"
+          },
+          "bigInteger" : {
+            "type" : "boolean"
+          },
+          "nodeType" : {
+            "type" : "string",
+            "enum" : [ "ARRAY", "BINARY", "BOOLEAN", "MISSING", "NULL", "NUMBER", "OBJECT", "POJO", "STRING" ]
+          },
+          "valueNode" : {
+            "type" : "boolean"
+          },
+          "number" : {
             "type" : "boolean"
           },
           "embeddedValue" : {

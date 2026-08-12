@@ -127,6 +127,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/inquiries/{id}/notes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["notes"];
+        put?: never;
+        post: operations["addNote"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/articles": {
         parameters: {
             query?: never;
@@ -554,6 +570,17 @@ export interface components {
             /** Format: date-time */
             createdAt?: string;
         };
+        NoteRequest: {
+            body: string;
+        };
+        InquiryNoteResponse: {
+            /** Format: uuid */
+            id?: string;
+            body?: string;
+            actorDisplayName?: string;
+            /** Format: date-time */
+            createdAt?: string;
+        };
         ArticleBlockInput: {
             type: string;
             heading?: string;
@@ -598,25 +625,25 @@ export interface components {
             object?: boolean;
             float?: boolean;
             container?: boolean;
-            number?: boolean;
-            /** @enum {string} */
-            nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
-            bigInteger?: boolean;
-            missingNode?: boolean;
-            valueNode?: boolean;
-            integralNumber?: boolean;
-            floatingPointNumber?: boolean;
-            bigDecimal?: boolean;
-            int?: boolean;
-            long?: boolean;
-            double?: boolean;
-            short?: boolean;
-            /** @deprecated */
-            textual?: boolean;
-            binary?: boolean;
-            boolean?: boolean;
             string?: boolean;
             pojo?: boolean;
+            int?: boolean;
+            short?: boolean;
+            long?: boolean;
+            double?: boolean;
+            /** @deprecated */
+            textual?: boolean;
+            boolean?: boolean;
+            binary?: boolean;
+            floatingPointNumber?: boolean;
+            missingNode?: boolean;
+            integralNumber?: boolean;
+            bigDecimal?: boolean;
+            bigInteger?: boolean;
+            /** @enum {string} */
+            nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
+            valueNode?: boolean;
+            number?: boolean;
             embeddedValue?: boolean;
         };
         WorkImageInput: {
@@ -1099,6 +1126,54 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    notes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["InquiryNoteResponse"][];
+                };
+            };
+        };
+    };
+    addNote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NoteRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["InquiryNoteResponse"];
+                };
             };
         };
     };

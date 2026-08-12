@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { AdminActionFeedback, useAdministrationAction } from "@/components/admin/AdminActionFeedback";
+import { InquiryNotes } from "@/components/admin/InquiryNotes";
 import { adminResponseMessage, writeAdminApi } from "@/lib/api/browser";
 import type { Inquiry } from "@/lib/api/admin";
 
@@ -91,6 +92,7 @@ export function InquiryList({ inquiries }: { inquiries: Inquiry[] }) {
             <div><dt>拍摄地点</dt><dd>{inquiry.location || "未填写"}</dd></div>
           </dl>
           <p className="admin-inquiry-message">{inquiry.message}</p>
+          <InquiryNotes disabled={inquiry.status === "ANONYMIZED"} inquiryId={inquiry.id} />
           {inquiry.status !== "ANONYMIZED" ? (
             <div className="admin-actions">
               {actionsFor(inquiry.status).map((action) => (

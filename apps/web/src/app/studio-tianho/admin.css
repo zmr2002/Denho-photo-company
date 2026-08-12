@@ -1108,6 +1108,50 @@
   white-space: pre-wrap;
 }
 
+.admin-inquiry-notes {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.admin-inquiry-notes > button {
+  width: fit-content;
+}
+
+.admin-inquiry-notes-panel {
+  display: grid;
+  gap: 1rem;
+  border-radius: 0.75rem;
+  background: var(--admin-soft, #f8f7f5);
+  padding: 1rem;
+}
+
+.admin-inquiry-note-list {
+  display: grid;
+  gap: 0.65rem;
+  list-style: none;
+}
+
+.admin-inquiry-note-list li {
+  border-left: 3px solid #d8d2ca;
+  padding-left: 0.8rem;
+}
+
+.admin-inquiry-note-list p {
+  white-space: pre-wrap;
+}
+
+.admin-inquiry-note-list small {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--admin-muted, #77736d);
+  font-size: 0.7rem;
+}
+
+.admin-inquiry-note-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
 .admin-login-page {
   min-height: 100vh;
   display: grid;

@@ -38,6 +38,16 @@ public class InquiryRetentionService {
                 .param("cutoff", cutoff)
                 .update();
 
+        jdbcClient.sql("""
+                        DELETE FROM inquiry_notes note
+                        USING inquiries inquiry
+                        WHERE note.inquiry_id = inquiry.id
+                          AND inquiry.created_at < :cutoff
+                          AND inquiry.anonymized_at IS NULL
+                        """)
+                .param("cutoff", cutoff)
+                .update();
+
         return jdbcClient.sql("""
                         UPDATE inquiries
                         SET name_company = '[removed]',

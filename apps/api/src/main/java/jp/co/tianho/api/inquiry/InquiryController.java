@@ -3,6 +3,8 @@ package jp.co.tianho.api.inquiry;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.util.List;
 import java.util.UUID;
 import jp.co.tianho.api.auth.AdministratorPrincipal;
@@ -62,6 +64,24 @@ public class InquiryController {
         return inquiryService.changeStatus(id, body.status(), actor, request.getRemoteAddr());
     }
 
+    @GetMapping("/api/v1/admin/inquiries/{id}/notes")
+    List<InquiryService.InquiryNoteResponse> notes(@PathVariable UUID id) {
+        return inquiryService.findNotes(id);
+    }
+
+    @PostMapping("/api/v1/admin/inquiries/{id}/notes")
+    @ResponseStatus(HttpStatus.CREATED)
+    InquiryService.InquiryNoteResponse addNote(
+            @PathVariable UUID id,
+            @Valid @RequestBody NoteRequest body,
+            @AuthenticationPrincipal AdministratorPrincipal actor,
+            HttpServletRequest request) {
+        return inquiryService.addNote(id, body.body(), actor, request.getRemoteAddr());
+    }
+
     public record StatusRequest(@NotNull InquiryStatus status) {
+    }
+
+    public record NoteRequest(@NotBlank @Size(max = 2000) String body) {
     }
 }
