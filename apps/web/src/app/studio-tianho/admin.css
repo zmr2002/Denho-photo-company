@@ -699,6 +699,38 @@
   min-height: 1.4rem;
 }
 
+.admin-block-insert {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--admin-line, #e8e5e0);
+}
+
+.admin-block-insert span {
+  margin-right: 0.25rem;
+  color: var(--admin-muted, #77736d);
+  font-size: 0.7rem;
+}
+
+.admin-block-insert button {
+  border: 0;
+  border-radius: 999px;
+  background: #ece8e2;
+  padding: 0.32rem 0.62rem;
+  color: #514d48;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+
+.admin-block-insert button:hover,
+.admin-block-insert button:focus-visible {
+  background: #ded8d0;
+  color: #111;
+}
+
 .admin-live-preview {
   position: fixed;
   z-index: 100;
@@ -949,6 +981,7 @@
   .admin-overview-grid a,
   .admin-block,
   .admin-block-actions button,
+  .admin-block-insert button,
   .admin-advanced-settings summary::after {
     transition: none;
   }

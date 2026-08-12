@@ -63,7 +63,7 @@ export function AdminArticleForm({
     resolver: zodResolver(articleFormSchema),
     defaultValues,
   });
-  const { fields, append, remove, move } = useFieldArray({ control, name: "blocks" });
+  const { fields, append, insert, remove, move } = useFieldArray({ control, name: "blocks" });
   const blocks = useWatch({ control, name: "blocks" });
   useUnsavedChanges(isDirty);
 
@@ -138,6 +138,15 @@ export function AdminArticleForm({
     append(createBlock(type, fields.length));
   }
 
+  function insertBlock(index: number, type: ArticleBlock["type"]) {
+    insert(index + 1, createBlock(type, index + 1));
+  }
+
+  function duplicateBlock(index: number) {
+    const source = getValues(`blocks.${index}`);
+    insert(index + 1, { ...source, sortOrder: index + 1 });
+  }
+
   return (
     <form className="admin-form admin-article-editor" onSubmit={handleSubmit(onSubmit)}>
       {isTutorial ? (
@@ -210,6 +219,9 @@ export function AdminArticleForm({
                     >
                       下移
                     </button>
+                    <button type="button" onClick={() => duplicateBlock(index)} aria-label={`复制第 ${index + 1} 个区块`}>
+                      复制
+                    </button>
                     <button type="button" disabled={fields.length <= 1} onClick={() => remove(index)} aria-label={`移除第 ${index + 1} 个区块`}>
                       移除
                     </button>
@@ -259,6 +271,12 @@ export function AdminArticleForm({
                     </Link>
                   </div>
                 ) : null}
+                <div className="admin-block-insert" aria-label={`在第 ${index + 1} 个区块后添加`}>
+                  <span>在下方添加</span>
+                  <button type="button" onClick={() => insertBlock(index, "paragraph")}>正文</button>
+                  <button type="button" onClick={() => insertBlock(index, "heading")}>小标题</button>
+                  <button type="button" onClick={() => insertBlock(index, "image")}>图片</button>
+                </div>
               </article>
             );
           })}

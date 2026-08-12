@@ -31,8 +31,9 @@ describe("article editor", () => {
     expect(screen.getAllByRole("article")).toHaveLength(1);
     expect(screen.getByLabelText("正文")).toBeVisible();
 
-    fireEvent.click(screen.getByRole("button", { name: "小标题" }));
-    fireEvent.click(screen.getByRole("button", { name: "图片" }));
+    const addToolbar = screen.getByLabelText("添加文章内容");
+    fireEvent.click(within(addToolbar).getByRole("button", { name: "小标题" }));
+    fireEvent.click(within(addToolbar).getByRole("button", { name: "图片" }));
 
     const blocks = screen.getAllByRole("article");
     expect(blocks).toHaveLength(3);
@@ -44,6 +45,20 @@ describe("article editor", () => {
 
     const reorderedBlocks = screen.getAllByRole("article");
     expect(reorderedBlocks.map((block) => block.querySelector("strong")?.textContent)).toEqual(["正文", "图片", "小标题"]);
+  });
+
+  it("inserts and duplicates content beside the block being edited", () => {
+    const values = blankArticleFormValues();
+    values.blocks[0].body = "需要复制的正文";
+    render(<AdminArticleForm defaultValues={values} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "复制第 1 个区块" }));
+    expect(screen.getAllByLabelText("正文")).toHaveLength(2);
+    expect(screen.getAllByLabelText("正文")[1]).toHaveValue("需要复制的正文");
+
+    const firstBlock = screen.getAllByRole("article")[0];
+    fireEvent.click(within(firstBlock).getByRole("button", { name: "图片" }));
+    expect(screen.getAllByRole("article").map((block) => block.querySelector("strong")?.textContent)).toEqual(["正文", "图片", "正文"]);
   });
 
   it("creates an automatic excerpt and preserves content order when saving", async () => {
@@ -59,7 +74,7 @@ describe("article editor", () => {
     } as Response);
 
     render(<AdminArticleForm defaultValues={defaultValues} />);
-    fireEvent.click(screen.getByRole("button", { name: "小标题" }));
+    fireEvent.click(within(screen.getByLabelText("添加文章内容")).getByRole("button", { name: "小标题" }));
     fireEvent.change(screen.getByLabelText("小标题"), { target: { value: "拍摄准备" } });
     fireEvent.click(screen.getByRole("button", { name: "保存文章" }));
 
