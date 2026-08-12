@@ -24,12 +24,12 @@ export default async function AdminWorkImagesPage({ params }: PageProps) {
               {localeLabel(work.locale)} / {mediaTypeLabel(work.mediaType)}
             </p>
             <h2>{work.title}</h2>
-            <p className="admin-help">修改图片路径、替代文字、图片说明、封面和排序。当前阶段不上传新图片。</p>
+            <p className="admin-help">从媒体库选择图片，确认缩略图、替代文字、图片说明、封面和展示顺序。</p>
           </div>
         </header>
         <div className="admin-info-box">
           <strong>作品图片填写说明</strong>
-          <p>图片路径：当前阶段填写已有图片路径。排序数字越小越靠前。封面图片会优先作为该作品的代表图。视频类型作品不会作为图片相册打开。</p>
+          <p>点击“从媒体库添加图片”即可选择已上传素材；使用上移、下移调整访客看到的顺序。每个作品必须指定一张封面图片。</p>
         </div>
         <AdminWorkImagesForm workId={work.id} contentVersion={work.version} defaultValues={workToImageFormValues(work)} />
       </section>

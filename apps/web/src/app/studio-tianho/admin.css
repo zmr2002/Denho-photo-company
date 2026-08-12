@@ -706,6 +706,41 @@
   gap: 1rem;
 }
 
+.admin-work-image-layout {
+  display: grid;
+  grid-template-columns: 11rem minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.admin-work-image-preview {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  min-height: 8.5rem;
+  place-items: center;
+  border-radius: 0.75rem;
+  background: #ebe8e3;
+  color: var(--admin-muted, #77736d);
+  font-size: 0.75rem;
+}
+
+.admin-work-image-preview img {
+  object-fit: cover;
+}
+
+.admin-work-image-preview small {
+  position: absolute;
+  z-index: 1;
+  right: 0.45rem;
+  bottom: 0.45rem;
+  left: 0.45rem;
+  border-radius: 0.4rem;
+  background: rgb(17 17 17 / 0.72);
+  padding: 0.35rem 0.45rem;
+  color: #fff;
+  text-align: center;
+}
+
 .admin-inline-link {
   width: fit-content;
   color: #9f432c;
@@ -1127,6 +1162,7 @@
   .admin-grid-3,
   .admin-overview-grid,
   .admin-form-grid,
+  .admin-work-image-layout,
   .admin-form-grid-compact,
   .admin-worklist-filters,
   .admin-list-row,

@@ -1,13 +1,16 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { AdminActionFeedback, useAdministrationAction } from "@/components/admin/AdminActionFeedback";
+import { MediaPickerDialog } from "@/components/admin/MediaPickerDialog";
 import { workImagesMutationSchema } from "@/lib/admin/validation";
 import { useUnsavedChanges } from "@/lib/admin/useUnsavedChanges";
+import type { MediaAsset } from "@/lib/api/admin";
 import { adminResponseMessage, writeAdminApi } from "@/lib/api/browser";
 
 export type AdminWorkImagesFormValues = z.input<typeof workImagesMutationSchema>;
@@ -21,6 +24,7 @@ type AdminWorkImagesFormProps = {
 export function AdminWorkImagesForm({ workId, contentVersion, defaultValues }: AdminWorkImagesFormProps) {
   const router = useRouter();
   const [version, setVersion] = useState(contentVersion);
+  const [mediaTarget, setMediaTarget] = useState<number | null>(null);
   const { feedback, pending: submitting, run, showError, showSuccess } = useAdministrationAction();
   const { control, register, handleSubmit, reset, setValue, formState: { errors, isDirty } } = useForm<AdminWorkImagesFormValues>({
     resolver: zodResolver(workImagesMutationSchema),
@@ -61,6 +65,34 @@ export function AdminWorkImagesForm({ workId, contentVersion, defaultValues }: A
     }
   }
 
+  function addImage() {
+    const index = fields.length;
+    append({
+      path: "/placeholders/new-work-image.svg",
+      label: "新图片",
+      tone: "neutral",
+      altJa: "",
+      altZh: "",
+      altEn: "",
+      captionJa: "",
+      captionZh: "",
+      captionEn: "",
+      isCover: fields.length === 0,
+      sortOrder: fields.length,
+    });
+    setMediaTarget(index);
+  }
+
+  function selectMedia(asset: MediaAsset) {
+    if (mediaTarget === null) return;
+    setValue(`images.${mediaTarget}.path`, asset.url, { shouldDirty: true, shouldValidate: true });
+    const currentLabel = images?.[mediaTarget]?.label?.trim();
+    if (!currentLabel || currentLabel === "新图片") {
+      setValue(`images.${mediaTarget}.label`, asset.originalFilename, { shouldDirty: true });
+    }
+    setMediaTarget(null);
+  }
+
   return (
     <form className="admin-form" onSubmit={handleSubmit(onSubmit)}>
       <div className="admin-form-grid">
@@ -96,38 +128,48 @@ export function AdminWorkImagesForm({ workId, contentVersion, defaultValues }: A
           <button
             className="admin-button-secondary"
             type="button"
-            onClick={() =>
-              append({
-                path: "/placeholders/new-work-image.svg",
-                label: "新图片",
-                tone: "neutral",
-                altJa: "",
-                altZh: "",
-                altEn: "",
-                captionJa: "",
-                captionZh: "",
-                captionEn: "",
-                isCover: fields.length === 0,
-                sortOrder: fields.length,
-              })
-            }
+            onClick={addImage}
           >
-            添加图片资料
+            从媒体库添加图片
           </button>
         </div>
 
         {fields.map((field, index) => (
           <article className="admin-block" key={field.id}>
-            <div className="admin-form-grid">
-              <label className="admin-field">
-                <span className="admin-label">图片路径</span>
-                <input {...register(`images.${index}.path`)} />
-                <span className="admin-help">当前阶段填写已有图片路径，不上传新图片。</span>
-              </label>
+            <div className="admin-work-image-layout">
+              <div className="admin-work-image-preview">
+                {images?.[index]?.path?.startsWith("/") ? (
+                  <Image alt="" fill sizes="176px" src={images[index].path} unoptimized />
+                ) : (
+                  <span>暂无预览</span>
+                )}
+                <small>第 {index + 1} 张{images?.[index]?.isCover ? " · 当前封面" : ""}</small>
+              </div>
+              <div className="admin-image-fields">
+                <div className="admin-card-heading">
+                  <div>
+                    <p className="admin-label">图片 {index + 1}</p>
+                    <strong>{images?.[index]?.label || "未命名图片"}</strong>
+                  </div>
+                  <button className="admin-button-secondary" type="button" onClick={() => setMediaTarget(index)}>
+                    从媒体库更换
+                  </button>
+                </div>
               <label className="admin-field">
                 <span className="admin-label">后台标签</span>
                 <input {...register(`images.${index}.label`)} />
-                <span className="admin-help">用于后台识别这张图片，也可能显示在占位图上。</span>
+                <span className="admin-help">用于后台识别这张图片。</span>
+              </label>
+              </div>
+            </div>
+
+            <details className="admin-advanced-settings">
+              <summary>图片路径与显示色调</summary>
+              <div className="admin-form-grid admin-advanced-content">
+              <label className="admin-field">
+                <span className="admin-label">图片路径</span>
+                <input {...register(`images.${index}.path`)} />
+                <span className="admin-help">通常由媒体库自动填写，只有迁移旧图片时才需手动修改。</span>
               </label>
               <label className="admin-field">
                 <span className="admin-label">色调</span>
@@ -138,23 +180,24 @@ export function AdminWorkImagesForm({ workId, contentVersion, defaultValues }: A
                   <option value="rust">砖红</option>
                 </select>
               </label>
-            </div>
+              </div>
+            </details>
 
             <div className="admin-form-grid">
               <label className="admin-field">
                 <span className="admin-label">日语页面替代文字</span>
                 <input {...register(`images.${index}.altJa`)} />
-                <span className="admin-help">给日语页面使用的图片文字说明。</span>
+                <span className="admin-help">简短描述画面内容，供无法看到图片的访客理解。</span>
               </label>
               <label className="admin-field">
                 <span className="admin-label">中文替代文字</span>
                 <input {...register(`images.${index}.altZh`)} />
-                <span className="admin-help">给中文页面使用的图片文字说明。</span>
+                <span className="admin-help">简短描述画面内容，供无法看到图片的访客理解。</span>
               </label>
               <label className="admin-field">
                 <span className="admin-label">英语页面替代文字</span>
                 <input {...register(`images.${index}.altEn`)} />
-                <span className="admin-help">给英语页面使用的图片文字说明。</span>
+                <span className="admin-help">简短描述画面内容，供无法看到图片的访客理解。</span>
               </label>
             </div>
 
@@ -213,6 +256,7 @@ export function AdminWorkImagesForm({ workId, contentVersion, defaultValues }: A
         </button>
         <AdminActionFeedback feedback={feedback} />
       </div>
+      {mediaTarget !== null ? <MediaPickerDialog onClose={() => setMediaTarget(null)} onSelect={selectMedia} /> : null}
     </form>
   );
 }
