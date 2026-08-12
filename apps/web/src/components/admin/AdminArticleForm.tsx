@@ -170,7 +170,7 @@ export function AdminArticleForm({
   }
 
   return (
-    <form className="admin-form admin-article-editor" onSubmit={handleSubmit(onSubmit)}>
+    <form className="admin-form admin-article-editor" onSubmit={handleSubmit((values) => onSubmit(values, "save"))}>
       {isTutorial ? (
         <div className="admin-info-box">
           <strong>教学示例</strong>
