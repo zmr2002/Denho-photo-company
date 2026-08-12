@@ -92,4 +92,59 @@ describe("article editor", () => {
     expect(generated).toHaveLength(140);
     expect(generated.endsWith("…")).toBe(true);
   });
+
+  it("shows publication controls only to administrators", () => {
+    const defaultValues = blankArticleFormValues();
+    defaultValues.status = "published";
+
+    const { rerender } = render(<AdminArticleForm defaultValues={defaultValues} />);
+    expect(screen.getByText("已发布")).toBeVisible();
+    expect(screen.queryByRole("button", { name: "归档文章" })).not.toBeInTheDocument();
+
+    rerender(
+      <AdminArticleForm
+        articleId="article-1"
+        canManagePublication
+        defaultValues={defaultValues}
+      />,
+    );
+    expect(screen.getByRole("combobox", { name: "状态" })).toHaveValue("published");
+    expect(screen.getByRole("button", { name: "归档文章" })).toBeVisible();
+  });
+
+  it("restores an archived article when an administrator selects draft", async () => {
+    const defaultValues = blankArticleFormValues();
+    defaultValues.title = "归档文章";
+    defaultValues.slug = "archived-article";
+    defaultValues.blocks[0].body = "正文";
+    defaultValues.status = "archived";
+
+    vi.mocked(writeAdminApi)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ id: "article-1", version: 4, status: "ARCHIVED" }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ id: "article-1", version: 5, status: "DRAFT" }),
+      } as Response);
+
+    render(
+      <AdminArticleForm
+        articleId="article-1"
+        canManagePublication
+        contentVersion={3}
+        defaultValues={defaultValues}
+      />,
+    );
+    fireEvent.change(screen.getByRole("combobox", { name: "状态" }), { target: { value: "draft" } });
+    fireEvent.click(screen.getByRole("button", { name: "保存文章" }));
+
+    await waitFor(() => expect(writeAdminApi).toHaveBeenCalledTimes(2));
+    expect(writeAdminApi).toHaveBeenLastCalledWith(
+      "/api/v1/admin/articles/article-1/restore",
+      "POST",
+      { expectedVersion: 4 },
+    );
+  });
 });

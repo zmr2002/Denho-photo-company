@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const localeSchema = z.enum(["ja", "zh", "en"]);
-export const statusSchema = z.enum(["draft", "published"]);
+export const statusSchema = z.enum(["draft", "published", "archived"]);
 export const toneSchema = z.enum(["neutral", "warm", "cool", "rust"]);
 export const articleBlockTypeSchema = z.enum(["heading", "paragraph", "image"]);
 export const workMediaTypeSchema = z.enum(["photo", "gallery", "video"]);
