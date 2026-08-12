@@ -134,6 +134,12 @@ services:
       BACKUP_ACCESS_KEY: ${BACKUP_ACCESS_KEY:?BACKUP_ACCESS_KEY is required}
       BACKUP_SECRET_KEY: ${BACKUP_SECRET_KEY:?BACKUP_SECRET_KEY is required}
       BACKUP_REGION: ${BACKUP_REGION:-auto}
+      BACKUP_ALERT_WEBHOOK: ${BACKUP_ALERT_WEBHOOK:?BACKUP_ALERT_WEBHOOK is required}
+      RESTORE_DB_HOST: ${RESTORE_DB_HOST:?RESTORE_DB_HOST is required}
+      RESTORE_DB_PORT: ${RESTORE_DB_PORT:-5432}
+      RESTORE_DB_ADMIN_USERNAME: ${RESTORE_DB_ADMIN_USERNAME:?RESTORE_DB_ADMIN_USERNAME is required}
+      RESTORE_DB_ADMIN_PASSWORD: ${RESTORE_DB_ADMIN_PASSWORD:?RESTORE_DB_ADMIN_PASSWORD is required}
+      RESTORE_DB_SSL_MODE: ${RESTORE_DB_SSL_MODE:-require}
       TMPDIR: /work
     read_only: true
     volumes:
@@ -144,6 +150,12 @@ services:
       - no-new-privileges:true
     networks:
       - backup
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /work/last-backup-success && test $$(( $$(date +%s) - $$(stat -c %Y /work/last-backup-success) )) -lt 129600"]
+      interval: 30m
+      timeout: 5s
+      retries: 3
+      start_period: 26h
 
 volumes:
   caddy-data:

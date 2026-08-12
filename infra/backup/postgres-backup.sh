@@ -17,7 +17,8 @@ checksum_file="$work_directory/database.dump.sha256"
 plain_archive="$work_directory/postgres-$timestamp.tar"
 archive_file="$plain_archive.enc"
 authentication_file="$archive_file.sha256"
-object_key="postgres/weekly/$(basename "$archive_file")"
+archive_name="$(basename "$archive_file")"
+daily_object_key="postgres/daily/$archive_name"
 
 cleanup() {
     rm -rf "$work_directory"
@@ -47,9 +48,16 @@ openssl dgst -sha256 -hmac "$BACKUP_AUTHENTICATION_KEY" -binary "$archive_file" 
     | openssl base64 -A > "$authentication_file"
 rm -f "$plain_archive"
 
-s3-backup-client put "$object_key" "$archive_file"
-s3-backup-client put "$object_key.sha256" "$authentication_file"
+s3-backup-client put "$daily_object_key" "$archive_file"
+s3-backup-client put "$daily_object_key.sha256" "$authentication_file"
+s3-backup-client delete-expired 'postgres/daily/' 14
 
-s3-backup-client delete-expired 'postgres/weekly/' 56
+if [ "$(date -u '+%u')" = "7" ]; then
+    weekly_object_key="postgres/weekly/$archive_name"
+    s3-backup-client put "$weekly_object_key" "$archive_file"
+    s3-backup-client put "$weekly_object_key.sha256" "$authentication_file"
+    s3-backup-client delete-expired 'postgres/weekly/' 56
+fi
 
-printf 'Uploaded encrypted PostgreSQL backup: %s\n' "$object_key"
+date -u '+%Y-%m-%dT%H:%M:%SZ' > "${BACKUP_STATUS_FILE:-/work/last-backup-success}"
+printf 'Uploaded encrypted PostgreSQL daily backup: %s\n' "$daily_object_key"

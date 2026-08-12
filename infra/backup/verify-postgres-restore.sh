@@ -1,7 +1,6 @@
 #!/bin/sh
 set -eu
 
-: "${1:?Pass the backup object key as the first argument}"
 : "${BACKUP_BUCKET:?BACKUP_BUCKET is required}"
 : "${BACKUP_ENDPOINT:?BACKUP_ENDPOINT is required}"
 : "${BACKUP_ENCRYPTION_PASSWORD:?BACKUP_ENCRYPTION_PASSWORD is required}"
@@ -10,7 +9,7 @@ set -eu
 : "${RESTORE_DB_ADMIN_USERNAME:?RESTORE_DB_ADMIN_USERNAME is required}"
 : "${RESTORE_DB_ADMIN_PASSWORD:?RESTORE_DB_ADMIN_PASSWORD is required}"
 
-object_key="$1"
+object_key="${1:-$(s3-backup-client latest 'postgres/daily/')}"
 timestamp="$(date -u '+%Y%m%d%H%M%S')"
 database_name="restore_check_${timestamp}_$$"
 work_directory="$(mktemp -d)"
@@ -56,4 +55,5 @@ createdb "$database_name"
 pg_restore --dbname="$database_name" --no-owner --no-acl --exit-on-error "$work_directory/database.dump"
 psql --dbname="$database_name" --no-psqlrc --tuples-only --command="SELECT count(*) FROM flyway_schema_history" >/dev/null
 
+date -u '+%Y-%m-%dT%H:%M:%SZ' > "${RESTORE_STATUS_FILE:-/work/last-restore-success}"
 printf 'PostgreSQL restore verification passed: %s\n' "$object_key"

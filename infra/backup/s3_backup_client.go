@@ -235,6 +235,52 @@ func (c *client) deleteExpired(prefix string, cutoff time.Time) error {
 	}
 }
 
+func (c *client) latest(prefix string) (string, error) {
+	latestKey := ""
+	latestTime := time.Time{}
+	continuationToken := ""
+	for {
+		query := url.Values{"list-type": {"2"}, "prefix": {prefix}}
+		if continuationToken != "" {
+			query.Set("continuation-token", continuationToken)
+		}
+		response, err := c.request(http.MethodGet, "", query, nil)
+		if err != nil {
+			return "", err
+		}
+		var result listResult
+		decodeErr := xml.NewDecoder(response.Body).Decode(&result)
+		response.Body.Close()
+		if decodeErr != nil {
+			return "", decodeErr
+		}
+		for _, storedObject := range result.Contents {
+			if !strings.HasSuffix(storedObject.Key, ".enc") {
+				continue
+			}
+			modified, err := time.Parse(time.RFC3339, storedObject.LastModified)
+			if err != nil {
+				return "", err
+			}
+			if modified.After(latestTime) {
+				latestKey = storedObject.Key
+				latestTime = modified
+			}
+		}
+		if !result.IsTruncated {
+			break
+		}
+		if result.NextContinuationToken == "" {
+			return "", errors.New("S3 listing was truncated without a continuation token")
+		}
+		continuationToken = result.NextContinuationToken
+	}
+	if latestKey == "" {
+		return "", errors.New("no backup archive found")
+	}
+	return latestKey, nil
+}
+
 func fatal(err error) {
 	fmt.Fprintln(os.Stderr, err)
 	os.Exit(1)
@@ -242,7 +288,7 @@ func fatal(err error) {
 
 func main() {
 	if len(os.Args) < 2 {
-		fatal(errors.New("expected put, get, or delete-expired command"))
+		fatal(errors.New("expected put, get, latest, or delete-expired command"))
 	}
 	client := newClient()
 	switch os.Args[1] {
@@ -275,7 +321,16 @@ func main() {
 		if err := client.deleteExpired(os.Args[2], cutoff); err != nil {
 			fatal(err)
 		}
+	case "latest":
+		if len(os.Args) != 3 {
+			fatal(errors.New("latest requires a prefix"))
+		}
+		key, err := client.latest(os.Args[2])
+		if err != nil {
+			fatal(err)
+		}
+		fmt.Println(key)
 	default:
-		fatal(errors.New("expected put, get, or delete-expired command"))
+		fatal(errors.New("expected put, get, latest, or delete-expired command"))
 	}
 }
