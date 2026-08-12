@@ -1,16 +1,18 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { AdminActionFeedback, useAdministrationAction } from "@/components/admin/AdminActionFeedback";
+import { UnsavedArticlePreview } from "@/components/admin/UnsavedArticlePreview";
+import { MediaPickerDialog } from "@/components/admin/MediaPickerDialog";
 import { articleMutationSchema } from "@/lib/admin/validation";
 import { useUnsavedChanges } from "@/lib/admin/useUnsavedChanges";
 import { adminResponseMessage, writeAdminApi } from "@/lib/api/browser";
 import { siteDateInputToTimestamp } from "@/lib/site-date";
+import type { MediaAsset } from "@/lib/api/admin";
 
 const articleFormSchema = articleMutationSchema.omit({ excerpt: true, relatedServices: true }).extend({
   excerpt: z.string().trim().max(10_000, "内容过长").optional(),
@@ -34,6 +36,8 @@ type AdminArticleFormProps = {
   canManagePublication?: boolean;
 };
 
+type SaveIntent = "save" | "publish" | "draft";
+
 const blockLabels: Record<ArticleBlock["type"], string> = {
   heading: "小标题",
   paragraph: "正文",
@@ -49,22 +53,27 @@ export function AdminArticleForm({
 }: AdminArticleFormProps) {
   const router = useRouter();
   const [version, setVersion] = useState(contentVersion);
+  const [currentStatus, setCurrentStatus] = useState<AdminArticleFormValues["status"]>(defaultValues.status);
+  const [previewValues, setPreviewValues] = useState<AdminArticleFormValues | null>(null);
+  const [mediaTarget, setMediaTarget] = useState<{ kind: "hero" } | { kind: "block"; index: number } | null>(null);
   const { feedback, pending: submitting, run, showError, showSuccess } = useAdministrationAction();
   const {
     control,
     register,
     handleSubmit,
+    getValues,
     reset,
+    setValue,
     formState: { errors, isDirty },
   } = useForm<AdminArticleFormValues>({
     resolver: zodResolver(articleFormSchema),
     defaultValues,
   });
-  const { fields, append, remove, move } = useFieldArray({ control, name: "blocks" });
+  const { fields, append, insert, remove, move } = useFieldArray({ control, name: "blocks" });
   const blocks = useWatch({ control, name: "blocks" });
   useUnsavedChanges(isDirty);
 
-  async function onSubmit(values: AdminArticleFormValues) {
+  async function onSubmit(values: AdminArticleFormValues, intent: SaveIntent = "save") {
     await run(async () => {
       const payload = {
         ...values,
@@ -90,8 +99,8 @@ export function AdminArticleForm({
 
       const result = (await response.json()) as ArticleMutationResult;
       let savedResult = result;
-      if (canManagePublication) {
-        const transitionResult = await transitionArticleStatus(result, values.status);
+      if (canManagePublication && intent !== "save") {
+        const transitionResult = await transitionArticleStatus(result, intent === "publish" ? "published" : "draft");
         savedResult = transitionResult.current;
         if (transitionResult.error) {
           setVersion(savedResult.version);
@@ -100,9 +109,11 @@ export function AdminArticleForm({
           return;
         }
       }
+      const savedStatus = normalizeArticleStatus(savedResult.status);
       setVersion(savedResult.version);
-      reset(values);
-      showSuccess("文章已保存。");
+      setCurrentStatus(savedStatus);
+      reset({ ...values, status: savedStatus });
+      showSuccess(intent === "publish" ? "文章已发布。" : intent === "draft" ? "文章已撤下并保存为草稿。" : "文章已保存。");
       router.refresh();
 
       if (!articleId && result.id) {
@@ -135,8 +146,31 @@ export function AdminArticleForm({
     append(createBlock(type, fields.length));
   }
 
+  function insertBlock(index: number, type: ArticleBlock["type"]) {
+    insert(index + 1, createBlock(type, index + 1));
+  }
+
+  function duplicateBlock(index: number) {
+    const source = getValues(`blocks.${index}`);
+    insert(index + 1, { ...source, sortOrder: index + 1 });
+  }
+
+  function selectMedia(asset: MediaAsset) {
+    if (!mediaTarget) return;
+    if (mediaTarget.kind === "hero") {
+      setValue("heroImagePath", asset.url, { shouldDirty: true, shouldValidate: true });
+      if (!getValues("heroAlt")) setValue("heroAlt", asset.originalFilename, { shouldDirty: true });
+    } else {
+      setValue(`blocks.${mediaTarget.index}.imagePath`, asset.url, { shouldDirty: true, shouldValidate: true });
+      if (!getValues(`blocks.${mediaTarget.index}.imageAlt`)) {
+        setValue(`blocks.${mediaTarget.index}.imageAlt`, asset.originalFilename, { shouldDirty: true });
+      }
+    }
+    setMediaTarget(null);
+  }
+
   return (
-    <form className="admin-form admin-article-editor" onSubmit={handleSubmit(onSubmit)}>
+    <form className="admin-form admin-article-editor" onSubmit={handleSubmit((values) => onSubmit(values, "save"))}>
       {isTutorial ? (
         <div className="admin-info-box">
           <strong>教学示例</strong>
@@ -150,22 +184,11 @@ export function AdminArticleForm({
             <p className="admin-kicker">文章内容</p>
             <h3 id="article-content-title">写作与排列</h3>
           </div>
-          {canManagePublication ? (
-            <label className="admin-field admin-status-field">
-              <span className="admin-label">状态</span>
-              <select {...register("status")}>
-                <option value="draft">草稿</option>
-                <option value="published">已发布</option>
-                <option value="archived">已归档</option>
-              </select>
-            </label>
-          ) : (
-            <div className="admin-field admin-status-field">
-              <span className="admin-label">状态</span>
-              <strong>{articleStatusLabel(defaultValues.status)}</strong>
-              <input type="hidden" {...register("status")} />
-            </div>
-          )}
+          <div className="admin-field admin-status-field">
+            <span className="admin-label">当前状态</span>
+            <strong>{articleStatusLabel(currentStatus)}</strong>
+            <input type="hidden" {...register("status")} />
+          </div>
         </div>
 
         <label className="admin-field admin-title-field">
@@ -207,6 +230,9 @@ export function AdminArticleForm({
                     >
                       下移
                     </button>
+                    <button type="button" onClick={() => duplicateBlock(index)} aria-label={`复制第 ${index + 1} 个区块`}>
+                      复制
+                    </button>
                     <button type="button" disabled={fields.length <= 1} onClick={() => remove(index)} aria-label={`移除第 ${index + 1} 个区块`}>
                       移除
                     </button>
@@ -232,6 +258,9 @@ export function AdminArticleForm({
                       <span className="admin-label">图片路径</span>
                       <input placeholder="/media/original/example.jpg" {...register(`blocks.${index}.imagePath`)} />
                     </label>
+                    <button className="admin-button-secondary admin-media-select-button" onClick={() => setMediaTarget({ kind: "block", index })} type="button">
+                      从媒体库选择
+                    </button>
                     <div className="admin-form-grid admin-form-grid-compact">
                       <label className="admin-field">
                         <span className="admin-label">图片内容说明</span>
@@ -251,11 +280,14 @@ export function AdminArticleForm({
                         </select>
                       </label>
                     </div>
-                    <Link className="admin-inline-link" href="/studio-tianho/media" target="_blank">
-                      在新窗口打开媒体库
-                    </Link>
                   </div>
                 ) : null}
+                <div className="admin-block-insert" aria-label={`在第 ${index + 1} 个区块后添加`}>
+                  <span>在下方添加</span>
+                  <button type="button" onClick={() => insertBlock(index, "paragraph")}>正文</button>
+                  <button type="button" onClick={() => insertBlock(index, "heading")}>小标题</button>
+                  <button type="button" onClick={() => insertBlock(index, "image")}>图片</button>
+                </div>
               </article>
             );
           })}
@@ -337,6 +369,9 @@ export function AdminArticleForm({
               <span className="admin-label">主图路径</span>
               <input placeholder="/placeholders/article.svg" {...register("heroImagePath")} />
             </label>
+            <button className="admin-button-secondary admin-media-select-button" onClick={() => setMediaTarget({ kind: "hero" })} type="button">
+              从媒体库选择主图
+            </button>
             <div className="admin-form-grid">
               <label className="admin-field">
                 <span className="admin-label">图片内容说明</span>
@@ -401,15 +436,35 @@ export function AdminArticleForm({
 
       <div className="admin-actions admin-save-bar">
         <button className="admin-button" disabled={submitting} type="submit">
-          {submitting ? "保存中…" : "保存文章"}
+          {submitting ? "保存中…" : currentStatus === "draft" ? "保存草稿" : "保存修改"}
         </button>
-        {articleId && canManagePublication && defaultValues.status !== "archived" ? (
+        {canManagePublication && currentStatus !== "published" ? (
+          <button className="admin-button-secondary" disabled={submitting} onClick={handleSubmit((values) => onSubmit(values, "publish"))} type="button">
+            保存并发布
+          </button>
+        ) : null}
+        {canManagePublication && currentStatus === "published" ? (
+          <button className="admin-button-secondary" disabled={submitting} onClick={handleSubmit((values) => onSubmit(values, "draft"))} type="button">
+            保存并撤下
+          </button>
+        ) : null}
+        {canManagePublication && currentStatus === "archived" ? (
+          <button className="admin-button-secondary" disabled={submitting} onClick={handleSubmit((values) => onSubmit(values, "draft"))} type="button">
+            恢复为草稿
+          </button>
+        ) : null}
+        <button className="admin-button-secondary" disabled={submitting} onClick={() => setPreviewValues(getValues())} type="button">
+          预览当前稿
+        </button>
+        {articleId && canManagePublication && currentStatus !== "archived" ? (
           <button className="admin-danger" disabled={submitting} type="button" onClick={handleArchive}>
             归档文章
           </button>
         ) : null}
         <AdminActionFeedback className="admin-save-message" feedback={feedback} />
       </div>
+      {previewValues ? <UnsavedArticlePreview onClose={() => setPreviewValues(null)} values={previewValues} /> : null}
+      {mediaTarget ? <MediaPickerDialog onClose={() => setMediaTarget(null)} onSelect={selectMedia} /> : null}
     </form>
   );
 }
@@ -419,7 +474,7 @@ type ArticleMutationResult = { id: string; version: number; status: string };
 async function transitionArticleStatus(result: ArticleMutationResult, targetStatus: AdminArticleFormValues["status"]) {
   let current = result;
 
-  async function transition(action: "publish" | "archive" | "restore", errorMessage: string) {
+  async function transition(action: "publish" | "archive" | "restore" | "unpublish", errorMessage: string) {
     const response = await writeAdminApi(`/api/v1/admin/articles/${current.id}/${action}`, "POST", {
       expectedVersion: current.version,
     });
@@ -441,8 +496,8 @@ async function transitionArticleStatus(result: ArticleMutationResult, targetStat
 
   if (targetStatus === "draft") {
     if (current.status === "PUBLISHED") {
-      const error = await transition("archive", "内容已保存，但无法撤下当前发布版本。");
-      if (error) return { current, error };
+      const error = await transition("unpublish", "内容已保存，但无法撤下当前发布版本。");
+      return { current, error };
     }
     if (current.status === "ARCHIVED") {
       const error = await transition("restore", "内容已归档，但无法恢复为草稿。");
@@ -462,6 +517,11 @@ function articleStatusLabel(status: AdminArticleFormValues["status"]) {
   if (status === "published") return "已发布";
   if (status === "archived") return "已归档";
   return "草稿";
+}
+
+function normalizeArticleStatus(status: string): AdminArticleFormValues["status"] {
+  const normalized = status.toLowerCase();
+  return normalized === "published" || normalized === "archived" ? normalized : "draft";
 }
 
 export function resolveArticleExcerpt(excerpt: string | null | undefined, blocks: ArticleBlock[], title: string) {

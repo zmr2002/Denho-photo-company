@@ -31,8 +31,9 @@ describe("article editor", () => {
     expect(screen.getAllByRole("article")).toHaveLength(1);
     expect(screen.getByLabelText("正文")).toBeVisible();
 
-    fireEvent.click(screen.getByRole("button", { name: "小标题" }));
-    fireEvent.click(screen.getByRole("button", { name: "图片" }));
+    const addToolbar = screen.getByLabelText("添加文章内容");
+    fireEvent.click(within(addToolbar).getByRole("button", { name: "小标题" }));
+    fireEvent.click(within(addToolbar).getByRole("button", { name: "图片" }));
 
     const blocks = screen.getAllByRole("article");
     expect(blocks).toHaveLength(3);
@@ -44,6 +45,20 @@ describe("article editor", () => {
 
     const reorderedBlocks = screen.getAllByRole("article");
     expect(reorderedBlocks.map((block) => block.querySelector("strong")?.textContent)).toEqual(["正文", "图片", "小标题"]);
+  });
+
+  it("inserts and duplicates content beside the block being edited", () => {
+    const values = blankArticleFormValues();
+    values.blocks[0].body = "需要复制的正文";
+    render(<AdminArticleForm defaultValues={values} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "复制第 1 个区块" }));
+    expect(screen.getAllByLabelText("正文")).toHaveLength(2);
+    expect(screen.getAllByLabelText("正文")[1]).toHaveValue("需要复制的正文");
+
+    const firstBlock = screen.getAllByRole("article")[0];
+    fireEvent.click(within(firstBlock).getByRole("button", { name: "图片" }));
+    expect(screen.getAllByRole("article").map((block) => block.querySelector("strong")?.textContent)).toEqual(["正文", "图片", "正文"]);
   });
 
   it("creates an automatic excerpt and preserves content order when saving", async () => {
@@ -59,9 +74,9 @@ describe("article editor", () => {
     } as Response);
 
     render(<AdminArticleForm defaultValues={defaultValues} />);
-    fireEvent.click(screen.getByRole("button", { name: "小标题" }));
+    fireEvent.click(within(screen.getByLabelText("添加文章内容")).getByRole("button", { name: "小标题" }));
     fireEvent.change(screen.getByLabelText("小标题"), { target: { value: "拍摄准备" } });
-    fireEvent.click(screen.getByRole("button", { name: "保存文章" }));
+    fireEvent.click(screen.getByRole("button", { name: "保存草稿" }));
 
     await waitFor(() => expect(writeAdminApi).toHaveBeenCalledTimes(1));
     const [path, method, payload] = vi.mocked(writeAdminApi).mock.calls[0];
@@ -103,6 +118,7 @@ describe("article editor", () => {
 
     const { rerender } = render(<AdminArticleForm defaultValues={defaultValues} />);
     expect(screen.getByText("已发布")).toBeVisible();
+    expect(screen.queryByRole("button", { name: "保存并撤下" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "归档文章" })).not.toBeInTheDocument();
 
     rerender(
@@ -112,7 +128,8 @@ describe("article editor", () => {
         defaultValues={defaultValues}
       />,
     );
-    expect(screen.getByRole("combobox", { name: "状态" })).toHaveValue("published");
+    expect(screen.queryByRole("combobox", { name: "状态" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "保存并撤下" })).toBeVisible();
     expect(screen.getByRole("button", { name: "归档文章" })).toBeVisible();
   });
 
@@ -141,8 +158,7 @@ describe("article editor", () => {
         defaultValues={defaultValues}
       />,
     );
-    fireEvent.change(screen.getByRole("combobox", { name: "状态" }), { target: { value: "draft" } });
-    fireEvent.click(screen.getByRole("button", { name: "保存文章" }));
+    fireEvent.click(screen.getByRole("button", { name: "恢复为草稿" }));
 
     await waitFor(() => expect(writeAdminApi).toHaveBeenCalledTimes(2));
     expect(writeAdminApi).toHaveBeenLastCalledWith(
@@ -150,5 +166,43 @@ describe("article editor", () => {
       "POST",
       { expectedVersion: 4 },
     );
+  });
+
+  it("keeps draft saving separate from publishing", async () => {
+    const defaultValues = blankArticleFormValues();
+    defaultValues.title = "待发布文章";
+    defaultValues.slug = "article-to-publish";
+    defaultValues.blocks[0].body = "正文";
+    vi.mocked(writeAdminApi)
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ id: "article-2", version: 1, status: "DRAFT" }) } as Response)
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ id: "article-2", version: 2, status: "PUBLISHED" }) } as Response);
+    render(<AdminArticleForm canManagePublication defaultValues={defaultValues} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "保存并发布" }));
+
+    await waitFor(() => expect(writeAdminApi).toHaveBeenCalledTimes(2));
+    expect(writeAdminApi).toHaveBeenLastCalledWith("/api/v1/admin/articles/article-2/publish", "POST", { expectedVersion: 1 });
+    expect(await screen.findByText("文章已发布。")).toBeVisible();
+    expect(screen.getByText("已发布")).toBeVisible();
+  });
+
+  it("saves edits to a published article without changing its public status", async () => {
+    const values = blankArticleFormValues();
+    values.title = "已发布文章";
+    values.slug = "published-article";
+    values.status = "published";
+    values.blocks[0].body = "修改后的正文";
+    vi.mocked(writeAdminApi).mockResolvedValue({
+      ok: true,
+      json: async () => ({ id: "article-3", version: 7, status: "PUBLISHED" }),
+    } as Response);
+    render(<AdminArticleForm articleId="article-3" canManagePublication contentVersion={6} defaultValues={values} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "保存修改" }));
+
+    await waitFor(() => expect(writeAdminApi).toHaveBeenCalledTimes(1));
+    expect(writeAdminApi).toHaveBeenCalledWith("/api/v1/admin/articles/article-3", "PATCH", expect.objectContaining({ expectedVersion: 6 }));
+    expect(await screen.findByText("文章已保存。")).toBeVisible();
+    expect(screen.getByText("已发布")).toBeVisible();
   });
 });
