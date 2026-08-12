@@ -124,6 +124,13 @@ jobs:
           docker build --file apps/api/Dockerfile --tag tianho-api-check .
           docker build --file infra/backup/Dockerfile --tag tianho-backup-check infra/backup
           docker build --file infra/caddy/Dockerfile --tag tianho-gateway-check infra/caddy
+      - name: Validate gateway configuration
+        run: >-
+          docker run --rm
+          --env SITE_DOMAIN=localhost
+          --volume "$PWD/infra/Caddyfile:/etc/caddy/Caddyfile:ro"
+          tianho-gateway-check
+          validate --config /etc/caddy/Caddyfile --adapter caddyfile
       - name: Scan Web image
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
         with:

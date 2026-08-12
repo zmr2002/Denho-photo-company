@@ -1,7 +1,22 @@
 {$SITE_DOMAIN} {
 	encode zstd gzip
 
-	@api path /api/* /media/* /actuator/health/*
+	# The API serves public media under /api/v1/public/media, not /media.
+	@media path /media/*
+	handle @media {
+		rewrite * /api/v1/public{uri}
+		reverse_proxy api:8080 {
+			health_uri /actuator/health/readiness
+			health_interval 15s
+			health_timeout 3s
+			health_fails 3
+			health_passes 2
+			fail_duration 30s
+			max_fails 3
+		}
+	}
+
+	@api path /api/* /actuator/health/*
 	handle @api {
 		reverse_proxy api:8080 {
 			health_uri /actuator/health/readiness
