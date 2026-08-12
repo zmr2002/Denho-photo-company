@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { writeAdminApi } from "@/lib/api/browser";
+import { adminResponseMessage, writeAdminApi } from "@/lib/api/browser";
 
 export function AdminLoginForm() {
   const router = useRouter();
@@ -19,7 +19,9 @@ export function AdminLoginForm() {
     const response = await writeAdminApi("/api/v1/auth/login", "POST", { email, password });
     if (!response.ok) {
       setSubmitting(false);
-      setError("邮箱或密码不正确，或账号暂时被锁定。");
+      setError(response.status === 401
+        ? "邮箱或密码不正确，或账号暂时被锁定。"
+        : adminResponseMessage(response, "登录失败，请稍后重试。"));
       return;
     }
 

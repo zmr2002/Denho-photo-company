@@ -24,29 +24,33 @@ export function MediaLibraryPanel({ activeAssets, recycledAssets }: MediaLibrary
     if (!file) return;
     setUploading(true);
     setMessage("");
-    const csrfHeaders = await getCsrfHeaders();
-    if (!csrfHeaders) {
+    try {
+      const csrfHeaders = await getCsrfHeaders();
+      if (!csrfHeaders) {
+        setMessage("无法取得安全验证信息，请刷新页面。");
+        return;
+      }
+      const body = new FormData();
+      body.append("file", file);
+      const response = await fetch("/api/v1/admin/media", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: csrfHeaders,
+        body,
+      });
+      if (!response.ok) {
+        const problem = (await response.json().catch(() => null)) as { detail?: string } | null;
+        setMessage(problem?.detail || "上传失败，请检查图片格式和大小。网络中断时可以直接重试。");
+        return;
+      }
+      form.reset();
+      setMessage("图片已上传。");
+      router.refresh();
+    } catch {
+      setMessage("暂时无法连接服务。图片没有上传，请检查网络后重试。");
+    } finally {
       setUploading(false);
-      setMessage("无法取得安全验证信息，请刷新页面。");
-      return;
     }
-    const body = new FormData();
-    body.append("file", file);
-    const response = await fetch("/api/v1/admin/media", {
-      method: "POST",
-      credentials: "same-origin",
-      headers: csrfHeaders,
-      body,
-    });
-    setUploading(false);
-    if (!response.ok) {
-      const problem = (await response.json().catch(() => null)) as { detail?: string } | null;
-      setMessage(problem?.detail || "上传失败，请检查图片格式和大小。");
-      return;
-    }
-    form.reset();
-    setMessage("图片已上传。");
-    router.refresh();
   }
 
   async function changeState(asset: MediaAsset, action: "trash" | "restore") {
@@ -61,8 +65,12 @@ export function MediaLibraryPanel({ activeAssets, recycledAssets }: MediaLibrary
   }
 
   async function copyPath(path: string) {
-    await navigator.clipboard.writeText(path);
-    setMessage("主文件路径已复制。");
+    try {
+      await navigator.clipboard.writeText(path);
+      setMessage("主文件路径已复制。");
+    } catch {
+      setMessage("浏览器未允许复制，请手动选择路径。");
+    }
   }
 
   return (

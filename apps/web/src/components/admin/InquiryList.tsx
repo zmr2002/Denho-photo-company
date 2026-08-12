@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { writeAdminApi } from "@/lib/api/browser";
+import { adminResponseMessage, writeAdminApi } from "@/lib/api/browser";
 import type { Inquiry } from "@/lib/api/admin";
 
 const actions: Array<{ status: Inquiry["status"]; label: string }> = [
@@ -23,7 +23,7 @@ export function InquiryList({ inquiries }: { inquiries: Inquiry[] }) {
     setPendingId(null);
     if (!response.ok) {
       const problem = (await response.json().catch(() => null)) as { detail?: string } | null;
-      setMessage(problem?.detail || "状态更新失败，请稍后重试。");
+      setMessage(problem?.detail || adminResponseMessage(response, "状态更新失败，请稍后重试。"));
       return;
     }
     router.refresh();
