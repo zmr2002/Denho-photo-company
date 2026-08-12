@@ -1,18 +1,18 @@
 import Link from "next/link";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { summarizeAdministrationTasks } from "@/lib/admin/dashboard";
 import { tutorialArticleSlug } from "@/lib/admin/labels";
-import { getAdminCollection, type AdminArticle, type AdminNotice, type AdminWork } from "@/lib/api/admin";
+import { getAdminCollection, getInquiries, type AdminArticle, type AdminNotice, type AdminWork } from "@/lib/api/admin";
 
 export default async function AdminDashboardPage() {
-  const [articles, notices, works] = await Promise.all([
+  const [articles, notices, works, inquiries] = await Promise.all([
     getAdminCollection<AdminArticle>("articles"),
     getAdminCollection<AdminNotice>("notices"),
     getAdminCollection<AdminWork>("works"),
+    getInquiries("NEW"),
   ]);
   const tutorialArticle = articles.find((article) => article.locale === "zh" && article.slug === tutorialArticleSlug);
-  const articleCount = articles.length;
-  const noticeCount = notices.length;
-  const workCount = works.length;
+  const summary = summarizeAdministrationTasks(articles, notices, works, inquiries);
 
   return (
     <AdminShell>
@@ -41,32 +41,52 @@ export default async function AdminDashboardPage() {
             <p className="admin-warning">尚未找到教学示例。请先运行本地 seed。</p>
           )}
         </section>
-        <div className="admin-grid admin-grid-3">
-          <article className="admin-card">
-            <p className="admin-label">文章</p>
-            <h3>{articleCount}</h3>
-            <p className="admin-help">新增或编辑文章，草稿不会作为正式文章显示。</p>
-            <Link className="admin-button-secondary" href="/studio-tianho/articles">
-              管理文章
+        <section className="admin-dashboard-section" aria-labelledby="admin-tasks-title">
+          <div className="admin-section-heading">
+            <div>
+              <p className="admin-kicker">需要处理</p>
+              <h3 id="admin-tasks-title">管理待办</h3>
+            </div>
+            <p className="admin-help">先处理新咨询和未完成内容，再检查当前公开状态。</p>
+          </div>
+          <div className="admin-task-list">
+            <Link className="admin-task-row" href="/studio-tianho/inquiries?status=NEW">
+              <span><strong>{summary.newInquiries}</strong> 条新咨询</span>
+              <small>{summary.newInquiries > 0 ? "建议优先回复" : "目前没有待回复咨询"}</small>
             </Link>
-          </article>
-          <article className="admin-card">
-            <p className="admin-label">开场通知</p>
-            <h3>{noticeCount}</h3>
-            <p className="admin-help">控制网站打开时的临时弹窗通知。</p>
-            <Link className="admin-button-secondary" href="/studio-tianho/notice">
-              管理通知
+            <Link className="admin-task-row" href="/studio-tianho/articles">
+              <span><strong>{summary.draftArticles}</strong> 篇草稿</span>
+              <small>{summary.publishedArticles} 篇文章正在公开展示</small>
             </Link>
-          </article>
-          <article className="admin-card">
-            <p className="admin-label">作品</p>
-            <h3>{workCount}</h3>
-            <p className="admin-help">调整已有作品的图片路径、封面和说明文字。</p>
-            <Link className="admin-button-secondary" href="/studio-tianho/works">
-              管理图片
+            <Link className="admin-task-row" href="/studio-tianho/works">
+              <span><strong>{summary.worksNeedingImages}</strong> 个作品需要检查图片</span>
+              <small>包括未设置图片或未指定封面的相册</small>
             </Link>
-          </article>
-        </div>
+          </div>
+        </section>
+
+        <section className="admin-dashboard-section" aria-labelledby="admin-status-title">
+          <div className="admin-section-heading">
+            <div>
+              <p className="admin-kicker">当前状态</p>
+              <h3 id="admin-status-title">网站内容概况</h3>
+            </div>
+          </div>
+          <div className="admin-overview-grid">
+            <Link href="/studio-tianho/articles">
+              <strong>{articles.length}</strong>
+              <span>全部文章</span>
+            </Link>
+            <Link href="/studio-tianho/notice">
+              <strong>{summary.visibleNotices}</strong>
+              <span>当前可见通知</span>
+            </Link>
+            <Link href="/studio-tianho/works">
+              <strong>{works.length}</strong>
+              <span>全部作品</span>
+            </Link>
+          </div>
+        </section>
       </section>
     </AdminShell>
   );
