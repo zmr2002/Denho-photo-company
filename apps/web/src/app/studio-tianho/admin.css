@@ -699,6 +699,42 @@
   min-height: 1.4rem;
 }
 
+.admin-live-preview {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  background: #111;
+}
+
+.admin-live-preview-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 4.5rem;
+  padding: 0.8rem clamp(1rem, 3vw, 2rem);
+  background: #fff;
+  color: var(--admin-ink, #242321);
+  box-shadow: 0 0.35rem 1.5rem rgb(0 0 0 / 0.14);
+}
+
+.admin-live-preview-toolbar div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.admin-live-preview-toolbar span {
+  color: var(--admin-muted, #77736d);
+  font-size: 0.75rem;
+}
+
+.admin-live-preview-page {
+  overflow: auto;
+  background: #fff;
+}
+
 .admin-action-feedback {
   min-height: 1.25rem;
   font-size: 0.8rem;
@@ -883,6 +919,11 @@
 
   .admin-save-bar {
     bottom: 0.5rem;
+  }
+
+  .admin-live-preview-toolbar {
+    align-items: stretch;
+    flex-direction: column;
   }
 }
 

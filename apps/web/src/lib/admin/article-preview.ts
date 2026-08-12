@@ -1,6 +1,5 @@
-import "server-only";
-
 import type { HomeNewsItem } from "@/data/home";
+import type { AdminArticleFormValues } from "@/components/admin/AdminArticleForm";
 import type { Article, ArticleImageBlock, ArticleSection, Locale } from "@/lib/content/types";
 import {
   articleImageTone,
@@ -125,4 +124,47 @@ function draftDateLabel(locale: Locale) {
   if (locale === "ja") return "未公開";
   if (locale === "zh") return "未发布";
   return "Unpublished";
+}
+
+export function articleFormValuesToPreview(values: AdminArticleFormValues, id = "unsaved-preview"): Article {
+  const excerpt = values.excerpt?.trim()
+    || values.blocks.find((block) => block.type === "paragraph" && block.body?.trim())?.body?.trim()
+    || values.title.trim()
+    || "未填写摘要";
+  return adminArticleToPreview({
+    id,
+    locale: values.locale,
+    slug: values.slug || "preview",
+    title: values.title || "未填写标题",
+    excerpt,
+    category: values.category || "未分类",
+    authorName: values.authorName || "编辑团队",
+    heroLabel: values.heroLabel || null,
+    heroImagePath: values.heroImagePath || null,
+    heroAlt: values.heroAlt || null,
+    heroTone: values.heroTone,
+    heroCaption: values.heroCaption || null,
+    closingNote: values.closingNote || null,
+    ctaLabel: values.ctaLabel || null,
+    ctaHref: values.ctaHref || null,
+    status: values.status,
+    publishedAt: values.publishedAt || null,
+    displayOrder: values.displayOrder,
+    relatedServices: (values.relatedServicesText || "").split(/\r?\n|,/).map((item) => item.trim()).filter(Boolean),
+    seoTitle: values.seoTitle || null,
+    seoDescription: values.seoDescription || null,
+    youtubeUrl: values.youtubeUrl || null,
+    demo: false,
+    version: 0,
+    blocks: values.blocks.map((block, index) => ({
+      type: block.type,
+      heading: block.heading || null,
+      body: block.body || null,
+      imagePath: block.imagePath || null,
+      imageAlt: block.imageAlt || null,
+      imageTone: block.imageTone,
+      caption: block.caption || null,
+      sortOrder: index,
+    })),
+  });
 }

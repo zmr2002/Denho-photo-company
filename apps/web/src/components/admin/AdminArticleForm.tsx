@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { AdminActionFeedback, useAdministrationAction } from "@/components/admin/AdminActionFeedback";
+import { UnsavedArticlePreview } from "@/components/admin/UnsavedArticlePreview";
 import { articleMutationSchema } from "@/lib/admin/validation";
 import { useUnsavedChanges } from "@/lib/admin/useUnsavedChanges";
 import { adminResponseMessage, writeAdminApi } from "@/lib/api/browser";
@@ -49,11 +50,13 @@ export function AdminArticleForm({
 }: AdminArticleFormProps) {
   const router = useRouter();
   const [version, setVersion] = useState(contentVersion);
+  const [previewValues, setPreviewValues] = useState<AdminArticleFormValues | null>(null);
   const { feedback, pending: submitting, run, showError, showSuccess } = useAdministrationAction();
   const {
     control,
     register,
     handleSubmit,
+    getValues,
     reset,
     formState: { errors, isDirty },
   } = useForm<AdminArticleFormValues>({
@@ -403,6 +406,9 @@ export function AdminArticleForm({
         <button className="admin-button" disabled={submitting} type="submit">
           {submitting ? "保存中…" : "保存文章"}
         </button>
+        <button className="admin-button-secondary" disabled={submitting} onClick={() => setPreviewValues(getValues())} type="button">
+          预览当前稿
+        </button>
         {articleId && canManagePublication && defaultValues.status !== "archived" ? (
           <button className="admin-danger" disabled={submitting} type="button" onClick={handleArchive}>
             归档文章
@@ -410,6 +416,7 @@ export function AdminArticleForm({
         ) : null}
         <AdminActionFeedback className="admin-save-message" feedback={feedback} />
       </div>
+      {previewValues ? <UnsavedArticlePreview onClose={() => setPreviewValues(null)} values={previewValues} /> : null}
     </form>
   );
 }
