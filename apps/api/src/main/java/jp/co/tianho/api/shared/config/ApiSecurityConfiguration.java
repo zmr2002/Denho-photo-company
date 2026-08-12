@@ -3,6 +3,7 @@ package jp.co.tianho.api.shared.config;
 import jp.co.tianho.api.auth.AbsoluteSessionExpirationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -33,6 +34,14 @@ public class ApiSecurityConfiguration {
         serializer.setUseHttpOnlyCookie(true);
         serializer.setSameSite("Lax");
         return serializer;
+    }
+
+    @Bean
+    FilterRegistrationBean<AbsoluteSessionExpirationFilter> absoluteSessionExpirationFilterRegistration(
+            AbsoluteSessionExpirationFilter filter) {
+        FilterRegistrationBean<AbsoluteSessionExpirationFilter> registration = new FilterRegistrationBean<>(filter);
+        registration.setEnabled(false);
+        return registration;
     }
 
     @Bean
