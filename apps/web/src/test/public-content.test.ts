@@ -75,30 +75,14 @@ const workSummary = {
   summary: "作品摘要",
   category: "活动",
   serviceCategory: "event",
+  scope: "摄影",
   featuredOnHomepage: true,
   featuredOrder: 1,
   mediaType: "gallery",
+  galleryEnabled: true,
   coverImagePath: "/media/original/work.jpg",
   coverImageAlt: "作品封面",
   coverImageTone: "cool",
-};
-
-const workDetail = {
-  ...workSummary,
-  translationGroupId: "66666666-6666-4666-8666-666666666666",
-  clientName: "客户",
-  projectDate: "2026",
-  scope: "摄影",
-  challenge: "现场光线",
-  approach: ["勘景", "拍摄"],
-  outcome: "完成交付",
-  deliverables: ["照片"],
-  galleryEnabled: true,
-  seoTitle: "作品 SEO",
-  seoDescription: "作品描述",
-  youtubeUrl: null,
-  version: 3,
-  updatedAt: "2026-07-12T02:00:00Z",
   images: [
     {
       id: "77777777-7777-4777-8777-777777777777",
@@ -111,6 +95,22 @@ const workDetail = {
       sortOrder: 1,
     },
   ],
+};
+
+const workDetail = {
+  ...workSummary,
+  translationGroupId: "66666666-6666-4666-8666-666666666666",
+  clientName: "客户",
+  projectDate: "2026",
+  challenge: "现场光线",
+  approach: ["勘景", "拍摄"],
+  outcome: "完成交付",
+  deliverables: ["照片"],
+  seoTitle: "作品 SEO",
+  seoDescription: "作品描述",
+  youtubeUrl: null,
+  version: 3,
+  updatedAt: "2026-07-12T02:00:00Z",
 };
 
 function json(value: unknown, status = 200) {
@@ -165,6 +165,7 @@ describe("public content API adapter", () => {
     });
     expect(notices[0]).toMatchObject({ detailClosing: "文章结尾", closeLabel: "关闭" });
     expect(works[0]).toMatchObject({ scope: "摄影", galleryImages: [{ src: "/media/original/work.jpg" }] });
+    expect(fetchMock.mock.calls.filter(([input]) => new URL(input instanceof Request ? input.url : input.toString()).pathname === "/api/v1/public/works/public-work")).toHaveLength(0);
     await expect(getApiOpeningNotice("zh")).resolves.toBeUndefined();
     expect(fetchMock).toHaveBeenCalled();
   });

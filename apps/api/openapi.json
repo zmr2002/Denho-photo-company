@@ -1444,22 +1444,38 @@
           "container" : {
             "type" : "boolean"
           },
-          "boolean" : {
+          "number" : {
             "type" : "boolean"
           },
-          "double" : {
+          "nodeType" : {
+            "type" : "string",
+            "enum" : [ "ARRAY", "BINARY", "BOOLEAN", "MISSING", "NULL", "NUMBER", "OBJECT", "POJO", "STRING" ]
+          },
+          "bigInteger" : {
             "type" : "boolean"
           },
-          "string" : {
+          "missingNode" : {
+            "type" : "boolean"
+          },
+          "valueNode" : {
+            "type" : "boolean"
+          },
+          "integralNumber" : {
+            "type" : "boolean"
+          },
+          "floatingPointNumber" : {
+            "type" : "boolean"
+          },
+          "bigDecimal" : {
             "type" : "boolean"
           },
           "int" : {
             "type" : "boolean"
           },
-          "binary" : {
+          "long" : {
             "type" : "boolean"
           },
-          "pojo" : {
+          "double" : {
             "type" : "boolean"
           },
           "short" : {
@@ -1469,32 +1485,16 @@
             "type" : "boolean",
             "deprecated" : true
           },
-          "long" : {
+          "binary" : {
             "type" : "boolean"
           },
-          "integralNumber" : {
+          "boolean" : {
             "type" : "boolean"
           },
-          "nodeType" : {
-            "type" : "string",
-            "enum" : [ "ARRAY", "BINARY", "BOOLEAN", "MISSING", "NULL", "NUMBER", "OBJECT", "POJO", "STRING" ]
-          },
-          "floatingPointNumber" : {
+          "string" : {
             "type" : "boolean"
           },
-          "bigDecimal" : {
-            "type" : "boolean"
-          },
-          "bigInteger" : {
-            "type" : "boolean"
-          },
-          "valueNode" : {
-            "type" : "boolean"
-          },
-          "missingNode" : {
-            "type" : "boolean"
-          },
-          "number" : {
+          "pojo" : {
             "type" : "boolean"
           },
           "embeddedValue" : {
@@ -1747,6 +1747,37 @@
         },
         "required" : [ "article" ]
       },
+      "WorkImage" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "path" : {
+            "type" : "string"
+          },
+          "label" : {
+            "type" : "string"
+          },
+          "tone" : {
+            "type" : "string"
+          },
+          "alt" : {
+            "type" : "string"
+          },
+          "caption" : {
+            "type" : "string"
+          },
+          "cover" : {
+            "type" : "boolean"
+          },
+          "sortOrder" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
       "WorkSummary" : {
         "type" : "object",
         "properties" : {
@@ -1772,6 +1803,9 @@
           "serviceCategory" : {
             "type" : "string"
           },
+          "scope" : {
+            "type" : "string"
+          },
           "featuredOnHomepage" : {
             "type" : "boolean"
           },
@@ -1782,6 +1816,9 @@
           "mediaType" : {
             "type" : "string"
           },
+          "galleryEnabled" : {
+            "type" : "boolean"
+          },
           "coverImagePath" : {
             "type" : "string"
           },
@@ -1790,6 +1827,12 @@
           },
           "coverImageTone" : {
             "type" : "string"
+          },
+          "images" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/WorkImage"
+            }
           }
         }
       },
@@ -1884,37 +1927,6 @@
             "items" : {
               "$ref" : "#/components/schemas/WorkImage"
             }
-          }
-        }
-      },
-      "WorkImage" : {
-        "type" : "object",
-        "properties" : {
-          "id" : {
-            "type" : "string",
-            "format" : "uuid"
-          },
-          "path" : {
-            "type" : "string"
-          },
-          "label" : {
-            "type" : "string"
-          },
-          "tone" : {
-            "type" : "string"
-          },
-          "alt" : {
-            "type" : "string"
-          },
-          "caption" : {
-            "type" : "string"
-          },
-          "cover" : {
-            "type" : "boolean"
-          },
-          "sortOrder" : {
-            "type" : "integer",
-            "format" : "int32"
           }
         }
       },
