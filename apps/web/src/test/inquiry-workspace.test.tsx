@@ -28,7 +28,10 @@ describe("inquiry workspace", () => {
     expect(screen.getByText("山田写真")).toBeVisible();
     expect(screen.queryByText("田中商事")).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("tab", { name: "处理中 1" }));
+    const inProgressFilter = screen.getByRole("button", { name: "处理中 1" });
+    expect(inProgressFilter).toHaveAttribute("aria-pressed", "false");
+    fireEvent.click(inProgressFilter);
+    expect(inProgressFilter).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByText("田中商事")).toBeVisible();
 
     fireEvent.change(screen.getByRole("searchbox"), { target: { value: "不存在" } });

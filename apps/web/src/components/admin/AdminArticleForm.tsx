@@ -197,7 +197,7 @@ export function AdminArticleForm({
           {errors.title ? <span className="admin-error">{errors.title.message}</span> : null}
         </label>
 
-        <div className="admin-block-toolbar" aria-label="添加文章内容">
+        <div className="admin-block-toolbar" aria-label="添加文章内容" role="toolbar">
           <span>在末尾添加</span>
           <button className="admin-button-secondary" type="button" onClick={() => addBlock("paragraph")}>
             正文

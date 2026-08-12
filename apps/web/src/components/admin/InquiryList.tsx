@@ -53,14 +53,13 @@ export function InquiryList({ inquiries }: { inquiries: Inquiry[] }) {
   return (
     <div className="admin-worklist">
       <div className="admin-inquiry-toolbar">
-        <div className="admin-language-tabs" role="tablist" aria-label="咨询状态">
+        <div className="admin-language-tabs" role="group" aria-label="咨询状态">
           {filters.map((filter) => (
             <button
-              aria-selected={activeStatus === filter.status}
+              aria-pressed={activeStatus === filter.status}
               className="admin-language-tab"
               key={filter.status}
               onClick={() => setActiveStatus(filter.status)}
-              role="tab"
               type="button"
             >
               {filter.label} <span>{counts[filter.status] ?? 0}</span>
