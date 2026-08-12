@@ -76,7 +76,7 @@ describe("article editor", () => {
     render(<AdminArticleForm defaultValues={defaultValues} />);
     fireEvent.click(within(screen.getByLabelText("添加文章内容")).getByRole("button", { name: "小标题" }));
     fireEvent.change(screen.getByLabelText("小标题"), { target: { value: "拍摄准备" } });
-    fireEvent.click(screen.getByRole("button", { name: "保存文章" }));
+    fireEvent.click(screen.getByRole("button", { name: "保存草稿" }));
 
     await waitFor(() => expect(writeAdminApi).toHaveBeenCalledTimes(1));
     const [path, method, payload] = vi.mocked(writeAdminApi).mock.calls[0];
@@ -118,6 +118,7 @@ describe("article editor", () => {
 
     const { rerender } = render(<AdminArticleForm defaultValues={defaultValues} />);
     expect(screen.getByText("已发布")).toBeVisible();
+    expect(screen.queryByRole("button", { name: "保存并撤下" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "归档文章" })).not.toBeInTheDocument();
 
     rerender(
@@ -127,7 +128,8 @@ describe("article editor", () => {
         defaultValues={defaultValues}
       />,
     );
-    expect(screen.getByRole("combobox", { name: "状态" })).toHaveValue("published");
+    expect(screen.queryByRole("combobox", { name: "状态" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "保存并撤下" })).toBeVisible();
     expect(screen.getByRole("button", { name: "归档文章" })).toBeVisible();
   });
 
@@ -156,8 +158,7 @@ describe("article editor", () => {
         defaultValues={defaultValues}
       />,
     );
-    fireEvent.change(screen.getByRole("combobox", { name: "状态" }), { target: { value: "draft" } });
-    fireEvent.click(screen.getByRole("button", { name: "保存文章" }));
+    fireEvent.click(screen.getByRole("button", { name: "恢复为草稿" }));
 
     await waitFor(() => expect(writeAdminApi).toHaveBeenCalledTimes(2));
     expect(writeAdminApi).toHaveBeenLastCalledWith(
@@ -165,5 +166,23 @@ describe("article editor", () => {
       "POST",
       { expectedVersion: 4 },
     );
+  });
+
+  it("keeps draft saving separate from publishing", async () => {
+    const defaultValues = blankArticleFormValues();
+    defaultValues.title = "待发布文章";
+    defaultValues.slug = "article-to-publish";
+    defaultValues.blocks[0].body = "正文";
+    vi.mocked(writeAdminApi)
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ id: "article-2", version: 1, status: "DRAFT" }) } as Response)
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ id: "article-2", version: 2, status: "PUBLISHED" }) } as Response);
+    render(<AdminArticleForm canManagePublication defaultValues={defaultValues} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "保存并发布" }));
+
+    await waitFor(() => expect(writeAdminApi).toHaveBeenCalledTimes(2));
+    expect(writeAdminApi).toHaveBeenLastCalledWith("/api/v1/admin/articles/article-2/publish", "POST", { expectedVersion: 1 });
+    expect(await screen.findByText("文章已发布。")).toBeVisible();
+    expect(screen.getByText("已发布")).toBeVisible();
   });
 });

@@ -36,6 +36,8 @@ type AdminArticleFormProps = {
   canManagePublication?: boolean;
 };
 
+type SaveIntent = "save" | "publish" | "draft";
+
 const blockLabels: Record<ArticleBlock["type"], string> = {
   heading: "小标题",
   paragraph: "正文",
@@ -51,6 +53,7 @@ export function AdminArticleForm({
 }: AdminArticleFormProps) {
   const router = useRouter();
   const [version, setVersion] = useState(contentVersion);
+  const [currentStatus, setCurrentStatus] = useState<AdminArticleFormValues["status"]>(defaultValues.status);
   const [previewValues, setPreviewValues] = useState<AdminArticleFormValues | null>(null);
   const [mediaTarget, setMediaTarget] = useState<{ kind: "hero" } | { kind: "block"; index: number } | null>(null);
   const { feedback, pending: submitting, run, showError, showSuccess } = useAdministrationAction();
@@ -70,7 +73,7 @@ export function AdminArticleForm({
   const blocks = useWatch({ control, name: "blocks" });
   useUnsavedChanges(isDirty);
 
-  async function onSubmit(values: AdminArticleFormValues) {
+  async function onSubmit(values: AdminArticleFormValues, intent: SaveIntent = "save") {
     await run(async () => {
       const payload = {
         ...values,
@@ -96,8 +99,8 @@ export function AdminArticleForm({
 
       const result = (await response.json()) as ArticleMutationResult;
       let savedResult = result;
-      if (canManagePublication) {
-        const transitionResult = await transitionArticleStatus(result, values.status);
+      if (canManagePublication && intent !== "save") {
+        const transitionResult = await transitionArticleStatus(result, intent === "publish" ? "published" : "draft");
         savedResult = transitionResult.current;
         if (transitionResult.error) {
           setVersion(savedResult.version);
@@ -106,9 +109,11 @@ export function AdminArticleForm({
           return;
         }
       }
+      const savedStatus = normalizeArticleStatus(savedResult.status);
       setVersion(savedResult.version);
-      reset(values);
-      showSuccess("文章已保存。");
+      setCurrentStatus(savedStatus);
+      reset({ ...values, status: savedStatus });
+      showSuccess(intent === "publish" ? "文章已发布。" : intent === "draft" ? "文章已撤下并保存为草稿。" : "文章已保存。");
       router.refresh();
 
       if (!articleId && result.id) {
@@ -179,22 +184,11 @@ export function AdminArticleForm({
             <p className="admin-kicker">文章内容</p>
             <h3 id="article-content-title">写作与排列</h3>
           </div>
-          {canManagePublication ? (
-            <label className="admin-field admin-status-field">
-              <span className="admin-label">状态</span>
-              <select {...register("status")}>
-                <option value="draft">草稿</option>
-                <option value="published">已发布</option>
-                <option value="archived">已归档</option>
-              </select>
-            </label>
-          ) : (
-            <div className="admin-field admin-status-field">
-              <span className="admin-label">状态</span>
-              <strong>{articleStatusLabel(defaultValues.status)}</strong>
-              <input type="hidden" {...register("status")} />
-            </div>
-          )}
+          <div className="admin-field admin-status-field">
+            <span className="admin-label">当前状态</span>
+            <strong>{articleStatusLabel(currentStatus)}</strong>
+            <input type="hidden" {...register("status")} />
+          </div>
         </div>
 
         <label className="admin-field admin-title-field">
@@ -442,12 +436,27 @@ export function AdminArticleForm({
 
       <div className="admin-actions admin-save-bar">
         <button className="admin-button" disabled={submitting} type="submit">
-          {submitting ? "保存中…" : "保存文章"}
+          {submitting ? "保存中…" : currentStatus === "draft" ? "保存草稿" : "保存修改"}
         </button>
+        {canManagePublication && currentStatus !== "published" ? (
+          <button className="admin-button-secondary" disabled={submitting} onClick={handleSubmit((values) => onSubmit(values, "publish"))} type="button">
+            保存并发布
+          </button>
+        ) : null}
+        {canManagePublication && currentStatus === "published" ? (
+          <button className="admin-button-secondary" disabled={submitting} onClick={handleSubmit((values) => onSubmit(values, "draft"))} type="button">
+            保存并撤下
+          </button>
+        ) : null}
+        {canManagePublication && currentStatus === "archived" ? (
+          <button className="admin-button-secondary" disabled={submitting} onClick={handleSubmit((values) => onSubmit(values, "draft"))} type="button">
+            恢复为草稿
+          </button>
+        ) : null}
         <button className="admin-button-secondary" disabled={submitting} onClick={() => setPreviewValues(getValues())} type="button">
           预览当前稿
         </button>
-        {articleId && canManagePublication && defaultValues.status !== "archived" ? (
+        {articleId && canManagePublication && currentStatus !== "archived" ? (
           <button className="admin-danger" disabled={submitting} type="button" onClick={handleArchive}>
             归档文章
           </button>
@@ -465,7 +474,7 @@ type ArticleMutationResult = { id: string; version: number; status: string };
 async function transitionArticleStatus(result: ArticleMutationResult, targetStatus: AdminArticleFormValues["status"]) {
   let current = result;
 
-  async function transition(action: "publish" | "archive" | "restore", errorMessage: string) {
+  async function transition(action: "publish" | "archive" | "restore" | "unpublish", errorMessage: string) {
     const response = await writeAdminApi(`/api/v1/admin/articles/${current.id}/${action}`, "POST", {
       expectedVersion: current.version,
     });
@@ -487,8 +496,8 @@ async function transitionArticleStatus(result: ArticleMutationResult, targetStat
 
   if (targetStatus === "draft") {
     if (current.status === "PUBLISHED") {
-      const error = await transition("archive", "内容已保存，但无法撤下当前发布版本。");
-      if (error) return { current, error };
+      const error = await transition("unpublish", "内容已保存，但无法撤下当前发布版本。");
+      return { current, error };
     }
     if (current.status === "ARCHIVED") {
       const error = await transition("restore", "内容已归档，但无法恢复为草稿。");
@@ -508,6 +517,11 @@ function articleStatusLabel(status: AdminArticleFormValues["status"]) {
   if (status === "published") return "已发布";
   if (status === "archived") return "已归档";
   return "草稿";
+}
+
+function normalizeArticleStatus(status: string): AdminArticleFormValues["status"] {
+  const normalized = status.toLowerCase();
+  return normalized === "published" || normalized === "archived" ? normalized : "draft";
 }
 
 export function resolveArticleExcerpt(excerpt: string | null | undefined, blocks: ArticleBlock[], title: string) {
