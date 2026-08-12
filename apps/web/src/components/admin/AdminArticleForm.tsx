@@ -1,17 +1,18 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { AdminActionFeedback, useAdministrationAction } from "@/components/admin/AdminActionFeedback";
 import { UnsavedArticlePreview } from "@/components/admin/UnsavedArticlePreview";
+import { MediaPickerDialog } from "@/components/admin/MediaPickerDialog";
 import { articleMutationSchema } from "@/lib/admin/validation";
 import { useUnsavedChanges } from "@/lib/admin/useUnsavedChanges";
 import { adminResponseMessage, writeAdminApi } from "@/lib/api/browser";
 import { siteDateInputToTimestamp } from "@/lib/site-date";
+import type { MediaAsset } from "@/lib/api/admin";
 
 const articleFormSchema = articleMutationSchema.omit({ excerpt: true, relatedServices: true }).extend({
   excerpt: z.string().trim().max(10_000, "内容过长").optional(),
@@ -51,6 +52,7 @@ export function AdminArticleForm({
   const router = useRouter();
   const [version, setVersion] = useState(contentVersion);
   const [previewValues, setPreviewValues] = useState<AdminArticleFormValues | null>(null);
+  const [mediaTarget, setMediaTarget] = useState<{ kind: "hero" } | { kind: "block"; index: number } | null>(null);
   const { feedback, pending: submitting, run, showError, showSuccess } = useAdministrationAction();
   const {
     control,
@@ -58,6 +60,7 @@ export function AdminArticleForm({
     handleSubmit,
     getValues,
     reset,
+    setValue,
     formState: { errors, isDirty },
   } = useForm<AdminArticleFormValues>({
     resolver: zodResolver(articleFormSchema),
@@ -145,6 +148,20 @@ export function AdminArticleForm({
   function duplicateBlock(index: number) {
     const source = getValues(`blocks.${index}`);
     insert(index + 1, { ...source, sortOrder: index + 1 });
+  }
+
+  function selectMedia(asset: MediaAsset) {
+    if (!mediaTarget) return;
+    if (mediaTarget.kind === "hero") {
+      setValue("heroImagePath", asset.url, { shouldDirty: true, shouldValidate: true });
+      if (!getValues("heroAlt")) setValue("heroAlt", asset.originalFilename, { shouldDirty: true });
+    } else {
+      setValue(`blocks.${mediaTarget.index}.imagePath`, asset.url, { shouldDirty: true, shouldValidate: true });
+      if (!getValues(`blocks.${mediaTarget.index}.imageAlt`)) {
+        setValue(`blocks.${mediaTarget.index}.imageAlt`, asset.originalFilename, { shouldDirty: true });
+      }
+    }
+    setMediaTarget(null);
   }
 
   return (
@@ -247,6 +264,9 @@ export function AdminArticleForm({
                       <span className="admin-label">图片路径</span>
                       <input placeholder="/media/original/example.jpg" {...register(`blocks.${index}.imagePath`)} />
                     </label>
+                    <button className="admin-button-secondary admin-media-select-button" onClick={() => setMediaTarget({ kind: "block", index })} type="button">
+                      从媒体库选择
+                    </button>
                     <div className="admin-form-grid admin-form-grid-compact">
                       <label className="admin-field">
                         <span className="admin-label">图片内容说明</span>
@@ -266,9 +286,6 @@ export function AdminArticleForm({
                         </select>
                       </label>
                     </div>
-                    <Link className="admin-inline-link" href="/studio-tianho/media" target="_blank">
-                      在新窗口打开媒体库
-                    </Link>
                   </div>
                 ) : null}
                 <div className="admin-block-insert" aria-label={`在第 ${index + 1} 个区块后添加`}>
@@ -358,6 +375,9 @@ export function AdminArticleForm({
               <span className="admin-label">主图路径</span>
               <input placeholder="/placeholders/article.svg" {...register("heroImagePath")} />
             </label>
+            <button className="admin-button-secondary admin-media-select-button" onClick={() => setMediaTarget({ kind: "hero" })} type="button">
+              从媒体库选择主图
+            </button>
             <div className="admin-form-grid">
               <label className="admin-field">
                 <span className="admin-label">图片内容说明</span>
@@ -435,6 +455,7 @@ export function AdminArticleForm({
         <AdminActionFeedback className="admin-save-message" feedback={feedback} />
       </div>
       {previewValues ? <UnsavedArticlePreview onClose={() => setPreviewValues(null)} values={previewValues} /> : null}
+      {mediaTarget ? <MediaPickerDialog onClose={() => setMediaTarget(null)} onSelect={selectMedia} /> : null}
     </form>
   );
 }
