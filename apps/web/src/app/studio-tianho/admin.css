@@ -55,6 +55,36 @@
   color: var(--admin-muted, #77736d);
 }
 
+.admin-account-summary {
+  display: grid;
+  gap: 0.25rem;
+  margin-top: 0.8rem;
+}
+
+.admin-account-summary strong {
+  overflow: hidden;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+}
+
+.admin-account-summary span {
+  width: fit-content;
+  border-radius: 999px;
+  background: #ece8e2;
+  padding: 0.2rem 0.55rem;
+  color: #625d57;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.admin-account-summary small {
+  overflow: hidden;
+  color: var(--admin-muted, #77736d);
+  font-size: 0.7rem;
+  text-overflow: ellipsis;
+}
+
 .admin-sidebar nav {
   display: grid;
   gap: 0.3rem;
@@ -70,6 +100,7 @@
 
 .admin-sidebar nav a:hover,
 .admin-sidebar nav a:focus-visible,
+.admin-sidebar nav a.admin-nav-link-active,
 .admin-muted-link:hover,
 .admin-muted-link:focus-visible {
   background: #f0ede8;
@@ -767,4 +798,9 @@
   .admin-advanced-settings summary::after {
     transition: none;
   }
+}
+
+.admin-sidebar nav a.admin-nav-link-active {
+  box-shadow: inset 3px 0 0 var(--admin-accent, #c95838);
+  font-weight: 700;
 }
