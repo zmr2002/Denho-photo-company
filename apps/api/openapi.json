@@ -301,6 +301,71 @@
         }
       }
     },
+    "/api/v1/admin/inquiries/{id}/notes" : {
+      "get" : {
+        "tags" : [ "inquiry-controller" ],
+        "operationId" : "notes",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/InquiryNoteResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "inquiry-controller" ],
+        "operationId" : "addNote",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/NoteRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InquiryNoteResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/admin/articles" : {
       "get" : {
         "tags" : [ "admin-content-controller" ],
@@ -977,6 +1042,27 @@
           }
         }
       }
+    },
+    "/api/v1/admin/audit-events" : {
+      "get" : {
+        "tags" : [ "audit-event-controller" ],
+        "operationId" : "recentEvents",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/AuditEventResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components" : {
@@ -1253,6 +1339,36 @@
           }
         }
       },
+      "NoteRequest" : {
+        "type" : "object",
+        "properties" : {
+          "body" : {
+            "type" : "string",
+            "maxLength" : 2000,
+            "minLength" : 0
+          }
+        },
+        "required" : [ "body" ]
+      },
+      "InquiryNoteResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "body" : {
+            "type" : "string"
+          },
+          "actorDisplayName" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
       "ArticleBlockInput" : {
         "type" : "object",
         "properties" : {
@@ -1444,7 +1560,44 @@
           "container" : {
             "type" : "boolean"
           },
+          "string" : {
+            "type" : "boolean"
+          },
           "number" : {
+            "type" : "boolean"
+          },
+          "long" : {
+            "type" : "boolean"
+          },
+          "int" : {
+            "type" : "boolean"
+          },
+          "binary" : {
+            "type" : "boolean"
+          },
+          "textual" : {
+            "type" : "boolean",
+            "deprecated" : true
+          },
+          "pojo" : {
+            "type" : "boolean"
+          },
+          "boolean" : {
+            "type" : "boolean"
+          },
+          "double" : {
+            "type" : "boolean"
+          },
+          "short" : {
+            "type" : "boolean"
+          },
+          "missingNode" : {
+            "type" : "boolean"
+          },
+          "valueNode" : {
+            "type" : "boolean"
+          },
+          "floatingPointNumber" : {
             "type" : "boolean"
           },
           "nodeType" : {
@@ -1454,47 +1607,10 @@
           "bigInteger" : {
             "type" : "boolean"
           },
-          "missingNode" : {
-            "type" : "boolean"
-          },
-          "valueNode" : {
-            "type" : "boolean"
-          },
-          "integralNumber" : {
-            "type" : "boolean"
-          },
-          "floatingPointNumber" : {
-            "type" : "boolean"
-          },
           "bigDecimal" : {
             "type" : "boolean"
           },
-          "int" : {
-            "type" : "boolean"
-          },
-          "long" : {
-            "type" : "boolean"
-          },
-          "double" : {
-            "type" : "boolean"
-          },
-          "short" : {
-            "type" : "boolean"
-          },
-          "textual" : {
-            "type" : "boolean",
-            "deprecated" : true
-          },
-          "binary" : {
-            "type" : "boolean"
-          },
-          "boolean" : {
-            "type" : "boolean"
-          },
-          "string" : {
-            "type" : "boolean"
-          },
-          "pojo" : {
+          "integralNumber" : {
             "type" : "boolean"
           },
           "embeddedValue" : {
@@ -2190,6 +2306,32 @@
             "format" : "uuid"
           },
           "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
+      "AuditEventResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "eventType" : {
+            "type" : "string"
+          },
+          "resourceType" : {
+            "type" : "string"
+          },
+          "resourceId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "actorDisplayName" : {
+            "type" : "string"
+          },
+          "occurredAt" : {
             "type" : "string",
             "format" : "date-time"
           }

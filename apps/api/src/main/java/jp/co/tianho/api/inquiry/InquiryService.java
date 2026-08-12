@@ -93,6 +93,55 @@ public class InquiryService {
         return findOne(id);
     }
 
+    @Transactional(readOnly = true)
+    public List<InquiryNoteResponse> findNotes(UUID inquiryId) {
+        requireInquiry(inquiryId);
+        return jdbcClient.sql("""
+                        SELECT note.id, note.body, note.created_at,
+                               COALESCE(administrator.display_name, '已删除账户') AS actor_display_name
+                        FROM inquiry_notes note
+                        LEFT JOIN administrator_users administrator ON administrator.id = note.actor_id
+                        WHERE note.inquiry_id = :inquiryId
+                        ORDER BY note.created_at DESC, note.id DESC
+                        """)
+                .param("inquiryId", inquiryId)
+                .query((resultSet, rowNumber) -> new InquiryNoteResponse(
+                        resultSet.getObject("id", UUID.class),
+                        resultSet.getString("body"),
+                        resultSet.getString("actor_display_name"),
+                        resultSet.getObject("created_at", OffsetDateTime.class)))
+                .list();
+    }
+
+    @Transactional
+    public InquiryNoteResponse addNote(
+            UUID inquiryId,
+            String body,
+            AdministratorPrincipal actor,
+            String ipAddress) {
+        requireInquiry(inquiryId);
+        UUID noteId = UUID.randomUUID();
+        InquiryNoteResponse note = jdbcClient.sql("""
+                        INSERT INTO inquiry_notes (id, inquiry_id, actor_id, body)
+                        VALUES (:id, :inquiryId, :actorId, :body)
+                        RETURNING id, body, created_at
+                        """)
+                .param("id", noteId)
+                .param("inquiryId", inquiryId)
+                .param("actorId", actor.id())
+                .param("body", body.strip())
+                .query((resultSet, rowNumber) -> new InquiryNoteResponse(
+                        resultSet.getObject("id", UUID.class),
+                        resultSet.getString("body"),
+                        actor.displayName(),
+                        resultSet.getObject("created_at", OffsetDateTime.class)))
+                .single();
+        auditEventRepository.record(
+                actor.id(), "INQUIRY_NOTE_ADDED", "INQUIRY", inquiryId,
+                Map.of("noteId", noteId), ipAddress);
+        return note;
+    }
+
     public java.util.Optional<PublicInquiryResponse> findExisting(UUID idempotencyKey) {
         return jdbcClient.sql("""
                         SELECT id, status, created_at FROM inquiries WHERE idempotency_key = :idempotencyKey
@@ -119,6 +168,14 @@ public class InquiryService {
                 .query(this::mapInquiry)
                 .optional()
                 .orElseThrow(InquiryNotFoundException::new);
+    }
+
+    private void requireInquiry(UUID id) {
+        Boolean exists = jdbcClient.sql("SELECT EXISTS (SELECT 1 FROM inquiries WHERE id = :id)")
+                .param("id", id)
+                .query(Boolean.class)
+                .single();
+        if (!Boolean.TRUE.equals(exists)) throw new InquiryNotFoundException();
     }
 
     private InquiryResponse mapInquiry(ResultSet resultSet, int rowNumber) throws SQLException {
@@ -159,5 +216,12 @@ public class InquiryService {
             OffsetDateTime consentedAt,
             OffsetDateTime createdAt,
             OffsetDateTime updatedAt) {
+    }
+
+    public record InquiryNoteResponse(
+            UUID id,
+            String body,
+            String actorDisplayName,
+            OffsetDateTime createdAt) {
     }
 }

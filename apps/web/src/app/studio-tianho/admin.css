@@ -1054,6 +1054,34 @@
   gap: 1rem;
 }
 
+.admin-inquiry-toolbar {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 0.9rem;
+  background: var(--admin-soft, #f8f7f5);
+}
+
+.admin-inquiry-toolbar .admin-language-tabs {
+  overflow-x: auto;
+}
+
+.admin-inquiry-toolbar .admin-language-tab {
+  min-width: 7.5rem;
+  white-space: nowrap;
+}
+
+.admin-inquiry-toolbar .admin-language-tab span {
+  display: inline-grid;
+  min-width: 1.4rem;
+  height: 1.4rem;
+  margin-left: 0.25rem;
+  place-items: center;
+  border-radius: 999px;
+  background: #ebe7e1;
+  font-size: 0.68rem;
+}
+
 .admin-inquiry header {
   display: flex;
   align-items: start;
@@ -1078,6 +1106,102 @@
 
 .admin-inquiry-message {
   white-space: pre-wrap;
+}
+
+.admin-inquiry-notes {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.admin-inquiry-notes > button {
+  width: fit-content;
+}
+
+.admin-inquiry-notes-panel {
+  display: grid;
+  gap: 1rem;
+  border-radius: 0.75rem;
+  background: var(--admin-soft, #f8f7f5);
+  padding: 1rem;
+}
+
+.admin-inquiry-note-list {
+  display: grid;
+  gap: 0.65rem;
+  list-style: none;
+}
+
+.admin-inquiry-note-list li {
+  border-left: 3px solid #d8d2ca;
+  padding-left: 0.8rem;
+}
+
+.admin-inquiry-note-list p {
+  white-space: pre-wrap;
+}
+
+.admin-inquiry-note-list small {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--admin-muted, #77736d);
+  font-size: 0.7rem;
+}
+
+.admin-inquiry-note-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.admin-user-workspace {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.admin-user-row small {
+  display: block;
+  margin-top: 0.45rem;
+  color: var(--admin-muted, #77736d);
+  font-size: 0.72rem;
+}
+
+.admin-activity-list {
+  display: grid;
+  list-style: none;
+}
+
+.admin-activity-list li {
+  display: grid;
+  grid-template-columns: 0.75rem 1fr;
+  gap: 0.75rem;
+  min-height: 4rem;
+}
+
+.admin-activity-marker {
+  position: relative;
+  width: 0.65rem;
+  height: 0.65rem;
+  margin-top: 0.35rem;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--admin-accent, #c95838);
+  box-shadow: 0 0 0 1px #d8d2ca;
+}
+
+.admin-activity-list li:not(:last-child) .admin-activity-marker::after {
+  position: absolute;
+  top: 0.65rem;
+  bottom: -3rem;
+  left: 50%;
+  width: 1px;
+  background: #ddd7cf;
+  content: "";
+}
+
+.admin-activity-list small {
+  display: block;
+  margin-top: 0.3rem;
+  color: var(--admin-muted, #77736d);
+  font-size: 0.7rem;
 }
 
 .admin-login-page {
