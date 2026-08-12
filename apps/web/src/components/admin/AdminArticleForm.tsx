@@ -7,12 +7,17 @@ import { useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { articleMutationSchema } from "@/lib/admin/validation";
-import { writeAdminApi } from "@/lib/api/browser";
+import { adminResponseMessage, writeAdminApi } from "@/lib/api/browser";
 import { siteDateInputToTimestamp } from "@/lib/site-date";
 
 const articleFormSchema = articleMutationSchema.omit({ excerpt: true, relatedServices: true }).extend({
-  excerpt: z.string().trim().optional(),
-  relatedServicesText: z.string().optional(),
+  excerpt: z.string().trim().max(10_000, "内容过长").optional(),
+  relatedServicesText: z.string().max(10_000, "内容过长").optional(),
+}).superRefine((values, context) => {
+  const services = splitLines(values.relatedServicesText);
+  if (services.length > 40 || services.some((service) => service.length > 160)) {
+    context.addIssue({ code: "custom", path: ["relatedServicesText"], message: "最多填写 40 项，每项最多 160 个字符。" });
+  }
 });
 
 export type AdminArticleFormValues = z.input<typeof articleFormSchema>;
@@ -43,6 +48,7 @@ export function AdminArticleForm({
   const router = useRouter();
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [version, setVersion] = useState(contentVersion);
   const {
     control,
     register,
@@ -73,25 +79,29 @@ export function AdminArticleForm({
     const response = await writeAdminApi(
       articleId ? `/api/v1/admin/articles/${articleId}` : "/api/v1/admin/articles",
       articleId ? "PATCH" : "POST",
-      articleId ? { expectedVersion: contentVersion, article: payload } : payload,
+      articleId ? { expectedVersion: version, article: payload } : payload,
     );
 
     setSubmitting(false);
 
     if (!response.ok) {
-      setMessage("保存失败。请检查字段后重试。");
+      setMessage(adminResponseMessage(response, "保存失败，请稍后重试。"));
       return;
     }
 
     const result = (await response.json()) as ArticleMutationResult;
+    let savedResult = result;
     if (canManagePublication) {
-      const transitionError = await transitionArticleStatus(result, values.status);
-      if (transitionError) {
-        setMessage(transitionError);
+      const transitionResult = await transitionArticleStatus(result, values.status);
+      savedResult = transitionResult.current;
+      if (transitionResult.error) {
+        setVersion(savedResult.version);
+        setMessage(transitionResult.error);
         router.refresh();
         return;
       }
     }
+    setVersion(savedResult.version);
     setMessage("已保存。");
     router.refresh();
 
@@ -109,13 +119,13 @@ export function AdminArticleForm({
     setMessage("");
 
     const response = await writeAdminApi(`/api/v1/admin/articles/${articleId}/archive`, "POST", {
-      expectedVersion: contentVersion,
+      expectedVersion: version,
     });
 
     setSubmitting(false);
 
     if (!response.ok) {
-      setMessage("归档失败。内容版本可能已经变化，请刷新后重试。");
+      setMessage(adminResponseMessage(response, "归档失败，请稍后重试。"));
       return;
     }
 
@@ -417,7 +427,7 @@ async function transitionArticleStatus(result: ArticleMutationResult, targetStat
     const response = await writeAdminApi(`/api/v1/admin/articles/${current.id}/${action}`, "POST", {
       expectedVersion: current.version,
     });
-    if (!response.ok) return errorMessage;
+    if (!response.ok) return adminResponseMessage(response, errorMessage);
     current = (await response.json()) as ArticleMutationResult;
     return null;
   }
@@ -425,28 +435,31 @@ async function transitionArticleStatus(result: ArticleMutationResult, targetStat
   if (targetStatus === "published") {
     if (current.status === "ARCHIVED") {
       const error = await transition("restore", "内容已保存，但无法从归档状态恢复。");
-      if (error) return error;
+      if (error) return { current, error };
     }
     if (current.status === "DRAFT") {
-      return transition("publish", "内容已保存为草稿，但当前账号无权发布或内容版本已变化。");
+      const error = await transition("publish", "内容已保存为草稿，但无法发布当前版本。");
+      return { current, error };
     }
   }
 
   if (targetStatus === "draft") {
     if (current.status === "PUBLISHED") {
       const error = await transition("archive", "内容已保存，但无法撤下当前发布版本。");
-      if (error) return error;
+      if (error) return { current, error };
     }
     if (current.status === "ARCHIVED") {
-      return transition("restore", "内容已归档，但无法恢复为草稿。");
+      const error = await transition("restore", "内容已归档，但无法恢复为草稿。");
+      return { current, error };
     }
   }
 
   if (targetStatus === "archived" && current.status !== "ARCHIVED") {
-    return transition("archive", "内容已保存，但无法归档当前版本。");
+    const error = await transition("archive", "内容已保存，但无法归档当前版本。");
+    return { current, error };
   }
 
-  return null;
+  return { current, error: null };
 }
 
 function articleStatusLabel(status: AdminArticleFormValues["status"]) {

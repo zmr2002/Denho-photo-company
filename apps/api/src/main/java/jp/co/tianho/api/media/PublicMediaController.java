@@ -2,6 +2,7 @@ package jp.co.tianho.api.media;
 
 import java.time.Duration;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.regex.Pattern;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
@@ -21,9 +22,11 @@ public class PublicMediaController {
             "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.(jpg|png)");
 
     private final MediaObjectStorage objectStorage;
+    private final MediaAssetRepository assetRepository;
 
-    public PublicMediaController(MediaObjectStorage objectStorage) {
+    public PublicMediaController(MediaObjectStorage objectStorage, MediaAssetRepository assetRepository) {
         this.objectStorage = objectStorage;
+        this.assetRepository = assetRepository;
     }
 
     @GetMapping("/{variant}/{filename}")
@@ -33,6 +36,14 @@ public class PublicMediaController {
         String normalizedFilename = filename.toLowerCase(Locale.ROOT);
         if (!(variant.equals("original") || variant.equals("thumbnail"))
                 || !FILENAME.matcher(normalizedFilename).matches()) {
+            throw new MediaAssetNotFoundException();
+        }
+        UUID assetId = UUID.fromString(normalizedFilename.substring(0, normalizedFilename.lastIndexOf('.')));
+        MediaAssetResponse asset = assetRepository.findById(assetId)
+                .filter(candidate -> candidate.status() == MediaAssetStatus.ACTIVE)
+                .orElseThrow(MediaAssetNotFoundException::new);
+        String expectedPath = variant.equals("original") ? asset.url() : asset.thumbnailUrl();
+        if (!expectedPath.endsWith("/" + variant + "/" + normalizedFilename)) {
             throw new MediaAssetNotFoundException();
         }
         try {

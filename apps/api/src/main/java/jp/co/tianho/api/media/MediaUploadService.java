@@ -8,7 +8,8 @@ import jp.co.tianho.api.media.ImageUploadProcessor.ProcessedImage;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -19,21 +20,23 @@ public class MediaUploadService {
     private final MediaAssetRepository assetRepository;
     private final JdbcClient jdbcClient;
     private final AuditEventRepository auditEventRepository;
+    private final TransactionTemplate transactionTemplate;
 
     public MediaUploadService(
             ImageUploadProcessor imageProcessor,
             MediaObjectStorage objectStorage,
             MediaAssetRepository assetRepository,
             JdbcClient jdbcClient,
-            AuditEventRepository auditEventRepository) {
+            AuditEventRepository auditEventRepository,
+            PlatformTransactionManager transactionManager) {
         this.imageProcessor = imageProcessor;
         this.objectStorage = objectStorage;
         this.assetRepository = assetRepository;
         this.jdbcClient = jdbcClient;
         this.auditEventRepository = auditEventRepository;
+        this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
 
-    @Transactional
     public MediaAssetResponse upload(
             MultipartFile file,
             AdministratorPrincipal actor,
@@ -55,26 +58,31 @@ public class MediaUploadService {
             originalStored = true;
             objectStorage.put(thumbnailKey, image.contentType(), image.thumbnailBytes());
             thumbnailStored = true;
-            jdbcClient.sql("""
-                            INSERT INTO media_assets (
-                                id, object_key, thumbnail_key, original_filename, content_type,
-                                byte_size, width, height, sha256, created_by
-                            ) VALUES (
-                                :id, :objectKey, :thumbnailKey, :originalFilename, :contentType,
-                                :byteSize, :width, :height, :sha256, :createdBy
-                            )
-                            """)
-                    .param("id", id)
-                    .param("objectKey", objectKey)
-                    .param("thumbnailKey", thumbnailKey)
-                    .param("originalFilename", image.originalFilename())
-                    .param("contentType", image.contentType())
-                    .param("byteSize", image.masterBytes().length)
-                    .param("width", image.width())
-                    .param("height", image.height())
-                    .param("sha256", image.sha256())
-                    .param("createdBy", actor.id())
-                    .update();
+            transactionTemplate.executeWithoutResult(status -> {
+                jdbcClient.sql("""
+                                INSERT INTO media_assets (
+                                    id, object_key, thumbnail_key, original_filename, content_type,
+                                    byte_size, width, height, sha256, created_by
+                                ) VALUES (
+                                    :id, :objectKey, :thumbnailKey, :originalFilename, :contentType,
+                                    :byteSize, :width, :height, :sha256, :createdBy
+                                )
+                                """)
+                        .param("id", id)
+                        .param("objectKey", objectKey)
+                        .param("thumbnailKey", thumbnailKey)
+                        .param("originalFilename", image.originalFilename())
+                        .param("contentType", image.contentType())
+                        .param("byteSize", image.masterBytes().length)
+                        .param("width", image.width())
+                        .param("height", image.height())
+                        .param("sha256", image.sha256())
+                        .param("createdBy", actor.id())
+                        .update();
+                auditEventRepository.record(
+                        actor.id(), "MEDIA_UPLOADED", "MEDIA_ASSET", id,
+                        Map.of("contentType", image.contentType(), "byteSize", image.masterBytes().length), ipAddress);
+            });
         } catch (DuplicateKeyException exception) {
             deleteStoredObjects(objectKey, thumbnailKey, originalStored, thumbnailStored);
             throw new DuplicateMediaException();
@@ -82,9 +90,6 @@ public class MediaUploadService {
             deleteStoredObjects(objectKey, thumbnailKey, originalStored, thumbnailStored);
             throw exception;
         }
-        auditEventRepository.record(
-                actor.id(), "MEDIA_UPLOADED", "MEDIA_ASSET", id,
-                Map.of("contentType", image.contentType(), "byteSize", image.masterBytes().length), ipAddress);
         return assetRepository.findById(id).orElseThrow(MediaAssetNotFoundException::new);
     }
 

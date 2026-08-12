@@ -1,7 +1,8 @@
 import "server-only";
 
 import { cookies } from "next/headers";
-import type { components } from "@/generated/api-schema";
+import { redirect } from "next/navigation";
+import type { components } from "@/api-contract/api-schema";
 
 const apiBaseUrl = process.env.API_INTERNAL_URL || "http://127.0.0.1:8080";
 
@@ -61,11 +62,23 @@ export type Inquiry = {
 };
 
 export async function getAdminSession(): Promise<AdminSession> {
-  const response = await adminApiFetch("/api/v1/auth/session", false);
-  if (!response.ok) {
-    return { authenticated: false, userId: null, email: null, displayName: null, role: null };
+  try {
+    const response = await adminApiFetch("/api/v1/auth/session", false);
+    if (!response.ok) return anonymousSession();
+    return response.json() as Promise<AdminSession>;
+  } catch {
+    return anonymousSession();
   }
-  return response.json() as Promise<AdminSession>;
+}
+
+function anonymousSession(): AdminSession {
+  return {
+    authenticated: false,
+    userId: null,
+    email: null,
+    displayName: null,
+    role: null,
+  };
 }
 
 export async function getAdminCollection<T>(collection: "articles" | "works" | "notices") {
@@ -100,6 +113,9 @@ async function adminApiFetch(path: string, requireSuccess = true) {
     cache: "no-store",
     headers: cookieHeader ? { Cookie: cookieHeader } : undefined,
   });
+  if (requireSuccess && response.status === 401) {
+    redirect("/studio-tianho/login");
+  }
   if (requireSuccess && !response.ok) {
     throw new Error(`Administration API returned ${response.status}`);
   }

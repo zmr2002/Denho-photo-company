@@ -10,6 +10,7 @@
     "build": "npm run build --workspace @tianho/web",
     "start": "npm run start --workspace @tianho/web",
     "lint": "npm run lint --workspace @tianho/web",
+    "api:generate": "npm run api:generate --workspace @tianho/web",
     "test:unit": "npm run test:unit --workspace @tianho/web",
     "services:up": "docker compose -f infra/compose.yml up -d",
     "services:down": "docker compose -f infra/compose.yml down"

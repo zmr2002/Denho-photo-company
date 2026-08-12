@@ -147,6 +147,20 @@ class AdminContentTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
+                                  "locale":"ja","slug":"unsafe-link","title":"Unsafe link","excerpt":"Excerpt",
+                                  "category":"Test","authorName":"Editorial Team","heroTone":"neutral",
+                                  "ctaHref":"javascript:alert(1)","displayOrder":0,"relatedServices":[],"demo":false,
+                                  "blocks":[{"type":"paragraph","body":"Body","imageTone":"neutral","sortOrder":0}]
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(post("/api/v1/admin/articles")
+                        .with(authentication(authenticationFor(AdministratorRole.EDITOR)))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
                                   "locale":"ja","slug":"empty-image","title":"Image","excerpt":"Excerpt",
                                   "category":"Test","authorName":"Editorial Team","heroTone":"neutral",
                                   "displayOrder":0,"relatedServices":[],"demo":false,
@@ -207,6 +221,21 @@ class AdminContentTests {
                 .query(Boolean.class)
                 .single();
         assertThat(cover).isTrue();
+
+        mockMvc.perform(patch("/api/v1/admin/works/{id}/images", workId)
+                        .with(authentication(authenticationFor(AdministratorRole.EDITOR)))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "expectedVersion":1,"galleryEnabled":true,"mediaType":"gallery",
+                                  "images":[
+                                    {"path":"/one.jpg","label":"One","tone":"neutral","isCover":true,"sortOrder":0},
+                                    {"path":"/two.jpg","label":"Two","tone":"neutral","isCover":true,"sortOrder":1}
+                                  ]
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
     }
 
     private org.springframework.test.web.servlet.ResultActions createArticle(AdministratorRole role) throws Exception {

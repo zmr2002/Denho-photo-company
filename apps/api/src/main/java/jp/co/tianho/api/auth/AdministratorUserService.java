@@ -83,6 +83,7 @@ public class AdministratorUserService {
         if (id.equals(actor.id())) {
             throw new AdministratorUserManagementException("Administrators cannot change their own role");
         }
+        UserResponse user = findUser(id);
         int updated = jdbcClient.sql("""
                         UPDATE administrator_users
                         SET role = :role, updated_at = CURRENT_TIMESTAMP
@@ -92,6 +93,7 @@ public class AdministratorUserService {
                 .param("role", role.name())
                 .update();
         requireUpdated(updated);
+        revokeSessions(user.email());
         auditEventRepository.record(
                 actor.id(), "USER_ROLE_CHANGED", "ADMINISTRATOR_USER", id,
                 Map.of("role", role.name()), ipAddress);
@@ -107,6 +109,7 @@ public class AdministratorUserService {
         if (id.equals(actor.id()) && !active) {
             throw new AdministratorUserManagementException("Administrators cannot deactivate their own account");
         }
+        UserResponse user = findUser(id);
         int updated = jdbcClient.sql("""
                         UPDATE administrator_users
                         SET active = :active, updated_at = CURRENT_TIMESTAMP
@@ -116,6 +119,7 @@ public class AdministratorUserService {
                 .param("active", active)
                 .update();
         requireUpdated(updated);
+        if (!active) revokeSessions(user.email());
         auditEventRepository.record(
                 actor.id(), active ? "USER_ACTIVATED" : "USER_DEACTIVATED", "ADMINISTRATOR_USER", id,
                 Map.of("active", active), ipAddress);
@@ -138,6 +142,12 @@ public class AdministratorUserService {
         if (updated != 1) {
             throw new AdministratorUserManagementException("Administrator account was not found");
         }
+    }
+
+    private void revokeSessions(String email) {
+        jdbcClient.sql("DELETE FROM spring_session WHERE principal_name = :email")
+                .param("email", email)
+                .update();
     }
 
     private UserResponse mapUser(ResultSet resultSet, int rowNumber) throws SQLException {

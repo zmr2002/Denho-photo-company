@@ -2,13 +2,12 @@ import type { Metadata } from "next";
 import { HomePage } from "@/components/pages/HomePage";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { getHomePageContent } from "@/lib/content";
-import { site } from "@/data/site";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: `${site.name} | Photography and film production`,
-  description: "English mock content for local production verification.",
+  title: "Photography and film production",
+  description: "Photography and film production in Japan, from planning and shooting through editing and delivery.",
 };
 
 export default async function Page() {

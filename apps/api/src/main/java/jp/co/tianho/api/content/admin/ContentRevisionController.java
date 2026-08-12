@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.UUID;
 import jp.co.tianho.api.auth.AdministratorPrincipal;
-import jp.co.tianho.api.content.admin.ContentRevisionService.ContentState;
+import jp.co.tianho.api.content.admin.ContentRevisionService.ContentAction;
 import jp.co.tianho.api.content.admin.ContentRevisionService.ContentStateResponse;
 import jp.co.tianho.api.content.admin.ContentRevisionService.ResourceType;
 import jp.co.tianho.api.content.admin.ContentRevisionService.RevisionResponse;
@@ -35,7 +35,7 @@ public class ContentRevisionController {
         return revisionService.findRevisions(resourceType(collection), id);
     }
 
-    @PostMapping("/{collection:articles|works|notices}/{id}/{action:publish|archive|restore}")
+    @PostMapping("/{collection:articles|works|notices}/{id}/{action:publish|archive|restore|unpublish}")
     ContentStateResponse changeState(
             @PathVariable String collection,
             @PathVariable UUID id,
@@ -43,14 +43,15 @@ public class ContentRevisionController {
             @Valid @RequestBody VersionRequest body,
             @AuthenticationPrincipal AdministratorPrincipal actor,
             HttpServletRequest request) {
-        ContentState state = switch (action) {
-            case "publish" -> ContentState.PUBLISHED;
-            case "archive" -> ContentState.ARCHIVED;
-            case "restore" -> ContentState.DRAFT;
+        ContentAction contentAction = switch (action) {
+            case "publish" -> ContentAction.PUBLISH;
+            case "archive" -> ContentAction.ARCHIVE;
+            case "restore" -> ContentAction.RESTORE;
+            case "unpublish" -> ContentAction.UNPUBLISH;
             default -> throw new IllegalArgumentException("Unsupported content action");
         };
         return revisionService.changeState(
-                resourceType(collection), id, body.expectedVersion(), state, actor, request.getRemoteAddr());
+                resourceType(collection), id, body.expectedVersion(), contentAction, actor, request.getRemoteAddr());
     }
 
     private ResourceType resourceType(String collection) {

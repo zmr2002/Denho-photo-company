@@ -3,7 +3,7 @@ import "server-only";
 import createClient from "openapi-fetch";
 import { z } from "zod";
 import { formatSiteDate } from "@/lib/site-date";
-import type { paths } from "@/generated/api-schema";
+import type { paths } from "@/api-contract/api-schema";
 import { mapArticleContentBlocks } from "@/lib/content/article-content";
 import type {
   Article,
