@@ -185,4 +185,24 @@ describe("article editor", () => {
     expect(await screen.findByText("文章已发布。")).toBeVisible();
     expect(screen.getByText("已发布")).toBeVisible();
   });
+
+  it("saves edits to a published article without changing its public status", async () => {
+    const values = blankArticleFormValues();
+    values.title = "已发布文章";
+    values.slug = "published-article";
+    values.status = "published";
+    values.blocks[0].body = "修改后的正文";
+    vi.mocked(writeAdminApi).mockResolvedValue({
+      ok: true,
+      json: async () => ({ id: "article-3", version: 7, status: "PUBLISHED" }),
+    } as Response);
+    render(<AdminArticleForm articleId="article-3" canManagePublication contentVersion={6} defaultValues={values} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "保存修改" }));
+
+    await waitFor(() => expect(writeAdminApi).toHaveBeenCalledTimes(1));
+    expect(writeAdminApi).toHaveBeenCalledWith("/api/v1/admin/articles/article-3", "PATCH", expect.objectContaining({ expectedVersion: 6 }));
+    expect(await screen.findByText("文章已保存。")).toBeVisible();
+    expect(screen.getByText("已发布")).toBeVisible();
+  });
 });

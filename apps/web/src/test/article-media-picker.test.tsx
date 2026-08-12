@@ -41,4 +41,14 @@ describe("article media picker", () => {
     expect(within(screen.getAllByRole("article")[1]).getByLabelText("图片内容说明")).toHaveValue("studio-photo.jpg");
     expect(screen.queryByRole("dialog", { name: "从媒体库选择图片" })).not.toBeInTheDocument();
   });
+
+  it("explains when the media library cannot be loaded", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
+    render(<AdminArticleForm defaultValues={blankArticleFormValues()} />);
+    fireEvent.click(within(screen.getByLabelText("添加文章内容")).getByRole("button", { name: "图片" }));
+    fireEvent.click(screen.getByRole("button", { name: "从媒体库选择" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("无法读取媒体库，请确认服务已启动后重试。");
+    expect(screen.getByRole("button", { name: "取消" })).toBeEnabled();
+  });
 });
