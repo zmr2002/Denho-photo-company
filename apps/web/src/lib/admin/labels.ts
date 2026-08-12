@@ -11,6 +11,7 @@ export function localeLabel(locale: string) {
 export function statusLabel(status: string) {
   if (status === "published") return "已发布";
   if (status === "draft") return "草稿";
+  if (status === "archived") return "已归档";
   return status;
 }
 

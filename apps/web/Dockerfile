@@ -8,6 +8,10 @@ FROM node:24.13.1-alpine AS build
 WORKDIR /workspace
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV CONTENT_PROVIDER=mock
+# Next.js records rewrite destinations during the image build. Server-side
+# content requests still use the runtime value supplied by Docker Compose.
+ARG API_INTERNAL_URL=http://api:8080
+ENV API_INTERNAL_URL=${API_INTERNAL_URL}
 COPY --from=dependencies /workspace/node_modules ./node_modules
 COPY package.json package-lock.json ./
 COPY apps/web ./apps/web

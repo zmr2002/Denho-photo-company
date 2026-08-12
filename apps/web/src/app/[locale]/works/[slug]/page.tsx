@@ -3,9 +3,7 @@ import { notFound } from "next/navigation";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { WorkDetailPage } from "@/components/pages/WorkDetailPage";
 import {
-  getSupportedLocales,
   getWork,
-  getWorks,
   isSupportedLocale,
   type Locale,
 } from "@/lib/content";
@@ -24,15 +22,6 @@ export async function generateMetadata({
     title: work?.seoTitle ?? "Work",
     description: work?.seoDescription,
   };
-}
-
-export async function generateStaticParams() {
-  const params = await Promise.all(
-    getSupportedLocales().map(async (locale) =>
-      (await getWorks(locale)).map((work) => ({ locale, slug: work.slug })),
-    ),
-  );
-  return params.flat();
 }
 
 export default async function Page({

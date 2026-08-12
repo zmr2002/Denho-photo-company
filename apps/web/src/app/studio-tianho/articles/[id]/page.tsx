@@ -5,13 +5,14 @@ import { AdminShell } from "@/components/admin/AdminShell";
 import { articleToFormValues } from "@/lib/admin/article-form";
 import { isTutorialArticle, localeLabel, statusLabel } from "@/lib/admin/labels";
 import { getAdminContent, type AdminArticle } from "@/lib/api/admin";
+import { requireAdminSession } from "@/lib/auth/session";
 
 type PageProps = {
   params: Promise<{ id: string }>;
 };
 
 export default async function EditAdminArticlePage({ params }: PageProps) {
-  const { id } = await params;
+  const [{ id }, session] = await Promise.all([params, requireAdminSession()]);
   const article = await getAdminContent<AdminArticle>("articles", id);
 
   if (!article) notFound();
@@ -59,7 +60,13 @@ export default async function EditAdminArticlePage({ params }: PageProps) {
             </Link>
           </div>
         </header>
-        <AdminArticleForm articleId={article.id} contentVersion={article.version} defaultValues={articleToFormValues(article)} isTutorial={isTutorialArticle(article)} />
+        <AdminArticleForm
+          articleId={article.id}
+          canManagePublication={session.role === "ADMIN"}
+          contentVersion={article.version}
+          defaultValues={articleToFormValues(article)}
+          isTutorial={isTutorialArticle(article)}
+        />
       </section>
     </AdminShell>
   );

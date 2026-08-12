@@ -4,8 +4,6 @@ import { ArticleDetailPage } from "@/components/pages/ArticleDetailPage";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import {
   getArticle,
-  getArticles,
-  getSupportedLocales,
   isSupportedLocale,
   type Locale,
 } from "@/lib/content";
@@ -24,15 +22,6 @@ export async function generateMetadata({
     title: article?.seoTitle ?? "Article",
     description: article?.seoDescription,
   };
-}
-
-export async function generateStaticParams() {
-  const params = await Promise.all(
-    getSupportedLocales().map(async (locale) =>
-      (await getArticles(locale)).map((article) => ({ locale, slug: article.slug })),
-    ),
-  );
-  return params.flat();
 }
 
 export default async function Page({

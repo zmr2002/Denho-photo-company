@@ -2,6 +2,7 @@ import "server-only";
 
 import createClient from "openapi-fetch";
 import { z } from "zod";
+import { formatSiteDate } from "@/lib/site-date";
 import type { paths } from "@/generated/api-schema";
 import { mapArticleContentBlocks } from "@/lib/content/article-content";
 import type {
@@ -280,8 +281,8 @@ function mapArticleSummary(article: ArticleSummaryContract): Article {
     excerpt: article.excerpt,
     category: article.category,
     authorName: article.authorName,
-    publishedAt: dateOnly(article.publishedAt),
-    updatedAt: dateOnly(article.publishedAt),
+    publishedAt: formatSiteDate(article.publishedAt),
+    updatedAt: formatSiteDate(article.publishedAt),
     status: "published",
     featuredImage: {
       label: article.title,
@@ -307,8 +308,8 @@ function mapArticleDetail(article: ArticleDetailContract): Article {
     excerpt: article.excerpt,
     category: article.category,
     authorName: article.authorName,
-    publishedAt: dateOnly(article.publishedAt),
-    updatedAt: dateOnly(article.updatedAt),
+    publishedAt: formatSiteDate(article.publishedAt),
+    updatedAt: formatSiteDate(article.updatedAt),
     status: "published",
     featuredImage: {
       label: article.heroLabel || article.title,
@@ -344,7 +345,7 @@ function mapArticleNotice(article: ArticleDetailContract): Notice {
     detailClosing: article.closingNote || "",
     closeLabel: article.locale === "ja" ? "閉じる" : article.locale === "zh" ? "关闭" : "Close",
     category: article.category,
-    publishedAt: dateOnly(article.publishedAt),
+    publishedAt: formatSiteDate(article.publishedAt),
     status: "published",
     linkHref: article.ctaHref ?? undefined,
   };
@@ -428,10 +429,6 @@ function imageTone(value: string): MockImage["tone"] {
 
 function managedImagePath(value: string | null | undefined) {
   return value?.startsWith("/media/") ? value : undefined;
-}
-
-function dateOnly(value: string) {
-  return value.slice(0, 10);
 }
 
 function requireSuccess(response: Response, path: string) {

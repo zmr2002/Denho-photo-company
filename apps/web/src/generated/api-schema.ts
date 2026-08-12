@@ -580,6 +580,8 @@ export interface components {
             closingNote?: string;
             ctaLabel?: string;
             ctaHref?: string;
+            /** Format: date-time */
+            publishedAt?: string;
             /** Format: int32 */
             displayOrder?: number;
             relatedServices: string[];
