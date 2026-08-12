@@ -171,7 +171,7 @@ export async function getWorksPageContent(locale: Locale): Promise<WorksPageCont
       category.id === "featured" ? work.featuredOnHomepage : work.serviceCategory === category.id,
     );
 
-    if (categoryWorks.length === 0) return category;
+    if (categoryWorks.length === 0) return { ...category, cases: [] };
 
     return {
       ...category,

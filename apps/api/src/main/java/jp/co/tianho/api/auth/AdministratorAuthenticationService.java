@@ -2,7 +2,9 @@ package jp.co.tianho.api.auth;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.Duration;
 import java.util.Locale;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -15,20 +17,32 @@ class AdministratorAuthenticationService {
     private final Argon2PasswordEncoder argon2PasswordEncoder;
     private final BCryptPasswordEncoder bcryptPasswordEncoder;
     private final String dummyPasswordHash;
+    private final int maximumAttemptsPerAddress;
+    private final Duration addressWindow;
 
     AdministratorAuthenticationService(
             AdministratorAccountRepository accountRepository,
             Argon2PasswordEncoder argon2PasswordEncoder,
-            BCryptPasswordEncoder bcryptPasswordEncoder) {
+            BCryptPasswordEncoder bcryptPasswordEncoder,
+            @Value("${tianho.auth.login-rate-limit.max-attempts:20}") int maximumAttemptsPerAddress,
+            @Value("${tianho.auth.login-rate-limit.window:15m}") Duration addressWindow) {
         this.accountRepository = accountRepository;
         this.argon2PasswordEncoder = argon2PasswordEncoder;
         this.bcryptPasswordEncoder = bcryptPasswordEncoder;
         this.dummyPasswordHash = argon2PasswordEncoder.encode("not-a-user-password");
+        this.maximumAttemptsPerAddress = maximumAttemptsPerAddress;
+        this.addressWindow = addressWindow;
     }
 
     @Transactional(noRollbackFor = AuthenticationFailedException.class)
     AdministratorPrincipal authenticate(String rawEmail, String password, String ipAddress) {
         String email = rawEmail.strip().toLowerCase(Locale.ROOT);
+        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+        long recentAddressAttempts = accountRepository.countAttemptsByAddressSince(
+                ipAddress, now.minus(addressWindow));
+        if (recentAddressAttempts >= maximumAttemptsPerAddress) {
+            throw new AdministratorLoginRateLimitException();
+        }
         accountRepository.resetExpiredLock(email);
         AdministratorAccount account = accountRepository.findByEmail(email).orElse(null);
 
@@ -38,12 +52,13 @@ class AdministratorAuthenticationService {
             throw new AuthenticationFailedException();
         }
 
-        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         if (account.lockedUntil() != null && account.lockedUntil().isAfter(now)) {
+            argon2PasswordEncoder.matches(password, dummyPasswordHash);
             accountRepository.recordAttempt(account.id(), email, ipAddress, false, "LOCKED");
             throw new AuthenticationFailedException();
         }
         if (!account.active()) {
+            argon2PasswordEncoder.matches(password, dummyPasswordHash);
             accountRepository.recordAttempt(account.id(), email, ipAddress, false, "INACTIVE");
             throw new AuthenticationFailedException();
         }

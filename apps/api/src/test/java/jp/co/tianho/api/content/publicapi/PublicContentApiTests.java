@@ -117,7 +117,10 @@ class PublicContentApiTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].slug").value("published-work"))
-                .andExpect(jsonPath("$[0].coverImageAlt").value("中文替代文字"));
+                .andExpect(jsonPath("$[0].scope").value("摄影"))
+                .andExpect(jsonPath("$[0].coverImageAlt").value("中文替代文字"))
+                .andExpect(jsonPath("$[0].images", hasSize(1)))
+                .andExpect(jsonPath("$[0].images[0].caption").value("中文说明"));
 
         mockMvc.perform(get("/api/v1/public/works/published-work").queryParam("locale", "zh"))
                 .andExpect(status().isOk())

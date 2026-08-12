@@ -3,7 +3,9 @@ package jp.co.tianho.api.content.publicapi;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -72,9 +74,9 @@ public class PublicContentService {
     }
 
     public List<PublicContentResponse.WorkSummary> findWorks(String locale) {
-        return jdbcClient.sql("""
+        List<WorkSummaryRow> works = jdbcClient.sql("""
                         SELECT w.id, w.locale, w.slug, w.title, w.summary, w.category, w.service_category,
-                               w.featured_on_homepage, w.featured_order, w.media_type,
+                               w.scope, w.featured_on_homepage, w.featured_order, w.media_type, w.gallery_enabled,
                                cover.path AS cover_image_path,
                                CASE w.locale WHEN 'ja' THEN cover.alt_ja WHEN 'zh' THEN cover.alt_zh ELSE cover.alt_en END
                                    AS cover_image_alt,
@@ -91,8 +93,31 @@ public class PublicContentService {
                         ORDER BY w.featured_order ASC, w.id ASC
                         """)
                 .param("locale", locale)
-                .query(this::mapWorkSummary)
+                .query(this::mapWorkSummaryRow)
                 .list();
+        if (works.isEmpty()) return List.of();
+
+        Map<UUID, List<PublicContentResponse.WorkImage>> imagesByWork = new HashMap<>();
+        jdbcClient.sql("""
+                        SELECT work_id, id, path, label, tone,
+                               CASE :locale WHEN 'ja' THEN alt_ja WHEN 'zh' THEN alt_zh ELSE alt_en END AS alt,
+                               CASE :locale WHEN 'ja' THEN caption_ja WHEN 'zh' THEN caption_zh ELSE caption_en END AS caption,
+                               is_cover, sort_order
+                        FROM work_images
+                        WHERE work_id IN (:workIds)
+                        ORDER BY work_id, sort_order ASC, id ASC
+                        """)
+                .param("locale", locale)
+                .param("workIds", works.stream().map(WorkSummaryRow::id).toList())
+                .query((resultSet, rowNumber) -> new WorkImageRow(
+                        resultSet.getObject("work_id", UUID.class), mapWorkImage(resultSet, rowNumber)))
+                .list()
+                .forEach(row -> imagesByWork.computeIfAbsent(row.workId(), ignored -> new java.util.ArrayList<>())
+                        .add(row.image()));
+
+        return works.stream()
+                .map(work -> work.toResponse(imagesByWork.getOrDefault(work.id(), List.of())))
+                .toList();
     }
 
     public PublicContentResponse.WorkDetail findWork(String locale, String slug) {
@@ -211,9 +236,9 @@ public class PublicContentService {
                 resultSet.getInt("sort_order"));
     }
 
-    private PublicContentResponse.WorkSummary mapWorkSummary(ResultSet resultSet, int rowNumber)
+    private WorkSummaryRow mapWorkSummaryRow(ResultSet resultSet, int rowNumber)
             throws SQLException {
-        return new PublicContentResponse.WorkSummary(
+        return new WorkSummaryRow(
                 resultSet.getObject("id", UUID.class),
                 resultSet.getString("locale"),
                 resultSet.getString("slug"),
@@ -221,9 +246,11 @@ public class PublicContentService {
                 resultSet.getString("summary"),
                 resultSet.getString("category"),
                 resultSet.getString("service_category"),
+                resultSet.getString("scope"),
                 resultSet.getBoolean("featured_on_homepage"),
                 resultSet.getInt("featured_order"),
                 resultSet.getString("media_type"),
+                resultSet.getBoolean("gallery_enabled"),
                 resultSet.getString("cover_image_path"),
                 resultSet.getString("cover_image_alt"),
                 resultSet.getString("cover_image_tone"));
@@ -292,5 +319,32 @@ public class PublicContentService {
     private List<String> readStringList(String json) {
         return objectMapper.readValue(json, new TypeReference<>() {
         });
+    }
+
+    private record WorkImageRow(UUID workId, PublicContentResponse.WorkImage image) {
+    }
+
+    private record WorkSummaryRow(
+            UUID id,
+            String locale,
+            String slug,
+            String title,
+            String summary,
+            String category,
+            String serviceCategory,
+            String scope,
+            boolean featuredOnHomepage,
+            int featuredOrder,
+            String mediaType,
+            boolean galleryEnabled,
+            String coverImagePath,
+            String coverImageAlt,
+            String coverImageTone) {
+
+        PublicContentResponse.WorkSummary toResponse(List<PublicContentResponse.WorkImage> images) {
+            return new PublicContentResponse.WorkSummary(
+                    id, locale, slug, title, summary, category, serviceCategory, scope, featuredOnHomepage,
+                    featuredOrder, mediaType, galleryEnabled, coverImagePath, coverImageAlt, coverImageTone, images);
+        }
     }
 }

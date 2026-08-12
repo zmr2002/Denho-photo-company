@@ -89,22 +89,6 @@ const articleDetailSchema = z.object({
   blocks: z.array(articleBlockSchema),
 });
 
-const workSummarySchema = z.object({
-  id: z.string().uuid(),
-  locale: localeSchema,
-  slug: z.string().min(1),
-  title: z.string().min(1),
-  summary: z.string(),
-  category: z.string(),
-  serviceCategory: serviceCategorySchema,
-  featuredOnHomepage: z.boolean(),
-  featuredOrder: z.number().int(),
-  mediaType: mediaTypeSchema,
-  coverImagePath: nullableString,
-  coverImageAlt: nullableString,
-  coverImageTone: z.string(),
-});
-
 const workImageSchema = z.object({
   id: z.string().uuid(),
   path: z.string().min(1),
@@ -114,6 +98,25 @@ const workImageSchema = z.object({
   caption: nullableString,
   cover: z.boolean(),
   sortOrder: z.number().int(),
+});
+
+const workSummarySchema = z.object({
+  id: z.string().uuid(),
+  locale: localeSchema,
+  slug: z.string().min(1),
+  title: z.string().min(1),
+  summary: z.string(),
+  category: z.string(),
+  serviceCategory: serviceCategorySchema,
+  scope: z.string(),
+  featuredOnHomepage: z.boolean(),
+  featuredOrder: z.number().int(),
+  mediaType: mediaTypeSchema,
+  galleryEnabled: z.boolean(),
+  coverImagePath: nullableString,
+  coverImageAlt: nullableString,
+  coverImageTone: z.string(),
+  images: z.array(workImageSchema),
 });
 
 const workDetailSchema = z.object({
@@ -165,6 +168,7 @@ type ArticleSummaryContract = z.infer<typeof articleSummarySchema>;
 type ArticleDetailContract = z.infer<typeof articleDetailSchema>;
 type ArticleBlockContract = z.infer<typeof articleBlockSchema>;
 type WorkDetailContract = z.infer<typeof workDetailSchema>;
+type WorkSummaryContract = z.infer<typeof workSummarySchema>;
 
 export class PublicContentApiError extends Error {
   constructor(path: string, status: number) {
@@ -228,7 +232,7 @@ export async function getApiWorks(locale: Locale): Promise<Work[]> {
   });
   requireSuccess(response, path);
   const summaries = z.array(workSummarySchema).parse(data);
-  return Promise.all(summaries.map((summary) => getRequiredWork(locale, summary.slug)));
+  return summaries.map(mapWorkSummary);
 }
 
 export async function getApiWork(locale: Locale, slug: string): Promise<Work | undefined> {
@@ -264,12 +268,6 @@ async function getApiArticleContract(locale: Locale, slug: string) {
   if (response.status === 404) return undefined;
   requireSuccess(response, path);
   return articleDetailSchema.parse(data);
-}
-
-async function getRequiredWork(locale: Locale, slug: string) {
-  const work = await getApiWork(locale, slug);
-  if (!work) throw new PublicContentApiError(`/api/v1/public/works/${slug}`, 502);
-  return work;
 }
 
 function mapArticleSummary(article: ArticleSummaryContract): Article {
@@ -381,6 +379,43 @@ function mapWork(work: WorkDetailContract): Work {
     seoTitle: work.seoTitle || work.title,
     seoDescription: work.seoDescription || work.summary,
     youtubeUrl: work.youtubeUrl ?? undefined,
+  };
+}
+
+function mapWorkSummary(work: WorkSummaryContract): Work {
+  const images = [...work.images].sort((left, right) => left.sortOrder - right.sortOrder);
+  const cover = images.find((image) => image.cover) || images[0];
+  const featuredImage: MockImage = cover
+    ? mapWorkImage(cover)
+    : {
+        label: work.title,
+        alt: work.coverImageAlt || work.title,
+        tone: imageTone(work.coverImageTone),
+        src: managedImagePath(work.coverImagePath),
+      };
+  return {
+    id: work.id,
+    language: work.locale,
+    slug: work.slug,
+    title: work.title,
+    summary: work.summary,
+    clientName: "",
+    projectDate: "",
+    category: work.category,
+    serviceCategory: work.serviceCategory,
+    scope: work.scope,
+    challenge: "",
+    approach: [],
+    outcome: "",
+    deliverables: [],
+    status: "published",
+    featuredOnHomepage: work.featuredOnHomepage,
+    featuredOrder: work.featuredOrder,
+    featuredImage,
+    galleryImages: images.map(mapWorkImage),
+    mediaType: work.mediaType,
+    seoTitle: work.title,
+    seoDescription: work.summary,
   };
 }
 

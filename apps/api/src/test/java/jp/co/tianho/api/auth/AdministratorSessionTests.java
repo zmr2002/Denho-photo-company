@@ -20,6 +20,7 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 @Import(PostgresTestConfiguration.class)
@@ -168,6 +169,33 @@ class AdministratorSessionTests {
                 .single();
         assertThat(scheme).isEqualTo("ARGON2ID");
         assertThat(passwordHash).startsWith("$argon2");
+    }
+
+    @Test
+    @Transactional
+    void limitsLoginAttemptsFromOneAddress() throws Exception {
+        String address = "203.0.113.42";
+        for (int attempt = 0; attempt < 20; attempt++) {
+            jdbcClient.sql("""
+                            INSERT INTO administrator_login_attempts (
+                                email, ip_address, successful, failure_reason
+                            ) VALUES ('unknown@example.com', :address, FALSE, 'INVALID_CREDENTIALS')
+                            """)
+                    .param("address", address)
+                    .update();
+        }
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .with(csrf())
+                        .with(request -> {
+                            ((MockHttpServletRequest) request).setRemoteAddr(address);
+                            return request;
+                        })
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginJson("admin@example.com", "administrator-test-password")))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(jsonPath("$.type").value("/problems/login-rate-limit"))
+                .andExpect(result -> assertThat(result.getResponse().getHeader("Retry-After")).isEqualTo("900"));
     }
 
     private String loginJson(String email, String password) {

@@ -598,25 +598,25 @@ export interface components {
             object?: boolean;
             float?: boolean;
             container?: boolean;
-            boolean?: boolean;
-            double?: boolean;
-            string?: boolean;
+            number?: boolean;
+            /** @enum {string} */
+            nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
+            bigInteger?: boolean;
+            missingNode?: boolean;
+            valueNode?: boolean;
+            integralNumber?: boolean;
+            floatingPointNumber?: boolean;
+            bigDecimal?: boolean;
             int?: boolean;
-            binary?: boolean;
-            pojo?: boolean;
+            long?: boolean;
+            double?: boolean;
             short?: boolean;
             /** @deprecated */
             textual?: boolean;
-            long?: boolean;
-            integralNumber?: boolean;
-            /** @enum {string} */
-            nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
-            floatingPointNumber?: boolean;
-            bigDecimal?: boolean;
-            bigInteger?: boolean;
-            valueNode?: boolean;
-            missingNode?: boolean;
-            number?: boolean;
+            binary?: boolean;
+            boolean?: boolean;
+            string?: boolean;
+            pojo?: boolean;
             embeddedValue?: boolean;
         };
         WorkImageInput: {
@@ -695,6 +695,18 @@ export interface components {
             expectedVersion?: number;
             article: components["schemas"]["ArticleInput"];
         };
+        WorkImage: {
+            /** Format: uuid */
+            id?: string;
+            path?: string;
+            label?: string;
+            tone?: string;
+            alt?: string;
+            caption?: string;
+            cover?: boolean;
+            /** Format: int32 */
+            sortOrder?: number;
+        };
         WorkSummary: {
             /** Format: uuid */
             id?: string;
@@ -704,13 +716,16 @@ export interface components {
             summary?: string;
             category?: string;
             serviceCategory?: string;
+            scope?: string;
             featuredOnHomepage?: boolean;
             /** Format: int32 */
             featuredOrder?: number;
             mediaType?: string;
+            galleryEnabled?: boolean;
             coverImagePath?: string;
             coverImageAlt?: string;
             coverImageTone?: string;
+            images?: components["schemas"]["WorkImage"][];
         };
         WorkDetail: {
             /** Format: uuid */
@@ -743,18 +758,6 @@ export interface components {
             /** Format: date-time */
             updatedAt?: string;
             images?: components["schemas"]["WorkImage"][];
-        };
-        WorkImage: {
-            /** Format: uuid */
-            id?: string;
-            path?: string;
-            label?: string;
-            tone?: string;
-            alt?: string;
-            caption?: string;
-            cover?: boolean;
-            /** Format: int32 */
-            sortOrder?: number;
         };
         Notice: {
             /** Format: uuid */

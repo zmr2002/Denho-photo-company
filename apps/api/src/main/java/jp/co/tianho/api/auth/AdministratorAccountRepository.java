@@ -96,6 +96,18 @@ class AdministratorAccountRepository {
                 .update();
     }
 
+    long countAttemptsByAddressSince(String ipAddress, OffsetDateTime since) {
+        return jdbcClient.sql("""
+                        SELECT count(*)
+                        FROM administrator_login_attempts
+                        WHERE ip_address = :ipAddress AND attempted_at >= :since
+                        """)
+                .param("ipAddress", ipAddress)
+                .param("since", since)
+                .query(Long.class)
+                .single();
+    }
+
     void createBootstrapAdministrator(String email, String displayName, String passwordHash) {
         jdbcClient.sql("""
                         INSERT INTO administrator_users (

@@ -73,12 +73,15 @@ public final class PublicContentResponse {
             String summary,
             String category,
             String serviceCategory,
+            String scope,
             boolean featuredOnHomepage,
             int featuredOrder,
             String mediaType,
+            boolean galleryEnabled,
             String coverImagePath,
             String coverImageAlt,
-            String coverImageTone) {
+            String coverImageTone,
+            List<WorkImage> images) {
     }
 
     public record WorkDetail(
