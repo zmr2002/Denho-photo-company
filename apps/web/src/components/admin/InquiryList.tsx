@@ -1,39 +1,82 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { AdminActionFeedback, useAdministrationAction } from "@/components/admin/AdminActionFeedback";
 import { adminResponseMessage, writeAdminApi } from "@/lib/api/browser";
 import type { Inquiry } from "@/lib/api/admin";
 
-const actions: Array<{ status: Inquiry["status"]; label: string }> = [
-  { status: "IN_PROGRESS", label: "开始处理" },
-  { status: "CLOSED", label: "标记完成" },
-  { status: "SPAM", label: "标记垃圾咨询" },
+const filters: Array<{ status: Inquiry["status"]; label: string }> = [
+  { status: "NEW", label: "新咨询" },
+  { status: "IN_PROGRESS", label: "处理中" },
+  { status: "CLOSED", label: "已完成" },
+  { status: "SPAM", label: "垃圾咨询" },
+  { status: "ANONYMIZED", label: "已匿名化" },
 ];
 
 export function InquiryList({ inquiries }: { inquiries: Inquiry[] }) {
   const router = useRouter();
+  const [items, setItems] = useState(inquiries);
+  const [activeStatus, setActiveStatus] = useState<Inquiry["status"]>("NEW");
+  const [query, setQuery] = useState("");
   const [pendingId, setPendingId] = useState<string | null>(null);
-  const [message, setMessage] = useState("");
+  const { feedback, run, showError, showSuccess } = useAdministrationAction();
+  const counts = useMemo(() => Object.fromEntries(filters.map(({ status }) => [status, items.filter((item) => item.status === status).length])), [items]);
+  const visibleInquiries = useMemo(() => {
+    const term = query.trim().toLocaleLowerCase();
+    return items.filter((inquiry) => inquiry.status === activeStatus && (!term || [
+      inquiry.nameCompany,
+      inquiry.email,
+      inquiry.projectType,
+      inquiry.location,
+      inquiry.message,
+    ].some((value) => value?.toLocaleLowerCase().includes(term))));
+  }, [activeStatus, items, query]);
 
   async function changeStatus(inquiry: Inquiry, status: Inquiry["status"]) {
-    setPendingId(inquiry.id);
-    setMessage("");
-    const response = await writeAdminApi(`/api/v1/admin/inquiries/${inquiry.id}/status`, "PATCH", { status });
-    setPendingId(null);
-    if (!response.ok) {
-      const problem = (await response.json().catch(() => null)) as { detail?: string } | null;
-      setMessage(problem?.detail || adminResponseMessage(response, "状态更新失败，请稍后重试。"));
-      return;
-    }
-    router.refresh();
+    await run(async () => {
+      setPendingId(inquiry.id);
+      const response = await writeAdminApi(`/api/v1/admin/inquiries/${inquiry.id}/status`, "PATCH", { status });
+      setPendingId(null);
+      if (!response.ok) {
+        showError(adminResponseMessage(response, "状态更新失败，请稍后重试。"));
+        return;
+      }
+      const updated = await response.json() as Inquiry;
+      setItems((current) => current.map((item) => item.id === inquiry.id ? updated : item));
+      showSuccess(`已将咨询更新为“${statusLabel(status)}”。`);
+      router.refresh();
+    });
   }
 
   return (
-    <div className="admin-list">
-      {message ? <p className="admin-error" role="status">{message}</p> : null}
-      {inquiries.length === 0 ? <p className="admin-empty">当前分类没有咨询。</p> : null}
-      {inquiries.map((inquiry) => (
+    <div className="admin-worklist">
+      <div className="admin-inquiry-toolbar">
+        <div className="admin-language-tabs" role="tablist" aria-label="咨询状态">
+          {filters.map((filter) => (
+            <button
+              aria-selected={activeStatus === filter.status}
+              className="admin-language-tab"
+              key={filter.status}
+              onClick={() => setActiveStatus(filter.status)}
+              role="tab"
+              type="button"
+            >
+              {filter.label} <span>{counts[filter.status] ?? 0}</span>
+            </button>
+          ))}
+        </div>
+        <label className="admin-field">
+          <span className="admin-label">搜索当前分类</span>
+          <input onChange={(event) => setQuery(event.target.value)} placeholder="姓名、邮箱、项目、地点或正文" type="search" value={query} />
+        </label>
+        <div className="admin-card-heading">
+          <p className="admin-worklist-count">显示 {visibleInquiries.length} 条咨询</p>
+          <AdminActionFeedback feedback={feedback} />
+        </div>
+      </div>
+      {visibleInquiries.length === 0 ? <p className="admin-empty">当前分类没有符合条件的咨询。</p> : null}
+      {visibleInquiries.map((inquiry) => (
         <article className="admin-card admin-inquiry" key={inquiry.id}>
           <header>
             <div>
@@ -50,7 +93,7 @@ export function InquiryList({ inquiries }: { inquiries: Inquiry[] }) {
           <p className="admin-inquiry-message">{inquiry.message}</p>
           {inquiry.status !== "ANONYMIZED" ? (
             <div className="admin-actions">
-              {actions.filter((action) => action.status !== inquiry.status).map((action) => (
+              {actionsFor(inquiry.status).map((action) => (
                 <button
                   className="admin-button-secondary"
                   disabled={pendingId === inquiry.id}
@@ -67,6 +110,14 @@ export function InquiryList({ inquiries }: { inquiries: Inquiry[] }) {
       ))}
     </div>
   );
+}
+
+function actionsFor(status: Inquiry["status"]): Array<{ status: Inquiry["status"]; label: string }> {
+  if (status === "NEW") return [{ status: "IN_PROGRESS", label: "开始处理" }, { status: "SPAM", label: "标记为垃圾咨询" }];
+  if (status === "IN_PROGRESS") return [{ status: "CLOSED", label: "标记完成" }, { status: "NEW", label: "退回新咨询" }, { status: "SPAM", label: "标记为垃圾咨询" }];
+  if (status === "CLOSED") return [{ status: "IN_PROGRESS", label: "重新处理" }];
+  if (status === "SPAM") return [{ status: "NEW", label: "恢复为新咨询" }];
+  return [];
 }
 
 function statusLabel(status: Inquiry["status"]) {

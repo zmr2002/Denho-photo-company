@@ -1054,6 +1054,34 @@
   gap: 1rem;
 }
 
+.admin-inquiry-toolbar {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 0.9rem;
+  background: var(--admin-soft, #f8f7f5);
+}
+
+.admin-inquiry-toolbar .admin-language-tabs {
+  overflow-x: auto;
+}
+
+.admin-inquiry-toolbar .admin-language-tab {
+  min-width: 7.5rem;
+  white-space: nowrap;
+}
+
+.admin-inquiry-toolbar .admin-language-tab span {
+  display: inline-grid;
+  min-width: 1.4rem;
+  height: 1.4rem;
+  margin-left: 0.25rem;
+  place-items: center;
+  border-radius: 999px;
+  background: #ebe7e1;
+  font-size: 0.68rem;
+}
+
 .admin-inquiry header {
   display: flex;
   align-items: start;
