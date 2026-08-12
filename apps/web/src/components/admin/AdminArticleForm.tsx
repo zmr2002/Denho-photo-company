@@ -8,6 +8,7 @@ import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { articleMutationSchema } from "@/lib/admin/validation";
 import { writeAdminApi } from "@/lib/api/browser";
+import { siteDateInputToTimestamp } from "@/lib/site-date";
 
 const articleFormSchema = articleMutationSchema.omit({ excerpt: true, relatedServices: true }).extend({
   excerpt: z.string().trim().optional(),
@@ -56,10 +57,10 @@ export function AdminArticleForm({ articleId, contentVersion = 0, defaultValues,
       excerpt: resolveArticleExcerpt(values.excerpt, values.blocks, values.title),
       relatedServices: splitLines(values.relatedServicesText),
       blocks: values.blocks.map((block, index) => ({ ...block, sortOrder: index })),
+      publishedAt: siteDateInputToTimestamp(values.publishedAt),
       demo: isTutorial,
     };
     delete (payload as Partial<typeof payload>).relatedServicesText;
-    delete (payload as Partial<typeof payload>).publishedAt;
     delete (payload as Partial<typeof payload>).status;
 
     const response = await writeAdminApi(

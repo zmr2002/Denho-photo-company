@@ -93,12 +93,12 @@ public class AdminContentService {
                         INSERT INTO articles (
                             id, translation_group_id, locale, slug, title, excerpt, category, author_name,
                             hero_label, hero_image_path, hero_alt, hero_tone, hero_caption, closing_note,
-                            cta_label, cta_href, status, display_order, related_services, seo_title,
+                            cta_label, cta_href, status, published_at, display_order, related_services, seo_title,
                             seo_description, youtube_url, demo
                         ) VALUES (
                             :id, :translationGroupId, :locale, :slug, :title, :excerpt, :category, :authorName,
                             :heroLabel, :heroImagePath, :heroAlt, :heroTone, :heroCaption, :closingNote,
-                            :ctaLabel, :ctaHref, 'DRAFT', :displayOrder, CAST(:relatedServices AS jsonb),
+                            :ctaLabel, :ctaHref, 'DRAFT', :publishedAt, :displayOrder, CAST(:relatedServices AS jsonb),
                             :seoTitle, :seoDescription, :youtubeUrl, :demo
                         )
                         """)
@@ -118,6 +118,7 @@ public class AdminContentService {
                 .param("closingNote", input.closingNote(), Types.VARCHAR)
                 .param("ctaLabel", input.ctaLabel(), Types.VARCHAR)
                 .param("ctaHref", input.ctaHref(), Types.VARCHAR)
+                .param("publishedAt", input.publishedAt(), Types.TIMESTAMP_WITH_TIMEZONE)
                 .param("displayOrder", input.displayOrder())
                 .param("relatedServices", objectMapper.writeValueAsString(input.relatedServices()))
                 .param("seoTitle", input.seoTitle(), Types.VARCHAR)
@@ -145,7 +146,11 @@ public class AdminContentService {
                             category = :category, author_name = :authorName, hero_label = :heroLabel,
                             hero_image_path = :heroImagePath, hero_alt = :heroAlt, hero_tone = :heroTone,
                             hero_caption = :heroCaption, closing_note = :closingNote, cta_label = :ctaLabel,
-                            cta_href = :ctaHref, display_order = :displayOrder,
+                            cta_href = :ctaHref,
+                            published_at = CASE WHEN status = 'PUBLISHED'
+                                THEN COALESCE(:publishedAt, published_at, CURRENT_TIMESTAMP)
+                                ELSE :publishedAt END,
+                            display_order = :displayOrder,
                             related_services = CAST(:relatedServices AS jsonb), seo_title = :seoTitle,
                             seo_description = :seoDescription, youtube_url = :youtubeUrl, demo = :demo,
                             version = version + 1, updated_at = CURRENT_TIMESTAMP
@@ -167,6 +172,7 @@ public class AdminContentService {
                 .param("closingNote", input.closingNote(), Types.VARCHAR)
                 .param("ctaLabel", input.ctaLabel(), Types.VARCHAR)
                 .param("ctaHref", input.ctaHref(), Types.VARCHAR)
+                .param("publishedAt", input.publishedAt(), Types.TIMESTAMP_WITH_TIMEZONE)
                 .param("displayOrder", input.displayOrder())
                 .param("relatedServices", objectMapper.writeValueAsString(input.relatedServices()))
                 .param("seoTitle", input.seoTitle(), Types.VARCHAR)
@@ -383,6 +389,7 @@ public class AdminContentService {
             String closingNote,
             String ctaLabel,
             String ctaHref,
+            OffsetDateTime publishedAt,
             @Min(0) int displayOrder,
             @NotNull List<@NotBlank String> relatedServices,
             String seoTitle,

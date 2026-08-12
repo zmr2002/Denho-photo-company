@@ -50,6 +50,7 @@ describe("article editor", () => {
     const defaultValues = blankArticleFormValues();
     defaultValues.title = "新的制作记录";
     defaultValues.slug = "new-production-story";
+    defaultValues.publishedAt = "2026-08-10";
     defaultValues.blocks[0].body = "这是第一段正文，会自动成为文章摘要。";
 
     vi.mocked(writeAdminApi).mockResolvedValue({
@@ -69,6 +70,7 @@ describe("article editor", () => {
     expect(payload).toMatchObject({
       title: "新的制作记录",
       excerpt: "这是第一段正文，会自动成为文章摘要。",
+      publishedAt: "2026-08-10T00:00:00+09:00",
       blocks: [
         { type: "paragraph", body: "这是第一段正文，会自动成为文章摘要。", sortOrder: 0 },
         { type: "heading", heading: "拍摄准备", sortOrder: 1 },

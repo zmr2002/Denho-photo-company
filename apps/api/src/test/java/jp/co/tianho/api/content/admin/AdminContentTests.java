@@ -9,6 +9,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 import jp.co.tianho.api.PostgresTestConfiguration;
 import jp.co.tianho.api.auth.AdministratorPrincipal;
@@ -76,10 +78,17 @@ class AdminContentTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"expectedVersion":0,"article":%s}
-                                """.formatted(articleBody("Updated title", "Updated body"))))
+                                """.formatted(articleBody(
+                                        "Updated title", "Updated body", "2026-08-11T00:00:00+09:00"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.version").value(1))
                 .andExpect(jsonPath("$.title").value("Updated title"));
+
+        OffsetDateTime publishedAt = jdbcClient.sql("SELECT published_at FROM articles WHERE id = :id")
+                .param("id", UUID.fromString(id))
+                .query(OffsetDateTime.class)
+                .single();
+        assertThat(publishedAt.toInstant()).isEqualTo(Instant.parse("2026-08-10T15:00:00Z"));
 
         mockMvc.perform(get("/api/v1/admin/articles/{id}/revisions", id)
                         .with(authentication(authenticationFor(AdministratorRole.EDITOR))))
@@ -182,14 +191,19 @@ class AdminContentTests {
     }
 
     private String articleBody(String title, String body) {
+        return articleBody(title, body, "2026-08-10T00:00:00+09:00");
+    }
+
+    private String articleBody(String title, String body, String publishedAt) {
         return """
                 {
                   "locale":"ja","slug":"content-test","title":"%s","excerpt":"Excerpt",
                   "category":"Test","authorName":"Editorial Team","heroTone":"neutral",
+                  "publishedAt":"%s",
                   "displayOrder":0,"relatedServices":[],"demo":false,
                   "blocks":[{"type":"paragraph","body":"%s","imageTone":"neutral","sortOrder":0}]
                 }
-                """.formatted(title, body);
+                """.formatted(title, publishedAt, body);
     }
 
     private Authentication authenticationFor(AdministratorRole role) {

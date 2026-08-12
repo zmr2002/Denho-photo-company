@@ -1,4 +1,5 @@
 import type { AdminArticleFormValues } from "@/components/admin/AdminArticleForm";
+import { formatSiteDate } from "@/lib/site-date";
 
 type ArticleForForm = {
   locale: string;
@@ -78,7 +79,7 @@ export function articleToFormValues(article: ArticleForForm): AdminArticleFormVa
     ctaLabel: article.ctaLabel || "",
     ctaHref: article.ctaHref || "",
     status: article.status as AdminArticleFormValues["status"],
-    publishedAt: article.publishedAt ? new Date(article.publishedAt).toISOString().slice(0, 10) : "",
+    publishedAt: article.publishedAt ? formatSiteDate(article.publishedAt) : "",
     displayOrder: article.displayOrder,
     relatedServicesText: parseList(article.relatedServices).join("\n"),
     seoTitle: article.seoTitle || "",

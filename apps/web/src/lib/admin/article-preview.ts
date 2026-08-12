@@ -8,15 +8,16 @@ import {
   mapArticleContentBlocks,
 } from "@/lib/content/article-content";
 import type { AdminArticle } from "@/lib/api/admin";
+import { formatSiteDate } from "@/lib/site-date";
 
 export function adminArticleToPreview(article: AdminArticle): Article {
   const locale = previewLocale(article.locale);
   const blocks = article.blocks ?? [];
-  const publishedAt = article.publishedAt ? dateOnly(article.publishedAt) : draftDateLabel(locale);
+  const publishedAt = article.publishedAt ? formatSiteDate(article.publishedAt) : draftDateLabel(locale);
   const updatedAt = article.updatedAt
-    ? dateOnly(article.updatedAt)
+    ? formatSiteDate(article.updatedAt)
     : article.publishedAt
-      ? dateOnly(article.publishedAt)
+      ? formatSiteDate(article.publishedAt)
       : publishedAt;
 
   return {
@@ -65,7 +66,7 @@ export function adminArticleToHomeNewsItem(article: AdminArticle): HomeNewsItem 
   const imageBlock = blocks.find((block) => block.imagePath);
 
   return {
-    date: article.publishedAt ? dateOnly(article.publishedAt) : draftDateLabel(locale),
+    date: article.publishedAt ? formatSiteDate(article.publishedAt) : draftDateLabel(locale),
     category: article.category,
     title: article.title,
     excerpt: article.excerpt,
@@ -118,10 +119,6 @@ function previewBlockImage(block: AdminArticle["blocks"][number], fallback: stri
 
 function previewLocale(value: string): Locale {
   return value === "zh" || value === "en" ? value : "ja";
-}
-
-function dateOnly(value: string) {
-  return value.slice(0, 10);
 }
 
 function draftDateLabel(locale: Locale) {
