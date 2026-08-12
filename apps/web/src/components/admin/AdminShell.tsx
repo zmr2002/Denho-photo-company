@@ -17,7 +17,7 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
             {session.displayName ? <small>{session.email}</small> : null}
           </div>
         </div>
-        <AdminNavigation />
+        <AdminNavigation role={session.role} />
         <AdminLogoutButton />
       </aside>
       <main className="admin-main">{children}</main>

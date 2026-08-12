@@ -61,6 +61,17 @@ export type Inquiry = {
   updatedAt: string;
 };
 
+export type AdministratorUser = {
+  id: string;
+  email: string;
+  displayName: string;
+  role: "ADMIN" | "EDITOR";
+  active: boolean;
+  verifiedAt: string | null;
+  lastLoginAt: string | null;
+  createdAt: string;
+};
+
 export type AdminRevision = {
   id: string;
   version: number;
@@ -109,6 +120,11 @@ export async function getMediaAssets(status: "ACTIVE" | "TRASHED") {
 export async function getInquiries(status: Inquiry["status"]) {
   const response = await adminApiFetch(`/api/v1/admin/inquiries?status=${status}`);
   return response.json() as Promise<Inquiry[]>;
+}
+
+export async function getAdministratorUsers() {
+  const response = await adminApiFetch("/api/v1/admin/users");
+  return response.json() as Promise<AdministratorUser[]>;
 }
 
 export async function getAdminRevisions(collection: "articles" | "works" | "notices", id: string) {

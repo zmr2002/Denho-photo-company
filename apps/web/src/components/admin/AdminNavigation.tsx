@@ -12,12 +12,18 @@ const adminLinks = [
   { href: "/studio-tianho/inquiries", label: "咨询管理" },
 ];
 
-export function AdminNavigation() {
+const administratorLinks = [
+  { href: "/studio-tianho/users", label: "账号管理" },
+  { href: "/studio-tianho/activity", label: "操作记录" },
+];
+
+export function AdminNavigation({ role }: { role: "ADMIN" | "EDITOR" | null }) {
   const pathname = usePathname();
+  const links = role === "ADMIN" ? [...adminLinks, ...administratorLinks] : adminLinks;
 
   return (
     <nav aria-label="后台导航">
-      {adminLinks.map((link) => {
+      {links.map((link) => {
         const active = link.href === "/studio-tianho" ? pathname === link.href : pathname.startsWith(link.href);
         return (
           <Link className={active ? "admin-nav-link-active" : undefined} key={link.href} href={link.href} aria-current={active ? "page" : undefined}>
