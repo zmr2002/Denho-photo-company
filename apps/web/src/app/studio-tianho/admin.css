@@ -55,6 +55,36 @@
   color: var(--admin-muted, #77736d);
 }
 
+.admin-account-summary {
+  display: grid;
+  gap: 0.25rem;
+  margin-top: 0.8rem;
+}
+
+.admin-account-summary strong {
+  overflow: hidden;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+}
+
+.admin-account-summary span {
+  width: fit-content;
+  border-radius: 999px;
+  background: #ece8e2;
+  padding: 0.2rem 0.55rem;
+  color: #625d57;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.admin-account-summary small {
+  overflow: hidden;
+  color: var(--admin-muted, #77736d);
+  font-size: 0.7rem;
+  text-overflow: ellipsis;
+}
+
 .admin-sidebar nav {
   display: grid;
   gap: 0.3rem;
@@ -70,6 +100,7 @@
 
 .admin-sidebar nav a:hover,
 .admin-sidebar nav a:focus-visible,
+.admin-sidebar nav a.admin-nav-link-active,
 .admin-muted-link:hover,
 .admin-muted-link:focus-visible {
   background: #f0ede8;
@@ -157,6 +188,94 @@
 
 .admin-grid-3 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin-dashboard-section {
+  display: grid;
+  gap: 1rem;
+}
+
+.admin-section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.admin-section-heading h3 {
+  margin-top: 0.3rem;
+  font-size: 1.45rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.admin-task-list {
+  overflow: hidden;
+  border-block: 1px solid var(--admin-line, #e8e5e0);
+}
+
+.admin-task-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 4.2rem;
+  padding: 0.85rem 0.2rem;
+  transition: color 150ms ease, padding 150ms ease;
+}
+
+.admin-task-row + .admin-task-row {
+  border-top: 1px solid var(--admin-line, #e8e5e0);
+}
+
+.admin-task-row:hover,
+.admin-task-row:focus-visible {
+  color: var(--admin-accent, #c95838);
+  padding-inline: 0.45rem;
+}
+
+.admin-task-row strong {
+  display: inline-block;
+  min-width: 2ch;
+  margin-right: 0.35rem;
+  font-size: 1.35rem;
+}
+
+.admin-task-row small {
+  color: var(--admin-muted, #77736d);
+  font-size: 0.76rem;
+  text-align: right;
+}
+
+.admin-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.admin-overview-grid a {
+  display: grid;
+  gap: 0.25rem;
+  border-radius: 0.8rem;
+  background: var(--admin-soft, #f8f7f5);
+  padding: 1rem;
+  transition: background-color 150ms ease, transform 150ms ease;
+}
+
+.admin-overview-grid a:hover,
+.admin-overview-grid a:focus-visible {
+  background: #f0ede8;
+  transform: translateY(-1px);
+}
+
+.admin-overview-grid strong {
+  font-size: 1.65rem;
+  font-weight: 600;
+}
+
+.admin-overview-grid span {
+  color: var(--admin-muted, #77736d);
+  font-size: 0.76rem;
 }
 
 .admin-button,
@@ -578,11 +697,23 @@
 
 .admin-save-message {
   min-height: 1.4rem;
-  color: #5d685a;
-  font-size: 0.8rem;
 }
 
-.admin-save-message:not(:empty) {
+.admin-action-feedback {
+  min-height: 1.25rem;
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.admin-action-feedback-success {
+  color: #486045;
+}
+
+.admin-action-feedback-error {
+  color: #9f3426;
+}
+
+.admin-action-feedback:not(:empty) {
   animation: admin-message-pulse 360ms ease-out both;
 }
 
@@ -717,12 +848,23 @@
   }
 
   .admin-grid-3,
+  .admin-overview-grid,
   .admin-form-grid,
   .admin-form-grid-compact,
   .admin-list-row,
   .admin-guide-card,
   .admin-inquiry-details {
     grid-template-columns: 1fr;
+  }
+
+  .admin-section-heading,
+  .admin-task-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-task-row small {
+    text-align: left;
   }
 
   .admin-status-field {
@@ -749,7 +891,7 @@
   .admin-block,
   .admin-advanced-content,
   .admin-login-panel,
-  .admin-save-message:not(:empty) {
+  .admin-action-feedback:not(:empty) {
     animation: none;
   }
 
@@ -762,9 +904,16 @@
   .admin-field select,
   .admin-field textarea,
   .admin-list-row,
+  .admin-task-row,
+  .admin-overview-grid a,
   .admin-block,
   .admin-block-actions button,
   .admin-advanced-settings summary::after {
     transition: none;
   }
+}
+
+.admin-sidebar nav a.admin-nav-link-active {
+  box-shadow: inset 3px 0 0 var(--admin-accent, #c95838);
+  font-weight: 700;
 }

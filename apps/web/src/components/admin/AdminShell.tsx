@@ -1,15 +1,6 @@
-import Link from "next/link";
 import { requireAdminSession } from "@/lib/auth/session";
+import { AdminNavigation } from "@/components/admin/AdminNavigation";
 import { AdminLogoutButton } from "@/components/admin/AdminLogoutButton";
-
-const adminLinks = [
-  { href: "/studio-tianho", label: "控制台" },
-  { href: "/studio-tianho/articles", label: "文章管理" },
-  { href: "/studio-tianho/notice", label: "开场通知" },
-  { href: "/studio-tianho/works", label: "作品图片" },
-  { href: "/studio-tianho/media", label: "媒体库" },
-  { href: "/studio-tianho/inquiries", label: "咨询管理" },
-];
 
 export async function AdminShell({ children }: { children: React.ReactNode }) {
   const session = await requireAdminSession();
@@ -20,15 +11,13 @@ export async function AdminShell({ children }: { children: React.ReactNode }) {
         <div>
           <p className="admin-kicker">田豊管理后台</p>
           <h1>管理中心</h1>
-          <p className="admin-user">{session.email}</p>
+          <div className="admin-account-summary">
+            <strong>{session.displayName || session.email}</strong>
+            <span>{session.role === "ADMIN" ? "管理员" : "编辑"}</span>
+            {session.displayName ? <small>{session.email}</small> : null}
+          </div>
         </div>
-        <nav aria-label="后台导航">
-          {adminLinks.map((link) => (
-            <Link key={link.href} href={link.href}>
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+        <AdminNavigation />
         <AdminLogoutButton />
       </aside>
       <main className="admin-main">{children}</main>

@@ -79,7 +79,11 @@ describe("article editor", () => {
     expect(payload).not.toHaveProperty("relatedServicesText");
     expect(router.refresh).toHaveBeenCalled();
     expect(router.push).toHaveBeenCalledWith("/studio-tianho/articles/article-1");
-    expect(await screen.findByText("已保存。")).toBeVisible();
+    expect(await screen.findByText("文章已保存。")).toBeVisible();
+
+    const unloadEvent = new Event("beforeunload", { cancelable: true });
+    window.dispatchEvent(unloadEvent);
+    expect(unloadEvent.defaultPrevented).toBe(false);
   });
 
   it("uses a manual excerpt when supplied and limits generated excerpts", () => {

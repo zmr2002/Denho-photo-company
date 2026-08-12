@@ -6,7 +6,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
+import { AdminActionFeedback, useAdministrationAction } from "@/components/admin/AdminActionFeedback";
 import { articleMutationSchema } from "@/lib/admin/validation";
+import { useUnsavedChanges } from "@/lib/admin/useUnsavedChanges";
 import { adminResponseMessage, writeAdminApi } from "@/lib/api/browser";
 import { siteDateInputToTimestamp } from "@/lib/site-date";
 
@@ -46,68 +48,67 @@ export function AdminArticleForm({
   canManagePublication = false,
 }: AdminArticleFormProps) {
   const router = useRouter();
-  const [message, setMessage] = useState("");
-  const [submitting, setSubmitting] = useState(false);
   const [version, setVersion] = useState(contentVersion);
+  const { feedback, pending: submitting, run, showError, showSuccess } = useAdministrationAction();
   const {
     control,
     register,
     handleSubmit,
-    formState: { errors },
+    reset,
+    formState: { errors, isDirty },
   } = useForm<AdminArticleFormValues>({
     resolver: zodResolver(articleFormSchema),
     defaultValues,
   });
   const { fields, append, remove, move } = useFieldArray({ control, name: "blocks" });
   const blocks = useWatch({ control, name: "blocks" });
+  useUnsavedChanges(isDirty);
 
   async function onSubmit(values: AdminArticleFormValues) {
-    setSubmitting(true);
-    setMessage("");
+    await run(async () => {
+      const payload = {
+        ...values,
+        excerpt: resolveArticleExcerpt(values.excerpt, values.blocks, values.title),
+        relatedServices: splitLines(values.relatedServicesText),
+        blocks: values.blocks.map((block, index) => ({ ...block, sortOrder: index })),
+        publishedAt: siteDateInputToTimestamp(values.publishedAt),
+        demo: isTutorial,
+      };
+      delete (payload as Partial<typeof payload>).relatedServicesText;
+      delete (payload as Partial<typeof payload>).status;
 
-    const payload = {
-      ...values,
-      excerpt: resolveArticleExcerpt(values.excerpt, values.blocks, values.title),
-      relatedServices: splitLines(values.relatedServicesText),
-      blocks: values.blocks.map((block, index) => ({ ...block, sortOrder: index })),
-      publishedAt: siteDateInputToTimestamp(values.publishedAt),
-      demo: isTutorial,
-    };
-    delete (payload as Partial<typeof payload>).relatedServicesText;
-    delete (payload as Partial<typeof payload>).status;
+      const response = await writeAdminApi(
+        articleId ? `/api/v1/admin/articles/${articleId}` : "/api/v1/admin/articles",
+        articleId ? "PATCH" : "POST",
+        articleId ? { expectedVersion: version, article: payload } : payload,
+      );
 
-    const response = await writeAdminApi(
-      articleId ? `/api/v1/admin/articles/${articleId}` : "/api/v1/admin/articles",
-      articleId ? "PATCH" : "POST",
-      articleId ? { expectedVersion: version, article: payload } : payload,
-    );
-
-    setSubmitting(false);
-
-    if (!response.ok) {
-      setMessage(adminResponseMessage(response, "保存失败，请稍后重试。"));
-      return;
-    }
-
-    const result = (await response.json()) as ArticleMutationResult;
-    let savedResult = result;
-    if (canManagePublication) {
-      const transitionResult = await transitionArticleStatus(result, values.status);
-      savedResult = transitionResult.current;
-      if (transitionResult.error) {
-        setVersion(savedResult.version);
-        setMessage(transitionResult.error);
-        router.refresh();
+      if (!response.ok) {
+        showError(adminResponseMessage(response, "保存失败，请稍后重试。"));
         return;
       }
-    }
-    setVersion(savedResult.version);
-    setMessage("已保存。");
-    router.refresh();
 
-    if (!articleId && result.id) {
-      router.push(`/studio-tianho/articles/${result.id}`);
-    }
+      const result = (await response.json()) as ArticleMutationResult;
+      let savedResult = result;
+      if (canManagePublication) {
+        const transitionResult = await transitionArticleStatus(result, values.status);
+        savedResult = transitionResult.current;
+        if (transitionResult.error) {
+          setVersion(savedResult.version);
+          showError(transitionResult.error);
+          router.refresh();
+          return;
+        }
+      }
+      setVersion(savedResult.version);
+      reset(values);
+      showSuccess("文章已保存。");
+      router.refresh();
+
+      if (!articleId && result.id) {
+        router.push(`/studio-tianho/articles/${result.id}`);
+      }
+    });
   }
 
   async function handleArchive() {
@@ -115,22 +116,19 @@ export function AdminArticleForm({
     const confirmed = window.confirm("归档后将不会向访客显示，可在后台恢复为草稿。确定归档吗？");
     if (!confirmed) return;
 
-    setSubmitting(true);
-    setMessage("");
+    await run(async () => {
+      const response = await writeAdminApi(`/api/v1/admin/articles/${articleId}/archive`, "POST", {
+        expectedVersion: version,
+      });
 
-    const response = await writeAdminApi(`/api/v1/admin/articles/${articleId}/archive`, "POST", {
-      expectedVersion: version,
+      if (!response.ok) {
+        showError(adminResponseMessage(response, "归档失败，请稍后重试。"));
+        return;
+      }
+
+      router.push("/studio-tianho/articles");
+      router.refresh();
     });
-
-    setSubmitting(false);
-
-    if (!response.ok) {
-      setMessage(adminResponseMessage(response, "归档失败，请稍后重试。"));
-      return;
-    }
-
-    router.push("/studio-tianho/articles");
-    router.refresh();
   }
 
   function addBlock(type: ArticleBlock["type"]) {
@@ -410,9 +408,7 @@ export function AdminArticleForm({
             归档文章
           </button>
         ) : null}
-        <p className="admin-save-message" aria-live="polite">
-          {message}
-        </p>
+        <AdminActionFeedback className="admin-save-message" feedback={feedback} />
       </div>
     </form>
   );

@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
+import { AdminActionFeedback, useAdministrationAction } from "@/components/admin/AdminActionFeedback";
 import { workImagesMutationSchema } from "@/lib/admin/validation";
+import { useUnsavedChanges } from "@/lib/admin/useUnsavedChanges";
 import { adminResponseMessage, writeAdminApi } from "@/lib/api/browser";
 
 export type AdminWorkImagesFormValues = z.input<typeof workImagesMutationSchema>;
@@ -18,41 +20,39 @@ type AdminWorkImagesFormProps = {
 
 export function AdminWorkImagesForm({ workId, contentVersion, defaultValues }: AdminWorkImagesFormProps) {
   const router = useRouter();
-  const [message, setMessage] = useState("");
-  const [submitting, setSubmitting] = useState(false);
   const [version, setVersion] = useState(contentVersion);
-  const { control, register, handleSubmit, setValue, formState: { errors } } = useForm<AdminWorkImagesFormValues>({
+  const { feedback, pending: submitting, run, showError, showSuccess } = useAdministrationAction();
+  const { control, register, handleSubmit, reset, setValue, formState: { errors, isDirty } } = useForm<AdminWorkImagesFormValues>({
     resolver: zodResolver(workImagesMutationSchema),
     defaultValues,
   });
   const { fields, append, remove, move } = useFieldArray({ control, name: "images" });
   const mediaType = useWatch({ control, name: "mediaType" });
   const images = useWatch({ control, name: "images" });
+  useUnsavedChanges(isDirty);
 
   async function onSubmit(values: AdminWorkImagesFormValues) {
-    setSubmitting(true);
-    setMessage("");
+    await run(async () => {
+      const payload = {
+        ...values,
+        expectedVersion: version,
+        galleryEnabled: values.mediaType === "video" ? false : values.galleryEnabled,
+        images: (values.images ?? []).map((image, index) => ({ ...image, sortOrder: index })),
+      };
 
-    const payload = {
-      ...values,
-      expectedVersion: version,
-      galleryEnabled: values.mediaType === "video" ? false : values.galleryEnabled,
-      images: (values.images ?? []).map((image, index) => ({ ...image, sortOrder: index })),
-    };
+      const response = await writeAdminApi(`/api/v1/admin/works/${workId}/images`, "PATCH", payload);
 
-    const response = await writeAdminApi(`/api/v1/admin/works/${workId}/images`, "PATCH", payload);
+      if (!response.ok) {
+        showError(adminResponseMessage(response, "保存失败，请稍后重试。"));
+        return;
+      }
 
-    setSubmitting(false);
-
-    if (!response.ok) {
-      setMessage(adminResponseMessage(response, "保存失败，请稍后重试。"));
-      return;
-    }
-
-    const result = (await response.json()) as { version: number };
-    setVersion(result.version);
-    setMessage("已保存。");
-    router.refresh();
+      const result = (await response.json()) as { version: number };
+      setVersion(result.version);
+      reset({ ...values, galleryEnabled: payload.galleryEnabled, images: payload.images });
+      showSuccess("作品图片已保存。");
+      router.refresh();
+    });
   }
 
   function removeImage(index: number) {
@@ -211,7 +211,7 @@ export function AdminWorkImagesForm({ workId, contentVersion, defaultValues }: A
         <button className="admin-button" disabled={submitting} type="submit">
           {submitting ? "保存中" : "保存图片"}
         </button>
-        {message ? <p className="admin-user">{message}</p> : null}
+        <AdminActionFeedback feedback={feedback} />
       </div>
     </form>
   );
