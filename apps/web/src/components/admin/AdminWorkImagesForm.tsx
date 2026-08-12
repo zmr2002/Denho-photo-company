@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { workImagesMutationSchema } from "@/lib/admin/validation";
+import { useUnsavedChanges } from "@/lib/admin/useUnsavedChanges";
 import { adminResponseMessage, writeAdminApi } from "@/lib/api/browser";
 
 export type AdminWorkImagesFormValues = z.input<typeof workImagesMutationSchema>;
@@ -21,13 +22,14 @@ export function AdminWorkImagesForm({ workId, contentVersion, defaultValues }: A
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [version, setVersion] = useState(contentVersion);
-  const { control, register, handleSubmit, setValue, formState: { errors } } = useForm<AdminWorkImagesFormValues>({
+  const { control, register, handleSubmit, reset, setValue, formState: { errors, isDirty } } = useForm<AdminWorkImagesFormValues>({
     resolver: zodResolver(workImagesMutationSchema),
     defaultValues,
   });
   const { fields, append, remove, move } = useFieldArray({ control, name: "images" });
   const mediaType = useWatch({ control, name: "mediaType" });
   const images = useWatch({ control, name: "images" });
+  useUnsavedChanges(isDirty);
 
   async function onSubmit(values: AdminWorkImagesFormValues) {
     setSubmitting(true);
@@ -51,6 +53,7 @@ export function AdminWorkImagesForm({ workId, contentVersion, defaultValues }: A
 
     const result = (await response.json()) as { version: number };
     setVersion(result.version);
+    reset({ ...values, galleryEnabled: payload.galleryEnabled, images: payload.images });
     setMessage("已保存。");
     router.refresh();
   }

@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { articleMutationSchema } from "@/lib/admin/validation";
+import { useUnsavedChanges } from "@/lib/admin/useUnsavedChanges";
 import { adminResponseMessage, writeAdminApi } from "@/lib/api/browser";
 import { siteDateInputToTimestamp } from "@/lib/site-date";
 
@@ -53,13 +54,15 @@ export function AdminArticleForm({
     control,
     register,
     handleSubmit,
-    formState: { errors },
+    reset,
+    formState: { errors, isDirty },
   } = useForm<AdminArticleFormValues>({
     resolver: zodResolver(articleFormSchema),
     defaultValues,
   });
   const { fields, append, remove, move } = useFieldArray({ control, name: "blocks" });
   const blocks = useWatch({ control, name: "blocks" });
+  useUnsavedChanges(isDirty);
 
   async function onSubmit(values: AdminArticleFormValues) {
     setSubmitting(true);
@@ -102,6 +105,7 @@ export function AdminArticleForm({
       }
     }
     setVersion(savedResult.version);
+    reset(values);
     setMessage("已保存。");
     router.refresh();
 

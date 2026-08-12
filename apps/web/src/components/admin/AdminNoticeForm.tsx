@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { noticeMutationSchema } from "@/lib/admin/validation";
+import { useUnsavedChanges } from "@/lib/admin/useUnsavedChanges";
 import { adminResponseMessage, writeAdminApi } from "@/lib/api/browser";
 import { siteDateInputToTimestamp } from "@/lib/site-date";
 
@@ -25,11 +26,13 @@ export function AdminNoticeForm({ defaultValues, contentVersion = 0 }: { default
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    reset,
+    formState: { errors, isDirty },
   } = useForm<AdminNoticeFormValues>({
     resolver: zodResolver(noticeMutationSchema),
     defaultValues,
   });
+  useUnsavedChanges(isDirty);
 
   async function onSubmit(values: AdminNoticeFormValues) {
     setSubmitting(true);
@@ -71,6 +74,7 @@ export function AdminNoticeForm({ defaultValues, contentVersion = 0 }: { default
       const unpublished = (await unpublishResponse.json()) as { version: number };
       setVersion(unpublished.version);
     }
+    reset(values);
     setMessage("已保存。");
     router.refresh();
   }
