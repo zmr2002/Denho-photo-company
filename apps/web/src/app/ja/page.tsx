@@ -2,13 +2,12 @@ import type { Metadata } from "next";
 import { HomePage } from "@/components/pages/HomePage";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { getHomePageContent } from "@/lib/content";
-import { site } from "@/data/site";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: `${site.name} | Photography and film production`,
-  description: site.description,
+  title: "写真・映像制作",
+  description: "日本国内で企画、撮影、編集、納品まで一貫して対応する写真・映像制作会社。",
 };
 
 export default async function Page() {

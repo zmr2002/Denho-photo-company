@@ -123,7 +123,13 @@ export function NewsNoticeViewer({ items }: NewsNoticeViewerProps) {
                   </div>
                   {section.image ? (
                     <figure className="news-detail-image news-detail-image-inline">
-                      <PlaceholderMedia label={section.image.label} size="wide" tone={section.image.tone} />
+                      <PlaceholderMedia
+                        alt={section.image.alt}
+                        label={section.image.label}
+                        size="wide"
+                        src={section.image.src}
+                        tone={section.image.tone}
+                      />
                       {section.image.caption ? <figcaption>{section.image.caption}</figcaption> : null}
                     </figure>
                   ) : null}

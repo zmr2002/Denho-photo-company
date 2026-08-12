@@ -155,7 +155,7 @@ const serviceFormats = {
 
 export const servicesPageContent: Record<'ja' | 'zh', ServicesPageContent> = {
 	ja: {
-		metaTitle: `サービス | ${site.name}`,
+		metaTitle: 'サービス',
 		metaDescription: 'イベント、空間、インタビュー、ポートレートに対応する写真・映像制作サービス。',
 		hero: {
 			eyebrow: 'サービス',
@@ -184,7 +184,7 @@ export const servicesPageContent: Record<'ja' | 'zh', ServicesPageContent> = {
 		cta: { label: '制作相談', title: '目的に合った制作方法をご提案します。', linkLabel: '制作について相談する' },
 	},
 	zh: {
-		metaTitle: `服务 | ${site.name}`,
+		metaTitle: '服务',
 		metaDescription: '面向活动、空间、访谈与人像项目的摄影和视频制作服务。',
 		hero: {
 			eyebrow: '服务',
@@ -382,14 +382,14 @@ const zhWorkCategories: WorkCategory[] = [
 
 export const worksPageContent: Record<'ja' | 'zh', WorksPageContent> = {
 	ja: {
-		metaTitle: `制作実績 | ${site.name}`,
+		metaTitle: '制作実績',
 		metaDescription: 'イベント、空間、インタビュー、ポートレートの制作事例。',
 		hero: { eyebrow: '制作実績', title: ['目的と現場から、', 'プロジェクトを設計する。'], description: 'プロジェクトの背景、制作範囲、成果物が伝わるサンプル事例として紹介します。' },
 		categories: jaWorkCategories,
 		cta: { label: '制作相談', title: '日本で同様のプロジェクトを検討されていますか。', linkLabel: '制作チームに相談する' },
 	},
 	zh: {
-		metaTitle: `制作案例 | ${site.name}`,
+		metaTitle: '制作案例',
 		metaDescription: '活动、空间、访谈与人像项目的制作案例。',
 		hero: { eyebrow: '制作案例', title: ['每个项目，', '都从目的与现场开始。'], description: '案例以项目为单位呈现制作范围和内容方向。当前影像区域为本地占位素材。' },
 		categories: zhWorkCategories,
@@ -399,7 +399,7 @@ export const worksPageContent: Record<'ja' | 'zh', WorksPageContent> = {
 
 export const aboutPageContent: Record<'ja' | 'zh', AboutPageContent> = {
 	ja: {
-		metaTitle: `会社について | ${site.name}`,
+		metaTitle: '会社について',
 		metaDescription: '制作領域、姿勢、日本国内での実行体制、多言語対応について。',
 		hero: { eyebrow: '会社について', title: ['日本を拠点に、', '企画から納品まで支える。'], description: '企業、組織、ブランドのための写真・映像制作会社として、映像がプロジェクトにどう機能するかを考え続けます。' },
 		mediaLabel: '制作チーム',
@@ -435,7 +435,7 @@ export const aboutPageContent: Record<'ja' | 'zh', AboutPageContent> = {
 		},
 	},
 	zh: {
-		metaTitle: `关于公司 | ${site.name}`,
+		metaTitle: '关于公司',
 		metaDescription: `了解${site.name}的制作领域、工作态度、日本本地执行与多语言支持。`,
 		hero: { eyebrow: '关于公司', title: ['立足日本，', '为项目提供完整影像制作支持。'], description: '我们面向企业、组织与品牌提供摄影和视频制作，从前期理解到最终交付，持续关注影像如何服务项目。' },
 		mediaLabel: '制作团队',
@@ -474,7 +474,7 @@ export const aboutPageContent: Record<'ja' | 'zh', AboutPageContent> = {
 
 export const contactPageContent: Record<'ja' | 'zh', ContactPageContent> = {
 	ja: {
-		metaTitle: `お問い合わせ | ${site.name}`,
+		metaTitle: 'お問い合わせ',
 		metaDescription: '日本国内の写真・映像制作プロジェクトに関するお問い合わせページ。',
 		hero: { eyebrow: 'お問い合わせ', title: ['プロジェクトの背景、', '日程、用途から', 'お聞かせください。'], description: '企画段階でも、撮影日が決まっている案件でも、現在わかる範囲から制作内容をご相談ください。' },
 		guideLabel: 'ご相談前に',
@@ -520,7 +520,7 @@ export const contactPageContent: Record<'ja' | 'zh', ContactPageContent> = {
 		},
 	},
 	zh: {
-		metaTitle: `项目咨询 | ${site.name}`,
+		metaTitle: '项目咨询',
 		metaDescription: '咨询在日本的活动、空间、访谈、人像摄影与视频制作项目。',
 		hero: { eyebrow: '项目咨询', title: ['请从项目背景、', '时间与用途开始说明。'], description: '即使项目仍在策划中，也可以先就制作范围和执行方式进行沟通。' },
 		guideLabel: '咨询前',

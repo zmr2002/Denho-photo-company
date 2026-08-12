@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import "./globals.css";
 import { site } from "@/data/site";
 
@@ -16,13 +17,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = (await headers()).get("x-site-locale");
+  const language = locale === "zh" || locale === "en" ? locale : "ja";
   return (
-    <html lang="ja">
+    <html lang={language}>
       <body>{children}</body>
     </html>
   );

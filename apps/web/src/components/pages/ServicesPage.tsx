@@ -10,8 +10,11 @@ interface ServicesPageProps {
 }
 
 export function ServicesPage({ content, basePath }: ServicesPageProps) {
-  const worksLinkLabel =
-    basePath === "/ja" ? "関連する制作実績を見る" : "查看相关制作案例";
+  const worksLinkLabel = basePath === "/ja"
+    ? "関連する制作実績を見る"
+    : basePath === "/zh"
+      ? "查看相关制作案例"
+      : "View related work";
 
   return (
     <>

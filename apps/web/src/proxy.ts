@@ -25,11 +25,14 @@ export function proxy(request: NextRequest) {
   const secureRequest = forwardedProtocol === "https" || request.nextUrl.protocol === "https:";
   const contentSecurityPolicy = createContentSecurityPolicy(nonce, secureRequest);
   const requestHeaders = new Headers(request.headers);
+  const locale = request.nextUrl.pathname.match(/^\/(ja|zh|en)(?:\/|$)/)?.[1] ?? "ja";
   requestHeaders.set("x-nonce", nonce);
+  requestHeaders.set("x-site-locale", locale);
   requestHeaders.set("Content-Security-Policy", contentSecurityPolicy);
 
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set("Content-Security-Policy", contentSecurityPolicy);
+  response.headers.set("Content-Language", locale);
 
   if (request.nextUrl.pathname.startsWith("/studio-tianho/preview/")) {
     response.headers.set("Cache-Control", "private, no-store, max-age=0");
