@@ -229,7 +229,7 @@ class MediaLifecycleTests {
 
     @Test
     void servesOnlyStrictImmutableMediaPaths() throws Exception {
-        UUID id = UUID.randomUUID();
+        UUID id = insertAsset();
         byte[] image = png(12, 12);
         when(objectStorage.get("original/" + id + ".png")).thenReturn(image);
 
@@ -238,6 +238,16 @@ class MediaLifecycleTests {
                 .andExpect(header().string("Cache-Control", matchesPattern(".*max-age=31536000.*immutable.*")))
                 .andExpect(header().string("Content-Type", "image/png"));
         mockMvc.perform(get("/api/v1/public/media/original/not-a-file.png"))
+                .andExpect(status().isNotFound());
+
+        jdbcClient.sql("""
+                        UPDATE media_assets SET status = 'TRASHED', trashed_at = CURRENT_TIMESTAMP,
+                            purge_after = CURRENT_TIMESTAMP + INTERVAL '30 days'
+                        WHERE id = :id
+                        """)
+                .param("id", id)
+                .update();
+        mockMvc.perform(get("/api/v1/public/media/original/{filename}", id + ".png"))
                 .andExpect(status().isNotFound());
     }
 

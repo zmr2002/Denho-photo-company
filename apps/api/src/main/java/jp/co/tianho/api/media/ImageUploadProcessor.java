@@ -31,7 +31,7 @@ public class ImageUploadProcessor {
     private static final int MASTER_EDGE = 4096;
     private static final int THUMBNAIL_EDGE = 480;
 
-    public ProcessedImage process(MultipartFile file) {
+    public synchronized ProcessedImage process(MultipartFile file) {
         String filename = safeFilename(file.getOriginalFilename());
         if (file.isEmpty() || file.getSize() > MAX_BYTES) {
             throw new ImageValidationException("Image must be between 1 byte and 15 MB");
