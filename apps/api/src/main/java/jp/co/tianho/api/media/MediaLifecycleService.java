@@ -106,18 +106,27 @@ public class MediaLifecycleService {
     }
 
     private StoredAsset requireAsset(UUID id) {
-        return jdbcClient.sql("""
-                        SELECT asset.id, asset.object_key, asset.thumbnail_key, asset.status, asset.purge_after,
-                               count(reference.id) AS reference_count
-                        FROM media_assets asset
-                        LEFT JOIN media_references reference ON reference.asset_id = asset.id
-                        WHERE asset.id = :id AND asset.status <> 'DELETED'
-                        GROUP BY asset.id
+        StoredAsset asset = jdbcClient.sql("""
+                        SELECT id, object_key, thumbnail_key, status, purge_after, 0 AS reference_count
+                        FROM media_assets
+                        WHERE id = :id AND status <> 'DELETED'
+                        FOR UPDATE
                         """)
                 .param("id", id)
                 .query(this::mapStoredAsset)
                 .optional()
                 .orElseThrow(MediaAssetNotFoundException::new);
+        long referenceCount = jdbcClient.sql("SELECT count(*) FROM media_references WHERE asset_id = :id")
+                .param("id", id)
+                .query(Long.class)
+                .single();
+        return new StoredAsset(
+                asset.id(),
+                asset.objectKey(),
+                asset.thumbnailKey(),
+                asset.status(),
+                asset.purgeAfter(),
+                referenceCount);
     }
 
     private void recordCleanup(StoredAsset asset, String result, String details) {

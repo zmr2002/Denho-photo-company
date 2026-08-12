@@ -38,6 +38,7 @@ public class MediaReferenceService {
                         SELECT id, :resourceType, :resourceId, :fieldName
                         FROM media_assets
                         WHERE object_key = :objectKey AND status = 'ACTIVE'
+                        FOR KEY SHARE
                         """)
                 .param("resourceType", resourceType)
                 .param("resourceId", resourceId)
