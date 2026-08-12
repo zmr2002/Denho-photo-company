@@ -597,26 +597,26 @@ export interface components {
             null?: boolean;
             object?: boolean;
             float?: boolean;
-            number?: boolean;
+            container?: boolean;
+            boolean?: boolean;
             double?: boolean;
             string?: boolean;
-            long?: boolean;
-            /** @deprecated */
-            textual?: boolean;
+            int?: boolean;
             binary?: boolean;
             pojo?: boolean;
-            boolean?: boolean;
-            int?: boolean;
             short?: boolean;
-            container?: boolean;
-            missingNode?: boolean;
-            floatingPointNumber?: boolean;
-            bigDecimal?: boolean;
+            /** @deprecated */
+            textual?: boolean;
+            long?: boolean;
+            integralNumber?: boolean;
             /** @enum {string} */
             nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
-            integralNumber?: boolean;
-            valueNode?: boolean;
+            floatingPointNumber?: boolean;
+            bigDecimal?: boolean;
             bigInteger?: boolean;
+            valueNode?: boolean;
+            missingNode?: boolean;
+            number?: boolean;
             embeddedValue?: boolean;
         };
         WorkImageInput: {
@@ -639,6 +639,7 @@ export interface components {
             galleryEnabled?: boolean;
             mediaType: string;
             images: components["schemas"]["WorkImageInput"][];
+            coverSelectionValid?: boolean;
         };
         ChangeStatusRequest: {
             active?: boolean;

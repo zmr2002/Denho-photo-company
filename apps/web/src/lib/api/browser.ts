@@ -1,5 +1,5 @@
 import createClient from "openapi-fetch";
-import type { paths } from "@/generated/api-schema";
+import type { paths } from "@/api-contract/api-schema";
 
 const apiClient = createClient<paths>({ credentials: "same-origin" });
 

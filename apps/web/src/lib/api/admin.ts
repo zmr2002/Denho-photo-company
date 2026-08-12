@@ -2,7 +2,7 @@ import "server-only";
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import type { components } from "@/generated/api-schema";
+import type { components } from "@/api-contract/api-schema";
 
 const apiBaseUrl = process.env.API_INTERNAL_URL || "http://127.0.0.1:8080";
 
