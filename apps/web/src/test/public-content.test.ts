@@ -180,4 +180,18 @@ describe("public content API adapter", () => {
     const { getApiArticles } = await import("@/lib/api/public-content");
     await expect(getApiArticles("zh")).rejects.toThrow();
   });
+
+  it("does not mix sample works into empty API categories", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
+      const url = new URL(input instanceof Request ? input.url : input.toString());
+      if (url.pathname === "/api/v1/public/works") return json([]);
+      return json([], 200);
+    }));
+
+    const { getWorksPageContent } = await import("@/lib/content");
+    const content = await getWorksPageContent("zh");
+
+    expect(content.categories).not.toHaveLength(0);
+    expect(content.categories.every((category) => category.cases.length === 0)).toBe(true);
+  });
 });
