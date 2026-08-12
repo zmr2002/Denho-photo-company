@@ -1,6 +1,6 @@
 import Link from "next/link";
+import { ArticleWorklist } from "@/components/admin/ArticleWorklist";
 import { AdminShell } from "@/components/admin/AdminShell";
-import { isTutorialArticle, localeLabel, statusLabel } from "@/lib/admin/labels";
 import { getAdminCollection, type AdminArticle } from "@/lib/api/admin";
 
 export default async function AdminArticlesPage() {
@@ -19,26 +19,7 @@ export default async function AdminArticlesPage() {
             新增文章
           </Link>
         </header>
-        <div className="admin-list">
-          {articles.length === 0 ? <p className="admin-empty">还没有文章。可以先新增一篇草稿。</p> : null}
-          {articles.map((article) => (
-            <article className={`admin-list-row ${isTutorialArticle(article) ? "admin-list-row-sample" : ""}`} key={article.id}>
-              <div>
-                <p className="admin-label">
-                  {localeLabel(article.locale)} / {statusLabel(article.status)} / {article.category}
-                </p>
-                <h3>
-                  {article.title}
-                  {isTutorialArticle(article) ? <span className="admin-badge">教学示例</span> : null}
-                </h3>
-                <p>{article.slug}</p>
-              </div>
-              <Link className="admin-button-secondary" href={`/studio-tianho/articles/${article.id}`}>
-                编辑
-              </Link>
-            </article>
-          ))}
-        </div>
+        <ArticleWorklist articles={articles} />
       </section>
     </AdminShell>
   );
