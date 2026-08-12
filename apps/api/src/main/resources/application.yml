@@ -68,6 +68,9 @@ tianho:
       display-name: ${ADMIN_BOOTSTRAP_DISPLAY_NAME:Administrator}
     session:
       absolute-timeout: 8h
+    login-rate-limit:
+      max-attempts: ${ADMIN_LOGIN_RATE_LIMIT_MAX_ATTEMPTS:20}
+      window: ${ADMIN_LOGIN_RATE_LIMIT_WINDOW:15m}
   content:
     bootstrap:
       enabled: ${CONTENT_BOOTSTRAP_ENABLED:false}

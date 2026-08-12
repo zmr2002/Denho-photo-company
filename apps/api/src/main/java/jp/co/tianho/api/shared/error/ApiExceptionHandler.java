@@ -4,6 +4,7 @@ import jakarta.validation.ConstraintViolationException;
 import jp.co.tianho.api.content.publicapi.ContentNotFoundException;
 import jp.co.tianho.api.content.admin.ContentRevisionException;
 import jp.co.tianho.api.auth.AuthenticationFailedException;
+import jp.co.tianho.api.auth.AdministratorLoginRateLimitException;
 import jp.co.tianho.api.auth.AdministratorUserManagementException;
 import jp.co.tianho.api.media.MediaAssetNotFoundException;
 import jp.co.tianho.api.media.DuplicateMediaException;
@@ -109,6 +110,17 @@ public class ApiExceptionHandler {
         problem.setTitle("Authentication failed");
         problem.setType(URI.create("/problems/authentication-failed"));
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problem);
+    }
+
+    @ExceptionHandler(AdministratorLoginRateLimitException.class)
+    ResponseEntity<ProblemDetail> handleAdministratorLoginRateLimit(
+            AdministratorLoginRateLimitException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS, exception.getMessage());
+        problem.setTitle("Login rate limit exceeded");
+        problem.setType(URI.create("/problems/login-rate-limit"));
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header("Retry-After", "900")
+                .body(problem);
     }
 
     @ExceptionHandler(ContentNotFoundException.class)
