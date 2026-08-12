@@ -474,6 +474,37 @@
   gap: 1rem;
 }
 
+.admin-worklist {
+  display: grid;
+  gap: 1rem;
+}
+
+.admin-worklist-filters {
+  display: grid;
+  grid-template-columns: minmax(14rem, 2fr) repeat(2, minmax(8rem, 0.7fr));
+  gap: 0.75rem;
+  align-items: end;
+  padding: 1rem;
+  border-radius: 0.9rem;
+  background: var(--admin-soft, #f8f7f5);
+}
+
+.admin-worklist-count {
+  color: var(--admin-muted, #77736d);
+  font-size: 0.75rem;
+}
+
+.admin-content-state {
+  display: inline-flex;
+  margin-right: 0.55rem;
+  border-radius: 999px;
+  padding: 0.24rem 0.55rem;
+}
+
+.admin-content-state-draft { background: #eeeae4; color: #625d57; }
+.admin-content-state-published { background: #e6f1e4; color: #3f663e; }
+.admin-content-state-archived { background: #f4e6e2; color: #8b4538; }
+
 .admin-list-row,
 .admin-block {
   display: grid;
@@ -632,6 +663,46 @@
 
 .admin-advanced-settings {
   border-block: 1px solid var(--admin-line, #e8e5e0);
+}
+
+.admin-revision-history {
+  border-top: 1px solid var(--admin-line, #e8e5e0);
+}
+
+.admin-revision-history summary {
+  display: flex;
+  padding: 1rem 0.2rem;
+  cursor: pointer;
+}
+
+.admin-revision-history summary span {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.admin-revision-history summary small,
+.admin-revision-list small {
+  color: var(--admin-muted, #77736d);
+  font-size: 0.72rem;
+}
+
+.admin-revision-list {
+  display: grid;
+  padding-bottom: 1rem;
+}
+
+.admin-revision-list article {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.75rem 0.2rem;
+  border-top: 1px solid var(--admin-line, #e8e5e0);
+}
+
+.admin-revision-list article div {
+  display: grid;
+  gap: 0.15rem;
 }
 
 .admin-advanced-settings summary {
@@ -1004,6 +1075,7 @@
   .admin-overview-grid,
   .admin-form-grid,
   .admin-form-grid-compact,
+  .admin-worklist-filters,
   .admin-list-row,
   .admin-guide-card,
   .admin-inquiry-details {

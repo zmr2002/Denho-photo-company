@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdminArticleForm } from "@/components/admin/AdminArticleForm";
+import { ArticleRevisionHistory } from "@/components/admin/ArticleRevisionHistory";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { articleToFormValues } from "@/lib/admin/article-form";
 import { isTutorialArticle, localeLabel, statusLabel } from "@/lib/admin/labels";
-import { getAdminContent, type AdminArticle } from "@/lib/api/admin";
+import { getAdminContent, getAdminRevisions, type AdminArticle } from "@/lib/api/admin";
 import { requireAdminSession } from "@/lib/auth/session";
 
 type PageProps = {
@@ -16,6 +17,7 @@ export default async function EditAdminArticlePage({ params }: PageProps) {
   const article = await getAdminContent<AdminArticle>("articles", id);
 
   if (!article) notFound();
+  const revisions = await getAdminRevisions("articles", id);
 
   return (
     <AdminShell>
@@ -67,6 +69,7 @@ export default async function EditAdminArticlePage({ params }: PageProps) {
           defaultValues={articleToFormValues(article)}
           isTutorial={isTutorialArticle(article)}
         />
+        <ArticleRevisionHistory revisions={revisions} />
       </section>
     </AdminShell>
   );
