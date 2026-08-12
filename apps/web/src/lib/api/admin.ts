@@ -61,6 +61,14 @@ export type Inquiry = {
   updatedAt: string;
 };
 
+export type AdminRevision = {
+  id: string;
+  version: number;
+  action: string;
+  actorId: string;
+  createdAt: string;
+};
+
 export async function getAdminSession(): Promise<AdminSession> {
   try {
     const response = await adminApiFetch("/api/v1/auth/session", false);
@@ -101,6 +109,11 @@ export async function getMediaAssets(status: "ACTIVE" | "TRASHED") {
 export async function getInquiries(status: Inquiry["status"]) {
   const response = await adminApiFetch(`/api/v1/admin/inquiries?status=${status}`);
   return response.json() as Promise<Inquiry[]>;
+}
+
+export async function getAdminRevisions(collection: "articles" | "works" | "notices", id: string) {
+  const response = await adminApiFetch(`/api/v1/admin/${collection}/${encodeURIComponent(id)}/revisions`);
+  return normalizeContent(await response.json()) as AdminRevision[];
 }
 
 async function adminApiFetch(path: string, requireSuccess = true) {

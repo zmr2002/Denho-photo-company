@@ -665,6 +665,46 @@
   border-block: 1px solid var(--admin-line, #e8e5e0);
 }
 
+.admin-revision-history {
+  border-top: 1px solid var(--admin-line, #e8e5e0);
+}
+
+.admin-revision-history summary {
+  display: flex;
+  padding: 1rem 0.2rem;
+  cursor: pointer;
+}
+
+.admin-revision-history summary span {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.admin-revision-history summary small,
+.admin-revision-list small {
+  color: var(--admin-muted, #77736d);
+  font-size: 0.72rem;
+}
+
+.admin-revision-list {
+  display: grid;
+  padding-bottom: 1rem;
+}
+
+.admin-revision-list article {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.75rem 0.2rem;
+  border-top: 1px solid var(--admin-line, #e8e5e0);
+}
+
+.admin-revision-list article div {
+  display: grid;
+  gap: 0.15rem;
+}
+
 .admin-advanced-settings summary {
   display: flex;
   align-items: center;
