@@ -22,6 +22,18 @@ const successText = {
   en: "Your inquiry has been received. We will respond after reviewing it.",
 };
 
+const verificationFailureText = {
+  ja: "安全確認を読み込めませんでした。ページを再読み込みし、広告ブロックが有効な場合は一時的に無効にしてください。",
+  zh: "安全验证组件加载失败。请刷新页面；如果启用了广告拦截，请暂时关闭后重试。",
+  en: "The security check could not load. Refresh the page and temporarily disable content blocking if it is enabled.",
+};
+
+const verificationExpiredText = {
+  ja: "安全確認の有効期限が切れました。もう一度確認してから送信してください。",
+  zh: "安全验证已过期，请重新完成验证后提交。",
+  en: "The security check expired. Complete it again before submitting.",
+};
+
 type TurnstileApi = {
   render: (container: HTMLElement, options: Record<string, unknown>) => string;
   remove: (widgetId: string) => void;
@@ -48,9 +60,18 @@ export function InquiryForm({ content, locale }: InquiryFormProps) {
     if (!turnstileSiteKey || !turnstileReady || !window.turnstile || !turnstileContainer.current) return;
     turnstileWidgetId.current = window.turnstile.render(turnstileContainer.current, {
       sitekey: turnstileSiteKey,
-      callback: (token: string) => setTurnstileToken(token),
-      "expired-callback": () => setTurnstileToken(""),
-      "error-callback": () => setTurnstileToken(""),
+      callback: (token: string) => {
+        setTurnstileToken(token);
+        setStatus(content.statusText);
+      },
+      "expired-callback": () => {
+        setTurnstileToken("");
+        setStatus(verificationExpiredText[locale]);
+      },
+      "error-callback": () => {
+        setTurnstileToken("");
+        setStatus(verificationFailureText[locale]);
+      },
     });
     return () => {
       if (turnstileWidgetId.current && window.turnstile) {
@@ -58,7 +79,7 @@ export function InquiryForm({ content, locale }: InquiryFormProps) {
       }
       turnstileWidgetId.current = null;
     };
-  }, [turnstileReady, turnstileSiteKey]);
+  }, [content.statusText, locale, turnstileReady, turnstileSiteKey]);
 
   function resetTurnstile() {
     setTurnstileToken("");
@@ -118,6 +139,10 @@ export function InquiryForm({ content, locale }: InquiryFormProps) {
         <Script
           async
           defer
+          onError={() => {
+            setTurnstileToken("");
+            setStatus(verificationFailureText[locale]);
+          }}
           onReady={() => setTurnstileReady(true)}
           src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
         />
