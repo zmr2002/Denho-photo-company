@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 class AdministratorRoleTests {
 
     private static final UUID ADMIN_ID = UUID.fromString("c0663319-2081-4d37-a548-d9b9831a6e6f");
+    private static final UUID EDITOR_ID = UUID.fromString("ac64d644-9f2c-48a7-a53f-4e75e03c2c1f");
 
     @Autowired
     private MockMvc mockMvc;
@@ -48,6 +49,15 @@ class AdministratorRoleTests {
                         )
                         """)
                 .param("id", ADMIN_ID)
+                .update();
+        jdbcClient.sql("""
+                        INSERT INTO administrator_users (
+                            id, email, display_name, password_hash, password_scheme, role, active, verified_at
+                        ) VALUES (
+                            :id, 'existing-editor@example.com', 'Editor', 'unused', 'ARGON2ID', 'EDITOR', TRUE, CURRENT_TIMESTAMP
+                        )
+                        """)
+                .param("id", EDITOR_ID)
                 .update();
     }
 
@@ -110,6 +120,52 @@ class AdministratorRoleTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"active\":false}"))
                 .andExpect(status().isConflict());
+    }
+
+    @Test
+    void roleChangesAndDeactivationRevokeExistingSessions() throws Exception {
+        insertSession("role-session", "existing-editor@example.com");
+
+        mockMvc.perform(patch("/api/v1/admin/users/{id}/role", EDITOR_ID)
+                        .with(authentication(adminAuthentication()))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"role\":\"ADMIN\"}"))
+                .andExpect(status().isOk());
+
+        assertThat(sessionCount("existing-editor@example.com")).isZero();
+
+        insertSession("status-session", "existing-editor@example.com");
+        mockMvc.perform(patch("/api/v1/admin/users/{id}/status", EDITOR_ID)
+                        .with(authentication(adminAuthentication()))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"active\":false}"))
+                .andExpect(status().isOk());
+
+        assertThat(sessionCount("existing-editor@example.com")).isZero();
+    }
+
+    private void insertSession(String id, String principalName) {
+        long now = System.currentTimeMillis();
+        jdbcClient.sql("""
+                        INSERT INTO spring_session (
+                            primary_id, session_id, creation_time, last_access_time,
+                            max_inactive_interval, expiry_time, principal_name
+                        ) VALUES (:id, :id, :now, :now, 1800, :expiry, :principalName)
+                        """)
+                .param("id", id)
+                .param("now", now)
+                .param("expiry", now + 1_800_000)
+                .param("principalName", principalName)
+                .update();
+    }
+
+    private long sessionCount(String principalName) {
+        return jdbcClient.sql("SELECT count(*) FROM spring_session WHERE principal_name = :principalName")
+                .param("principalName", principalName)
+                .query(Long.class)
+                .single();
     }
 
     private Authentication adminAuthentication() {
