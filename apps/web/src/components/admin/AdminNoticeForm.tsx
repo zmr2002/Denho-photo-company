@@ -6,14 +6,22 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { noticeMutationSchema } from "@/lib/admin/validation";
-import { writeAdminApi } from "@/lib/api/browser";
+import { adminResponseMessage, writeAdminApi } from "@/lib/api/browser";
+import { siteDateInputToTimestamp } from "@/lib/site-date";
 
 export type AdminNoticeFormValues = z.input<typeof noticeMutationSchema>;
+
+function localeLabel(locale: AdminNoticeFormValues["locale"]) {
+  if (locale === "ja") return "日语页面（ja）";
+  if (locale === "zh") return "中文页面（zh）";
+  return "英语页面（en）";
+}
 
 export function AdminNoticeForm({ defaultValues, contentVersion = 0 }: { defaultValues: AdminNoticeFormValues; contentVersion?: number }) {
   const router = useRouter();
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [version, setVersion] = useState(contentVersion);
   const {
     register,
     handleSubmit,
@@ -29,41 +37,39 @@ export function AdminNoticeForm({ defaultValues, contentVersion = 0 }: { default
 
     const response = await writeAdminApi("/api/v1/admin/notices", "PATCH", {
       ...values,
-      startAt: values.startAt ? new Date(values.startAt).toISOString() : null,
-      endAt: values.endAt ? new Date(values.endAt).toISOString() : null,
-      expectedVersion: contentVersion,
+      startAt: siteDateInputToTimestamp(values.startAt),
+      endAt: siteDateInputToTimestamp(values.endAt),
+      expectedVersion: version,
     });
 
     setSubmitting(false);
 
     if (!response.ok) {
-      setMessage("保存失败。请检查字段后重试。");
+      setMessage(adminResponseMessage(response, "保存失败，请稍后重试。"));
       return;
     }
 
     const result = (await response.json()) as { id: string; version: number; status: string };
+    setVersion(result.version);
     if (values.status === "published" && result.status === "DRAFT") {
       const publishResponse = await writeAdminApi(`/api/v1/admin/notices/${result.id}/publish`, "POST", { expectedVersion: result.version });
       if (!publishResponse.ok) {
-        setMessage("通知已保存为草稿，但当前账号无权发布或内容版本已变化。");
+        setMessage(adminResponseMessage(publishResponse, "通知已保存为草稿，但无法发布当前版本。"));
         router.refresh();
         return;
       }
+      const published = (await publishResponse.json()) as { version: number };
+      setVersion(published.version);
     }
     if (values.status === "draft" && result.status === "PUBLISHED") {
-      const archiveResponse = await writeAdminApi(`/api/v1/admin/notices/${result.id}/archive`, "POST", { expectedVersion: result.version });
-      if (!archiveResponse.ok) {
-        setMessage("通知已保存，但无法撤下当前发布版本。");
+      const unpublishResponse = await writeAdminApi(`/api/v1/admin/notices/${result.id}/unpublish`, "POST", { expectedVersion: result.version });
+      if (!unpublishResponse.ok) {
+        setMessage(adminResponseMessage(unpublishResponse, "通知已保存，但无法撤下当前发布版本。"));
         router.refresh();
         return;
       }
-      const archived = (await archiveResponse.json()) as { version: number };
-      const restoreResponse = await writeAdminApi(`/api/v1/admin/notices/${result.id}/restore`, "POST", { expectedVersion: archived.version });
-      if (!restoreResponse.ok) {
-        setMessage("通知已归档，但无法恢复为草稿。");
-        router.refresh();
-        return;
-      }
+      const unpublished = (await unpublishResponse.json()) as { version: number };
+      setVersion(unpublished.version);
     }
     setMessage("已保存。");
     router.refresh();
@@ -74,12 +80,9 @@ export function AdminNoticeForm({ defaultValues, contentVersion = 0 }: { default
       <div className="admin-form-grid">
         <label className="admin-field">
           <span className="admin-label">语言</span>
-          <select {...register("locale")}>
-            <option value="ja">日语页面（ja）</option>
-            <option value="zh">中文页面（zh）</option>
-            <option value="en">英语页面（en）</option>
-          </select>
-          <span className="admin-help">选择通知显示在哪个语言页面。</span>
+          <strong>{localeLabel(defaultValues.locale)}</strong>
+          <input type="hidden" {...register("locale")} />
+          <span className="admin-help">语言由当前卡片确定，避免误改其他语言通知。</span>
         </label>
         <label className="admin-field">
           <span className="admin-label">状态</span>

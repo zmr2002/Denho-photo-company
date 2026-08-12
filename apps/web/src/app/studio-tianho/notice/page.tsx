@@ -3,6 +3,7 @@ import { AdminNoticeForm, type AdminNoticeFormValues } from "@/components/admin/
 import { AdminShell } from "@/components/admin/AdminShell";
 import { localeLabel } from "@/lib/admin/labels";
 import { getAdminCollection, type AdminNotice } from "@/lib/api/admin";
+import { formatSiteDate } from "@/lib/site-date";
 
 const locales = ["ja", "zh", "en"] as const;
 
@@ -66,7 +67,7 @@ function noticeToFormValues(locale: (typeof locales)[number], notice?: AdminNoti
     storageKey: notice?.storageKey || `tianho-opening-notice-${locale}-local`,
     dismissalMode: (notice?.dismissalMode as AdminNoticeFormValues["dismissalMode"]) || "session",
     status: (notice?.status as AdminNoticeFormValues["status"]) || "published",
-    startAt: notice?.startAt ? new Date(notice.startAt).toISOString().slice(0, 10) : "",
-    endAt: notice?.endAt ? new Date(notice.endAt).toISOString().slice(0, 10) : "",
+    startAt: notice?.startAt ? formatSiteDate(notice.startAt) : "",
+    endAt: notice?.endAt ? formatSiteDate(notice.endAt) : "",
   };
 }

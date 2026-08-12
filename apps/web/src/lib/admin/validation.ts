@@ -9,6 +9,25 @@ export const dismissalModeSchema = z.enum(["session", "local"]);
 
 const optionalText = z.string().trim().optional().nullable();
 const requiredText = z.string().trim().min(1, "必填");
+const safeHref = z.string().trim().max(2_048, "网址过长").refine((value) => {
+  if (!value) return true;
+  if (value.startsWith("/") && !value.startsWith("//")) return true;
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}, "只允许站内路径或 http/https 网址。").optional().nullable();
+const youtubeHref = z.string().trim().max(2_048, "网址过长").refine((value) => {
+  if (!value) return true;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && ["youtube.com", "www.youtube.com", "youtu.be"].includes(url.hostname);
+  } catch {
+    return false;
+  }
+}, "请填写有效的 YouTube https 网址。").optional().nullable();
 const slugSchema = z
   .string()
   .trim()
@@ -49,14 +68,14 @@ export const articleMutationSchema = z.object({
   heroCaption: optionalText.pipe(z.string().max(2_000).nullable().optional()),
   closingNote: optionalText.pipe(z.string().max(5_000).nullable().optional()),
   ctaLabel: optionalText.pipe(z.string().max(240).nullable().optional()),
-  ctaHref: optionalText.pipe(z.string().max(2_048).nullable().optional()),
+  ctaHref: safeHref,
   status: statusSchema.default("draft"),
   publishedAt: optionalText,
   displayOrder: z.coerce.number().int().min(0).default(0),
   relatedServices: z.array(z.string().trim().min(1).max(160)).max(40).default([]),
   seoTitle: optionalText.pipe(z.string().max(240).nullable().optional()),
   seoDescription: optionalText.pipe(z.string().max(1_000).nullable().optional()),
-  youtubeUrl: optionalText.pipe(z.string().max(2_048).nullable().optional()),
+  youtubeUrl: youtubeHref,
   blocks: z.array(articleBlockSchema).min(1, "至少需要一个内容区块。").max(200),
 });
 
@@ -68,7 +87,7 @@ export const noticeMutationSchema = z.object({
   body: requiredText,
   dismissLabel: requiredText,
   linkLabel: optionalText,
-  linkHref: optionalText,
+  linkHref: safeHref,
   storageKey: requiredText,
   dismissalMode: dismissalModeSchema.default("session"),
   status: statusSchema.default("published"),
@@ -94,7 +113,12 @@ export const workImageSchema = z.object({
 export const workImagesMutationSchema = z.object({
   galleryEnabled: z.boolean().default(false),
   mediaType: workMediaTypeSchema.optional(),
-  images: z.array(workImageSchema).default([]),
+  images: z.array(workImageSchema).max(200).default([]),
+}).superRefine((values, context) => {
+  const covers = values.images.filter((image) => image.isCover).length;
+  if (values.images.length > 0 && covers !== 1) {
+    context.addIssue({ code: "custom", path: ["images"], message: "请选择且只能选择一张封面图片。" });
+  }
 });
 
 export function nullable(value?: string | null) {

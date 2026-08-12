@@ -50,14 +50,15 @@ public class ContentRevisionService {
             ResourceType resourceType,
             UUID resourceId,
             long expectedVersion,
-            ContentState targetState,
+            ContentAction action,
             AdministratorPrincipal actor,
             String ipAddress) {
         CurrentContent current = requireCurrent(resourceType, resourceId);
         if (current.version() != expectedVersion) {
             throw conflict("Content changed after it was loaded");
         }
-        validateTransition(current.state(), targetState);
+        validateTransition(current.state(), action);
+        ContentState targetState = action.targetState();
 
         int updated = jdbcClient.sql(updateStatement(resourceType, targetState))
                 .param("id", resourceId)
@@ -70,11 +71,7 @@ public class ContentRevisionService {
 
         CurrentContent changed = requireCurrent(resourceType, resourceId);
         JsonNode snapshot = readSnapshot(resourceType, resourceId);
-        String action = switch (targetState) {
-            case PUBLISHED -> "PUBLISHED";
-            case ARCHIVED -> "ARCHIVED";
-            case DRAFT -> "RESTORED";
-        };
+        String revisionAction = action.revisionAction();
         jdbcClient.sql("""
                         INSERT INTO content_revisions (
                             resource_type, resource_id, version, action, snapshot, actor_id
@@ -85,12 +82,12 @@ public class ContentRevisionService {
                 .param("resourceType", resourceType.name())
                 .param("resourceId", resourceId)
                 .param("version", changed.version())
-                .param("action", action)
+                .param("action", revisionAction)
                 .param("snapshot", objectMapper.writeValueAsString(snapshot))
                 .param("actorId", actor.id())
                 .update();
         auditEventRepository.record(
-                actor.id(), "CONTENT_" + action, resourceType.name(), resourceId,
+                actor.id(), "CONTENT_" + revisionAction, resourceType.name(), resourceId,
                 Map.of("version", changed.version(), "status", changed.state().name()), ipAddress);
         return new ContentStateResponse(
                 resourceType, resourceId, changed.state(), changed.version(), changed.archivedAt(), changed.updatedAt());
@@ -174,14 +171,15 @@ public class ContentRevisionService {
                 + publishedAt + " WHERE id = :id AND version = :expectedVersion";
     }
 
-    private void validateTransition(ContentState currentState, ContentState targetState) {
-        boolean valid = switch (targetState) {
-            case PUBLISHED -> currentState == ContentState.DRAFT;
-            case ARCHIVED -> currentState != ContentState.ARCHIVED;
-            case DRAFT -> currentState == ContentState.ARCHIVED;
+    private void validateTransition(ContentState currentState, ContentAction action) {
+        boolean valid = switch (action) {
+            case PUBLISH -> currentState == ContentState.DRAFT;
+            case ARCHIVE -> currentState != ContentState.ARCHIVED;
+            case RESTORE -> currentState == ContentState.ARCHIVED;
+            case UNPUBLISH -> currentState == ContentState.PUBLISHED;
         };
         if (!valid) {
-            throw conflict("Content cannot move from " + currentState + " to " + targetState);
+            throw conflict("Content cannot perform " + action + " from " + currentState);
         }
     }
 
@@ -244,5 +242,28 @@ public class ContentRevisionService {
         DRAFT,
         PUBLISHED,
         ARCHIVED
+    }
+
+    public enum ContentAction {
+        PUBLISH(ContentState.PUBLISHED, "PUBLISHED"),
+        ARCHIVE(ContentState.ARCHIVED, "ARCHIVED"),
+        RESTORE(ContentState.DRAFT, "RESTORED"),
+        UNPUBLISH(ContentState.DRAFT, "UNPUBLISHED");
+
+        private final ContentState targetState;
+        private final String revisionAction;
+
+        ContentAction(ContentState targetState, String revisionAction) {
+            this.targetState = targetState;
+            this.revisionAction = revisionAction;
+        }
+
+        ContentState targetState() {
+            return targetState;
+        }
+
+        String revisionAction() {
+            return revisionAction;
+        }
     }
 }

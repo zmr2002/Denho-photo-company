@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { workImagesMutationSchema } from "@/lib/admin/validation";
-import { writeAdminApi } from "@/lib/api/browser";
+import { adminResponseMessage, writeAdminApi } from "@/lib/api/browser";
 
 export type AdminWorkImagesFormValues = z.input<typeof workImagesMutationSchema>;
 
@@ -20,12 +20,14 @@ export function AdminWorkImagesForm({ workId, contentVersion, defaultValues }: A
   const router = useRouter();
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const { control, register, handleSubmit, setValue } = useForm<AdminWorkImagesFormValues>({
+  const [version, setVersion] = useState(contentVersion);
+  const { control, register, handleSubmit, setValue, formState: { errors } } = useForm<AdminWorkImagesFormValues>({
     resolver: zodResolver(workImagesMutationSchema),
     defaultValues,
   });
   const { fields, append, remove, move } = useFieldArray({ control, name: "images" });
   const mediaType = useWatch({ control, name: "mediaType" });
+  const images = useWatch({ control, name: "images" });
 
   async function onSubmit(values: AdminWorkImagesFormValues) {
     setSubmitting(true);
@@ -33,7 +35,7 @@ export function AdminWorkImagesForm({ workId, contentVersion, defaultValues }: A
 
     const payload = {
       ...values,
-      expectedVersion: contentVersion,
+      expectedVersion: version,
       galleryEnabled: values.mediaType === "video" ? false : values.galleryEnabled,
       images: (values.images ?? []).map((image, index) => ({ ...image, sortOrder: index })),
     };
@@ -43,10 +45,12 @@ export function AdminWorkImagesForm({ workId, contentVersion, defaultValues }: A
     setSubmitting(false);
 
     if (!response.ok) {
-      setMessage("保存失败。请检查图片资料后重试。");
+      setMessage(adminResponseMessage(response, "保存失败，请稍后重试。"));
       return;
     }
 
+    const result = (await response.json()) as { version: number };
+    setVersion(result.version);
     setMessage("已保存。");
     router.refresh();
   }
@@ -173,8 +177,14 @@ export function AdminWorkImagesForm({ workId, contentVersion, defaultValues }: A
             </div>
 
             <div className="admin-actions">
+              <input type="hidden" {...register(`images.${index}.isCover`)} />
               <label className="admin-inline-check">
-                <input type="checkbox" {...register(`images.${index}.isCover`)} />
+                <input
+                  checked={Boolean(images?.[index]?.isCover)}
+                  name="work-cover"
+                  onChange={() => fields.forEach((_, imageIndex) => setValue(`images.${imageIndex}.isCover`, imageIndex === index, { shouldDirty: true, shouldValidate: true }))}
+                  type="radio"
+                />
                 设为封面
               </label>
               <button className="admin-button-secondary" type="button" disabled={index === 0} onClick={() => move(index, index - 1)}>
@@ -195,6 +205,7 @@ export function AdminWorkImagesForm({ workId, contentVersion, defaultValues }: A
           </article>
         ))}
       </section>
+      {errors.images?.root ? <p className="admin-error">{errors.images.root.message}</p> : null}
 
       <div className="admin-actions">
         <button className="admin-button" disabled={submitting} type="submit">

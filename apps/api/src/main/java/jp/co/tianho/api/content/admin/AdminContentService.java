@@ -1,6 +1,7 @@
 package jp.co.tianho.api.content.admin;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,6 +22,9 @@ import tools.jackson.databind.ObjectMapper;
 
 @Service
 public class AdminContentService {
+
+    private static final String SAFE_HREF_PATTERN = "(?:/[^\\s]*)|(?:https?://[^\\s]+)";
+    private static final String YOUTUBE_HREF_PATTERN = "https://(?:www\\.)?(?:youtube\\.com|youtu\\.be)/[^\\s]+";
 
     private final JdbcClient jdbcClient;
     private final ObjectMapper objectMapper;
@@ -299,7 +303,7 @@ public class AdminContentService {
                     .param("captionJa", image.captionJa(), Types.VARCHAR)
                     .param("captionZh", image.captionZh(), Types.VARCHAR)
                     .param("captionEn", image.captionEn(), Types.VARCHAR)
-                    .param("cover", image.isCover() || index == 0 && input.images().stream().noneMatch(WorkImageInput::isCover))
+                    .param("cover", image.isCover())
                     .param("sortOrder", image.sortOrder())
                     .update();
         }
@@ -388,13 +392,13 @@ public class AdminContentService {
             @Size(max = 2_000) String heroCaption,
             @Size(max = 5_000) String closingNote,
             @Size(max = 240) String ctaLabel,
-            @Size(max = 2_048) String ctaHref,
+            @Size(max = 2_048) @Pattern(regexp = SAFE_HREF_PATTERN) String ctaHref,
             OffsetDateTime publishedAt,
             @Min(0) int displayOrder,
             @NotNull @Size(max = 40) List<@NotBlank @Size(max = 160) String> relatedServices,
             @Size(max = 240) String seoTitle,
             @Size(max = 1_000) String seoDescription,
-            @Size(max = 2_048) String youtubeUrl,
+            @Size(max = 2_048) @Pattern(regexp = YOUTUBE_HREF_PATTERN) String youtubeUrl,
             boolean demo,
             @NotNull @Size(min = 1, max = 200) List<@Valid ArticleBlockInput> blocks) {
     }
@@ -414,13 +418,13 @@ public class AdminContentService {
     public record NoticeInput(
             @NotBlank @Pattern(regexp = "ja|zh|en") String locale,
             boolean enabled,
-            @NotBlank String label,
-            @NotBlank String title,
-            @NotBlank String body,
-            @NotBlank String dismissLabel,
-            String linkLabel,
-            String linkHref,
-            @NotBlank String storageKey,
+            @NotBlank @Size(max = 160) String label,
+            @NotBlank @Size(max = 240) String title,
+            @NotBlank @Size(max = 20_000) String body,
+            @NotBlank @Size(max = 120) String dismissLabel,
+            @Size(max = 240) String linkLabel,
+            @Size(max = 2_048) @Pattern(regexp = SAFE_HREF_PATTERN) String linkHref,
+            @NotBlank @Size(max = 240) String storageKey,
             @NotBlank @Pattern(regexp = "session|local") String dismissalMode,
             OffsetDateTime startAt,
             OffsetDateTime endAt,
@@ -431,19 +435,24 @@ public class AdminContentService {
             long expectedVersion,
             boolean galleryEnabled,
             @NotBlank @Pattern(regexp = "photo|gallery|video") String mediaType,
-            @NotNull List<@Valid WorkImageInput> images) {
+            @NotNull @Size(max = 200) List<@Valid WorkImageInput> images) {
+
+        @AssertTrue(message = "Exactly one cover image is required when images are present")
+        public boolean isCoverSelectionValid() {
+            return images == null || images.isEmpty() || images.stream().filter(WorkImageInput::isCover).count() == 1;
+        }
     }
 
     public record WorkImageInput(
-            @NotBlank String path,
-            @NotBlank String label,
+            @NotBlank @Size(max = 2_048) String path,
+            @NotBlank @Size(max = 240) String label,
             @NotBlank @Pattern(regexp = "neutral|warm|cool|rust") String tone,
-            String altJa,
-            String altZh,
-            String altEn,
-            String captionJa,
-            String captionZh,
-            String captionEn,
+            @Size(max = 1_000) String altJa,
+            @Size(max = 1_000) String altZh,
+            @Size(max = 1_000) String altEn,
+            @Size(max = 2_000) String captionJa,
+            @Size(max = 2_000) String captionZh,
+            @Size(max = 2_000) String captionEn,
             boolean isCover,
             @Min(0) int sortOrder) {
     }

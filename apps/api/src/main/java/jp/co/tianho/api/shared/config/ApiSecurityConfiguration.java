@@ -72,12 +72,15 @@ public class ApiSecurityConfiguration {
                                 "/api/v1/admin/articles/*/publish",
                                 "/api/v1/admin/articles/*/archive",
                                 "/api/v1/admin/articles/*/restore",
+                                "/api/v1/admin/articles/*/unpublish",
                                 "/api/v1/admin/works/*/publish",
                                 "/api/v1/admin/works/*/archive",
                                 "/api/v1/admin/works/*/restore",
+                                "/api/v1/admin/works/*/unpublish",
                                 "/api/v1/admin/notices/*/publish",
                                 "/api/v1/admin/notices/*/archive",
-                                "/api/v1/admin/notices/*/restore")
+                                "/api/v1/admin/notices/*/restore",
+                                "/api/v1/admin/notices/*/unpublish")
                         .hasRole("ADMIN")
                         .requestMatchers("/api/v1/admin/**")
                         .hasAnyRole("ADMIN", "EDITOR")

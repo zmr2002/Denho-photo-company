@@ -109,6 +109,25 @@ class ContentRevisionTests {
     }
 
     @Test
+    void unpublishesDirectlyToDraftAndRecordsRevision() throws Exception {
+        publishAsAdministrator(0).andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/v1/admin/articles/{id}/unpublish", ARTICLE_ID)
+                        .with(authentication(authenticationFor(AdministratorRole.ADMIN)))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"expectedVersion\":1}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("DRAFT"))
+                .andExpect(jsonPath("$.version").value(2));
+
+        mockMvc.perform(get("/api/v1/admin/articles/{id}/revisions", ARTICLE_ID)
+                        .with(authentication(authenticationFor(AdministratorRole.ADMIN))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].action").value("UNPUBLISHED"));
+    }
+
+    @Test
     void preventsEditorsFromPublishing() throws Exception {
         mockMvc.perform(post("/api/v1/admin/articles/{id}/publish", ARTICLE_ID)
                         .with(authentication(authenticationFor(AdministratorRole.EDITOR)))
