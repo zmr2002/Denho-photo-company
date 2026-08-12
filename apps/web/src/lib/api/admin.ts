@@ -72,6 +72,15 @@ export type AdministratorUser = {
   createdAt: string;
 };
 
+export type AuditEvent = {
+  id: string;
+  eventType: string;
+  resourceType: string;
+  resourceId: string | null;
+  actorDisplayName: string;
+  occurredAt: string;
+};
+
 export type AdminRevision = {
   id: string;
   version: number;
@@ -125,6 +134,11 @@ export async function getInquiries(status: Inquiry["status"]) {
 export async function getAdministratorUsers() {
   const response = await adminApiFetch("/api/v1/admin/users");
   return response.json() as Promise<AdministratorUser[]>;
+}
+
+export async function getAuditEvents() {
+  const response = await adminApiFetch("/api/v1/admin/audit-events");
+  return response.json() as Promise<AuditEvent[]>;
 }
 
 export async function getAdminRevisions(collection: "articles" | "works" | "notices", id: string) {

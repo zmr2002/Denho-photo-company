@@ -1042,6 +1042,27 @@
           }
         }
       }
+    },
+    "/api/v1/admin/audit-events" : {
+      "get" : {
+        "tags" : [ "audit-event-controller" ],
+        "operationId" : "recentEvents",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/AuditEventResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components" : {
@@ -1542,54 +1563,54 @@
           "string" : {
             "type" : "boolean"
           },
-          "pojo" : {
-            "type" : "boolean"
-          },
-          "int" : {
-            "type" : "boolean"
-          },
-          "short" : {
+          "number" : {
             "type" : "boolean"
           },
           "long" : {
             "type" : "boolean"
           },
-          "double" : {
+          "int" : {
+            "type" : "boolean"
+          },
+          "binary" : {
             "type" : "boolean"
           },
           "textual" : {
             "type" : "boolean",
             "deprecated" : true
           },
+          "pojo" : {
+            "type" : "boolean"
+          },
           "boolean" : {
             "type" : "boolean"
           },
-          "binary" : {
+          "double" : {
             "type" : "boolean"
           },
-          "floatingPointNumber" : {
+          "short" : {
             "type" : "boolean"
           },
           "missingNode" : {
             "type" : "boolean"
           },
-          "integralNumber" : {
+          "valueNode" : {
             "type" : "boolean"
           },
-          "bigDecimal" : {
-            "type" : "boolean"
-          },
-          "bigInteger" : {
+          "floatingPointNumber" : {
             "type" : "boolean"
           },
           "nodeType" : {
             "type" : "string",
             "enum" : [ "ARRAY", "BINARY", "BOOLEAN", "MISSING", "NULL", "NUMBER", "OBJECT", "POJO", "STRING" ]
           },
-          "valueNode" : {
+          "bigInteger" : {
             "type" : "boolean"
           },
-          "number" : {
+          "bigDecimal" : {
+            "type" : "boolean"
+          },
+          "integralNumber" : {
             "type" : "boolean"
           },
           "embeddedValue" : {
@@ -2285,6 +2306,32 @@
             "format" : "uuid"
           },
           "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
+      "AuditEventResponse" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "eventType" : {
+            "type" : "string"
+          },
+          "resourceType" : {
+            "type" : "string"
+          },
+          "resourceId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "actorDisplayName" : {
+            "type" : "string"
+          },
+          "occurredAt" : {
             "type" : "string",
             "format" : "date-time"
           }

@@ -463,6 +463,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/audit-events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["recentEvents"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -626,24 +642,24 @@ export interface components {
             float?: boolean;
             container?: boolean;
             string?: boolean;
-            pojo?: boolean;
-            int?: boolean;
-            short?: boolean;
+            number?: boolean;
             long?: boolean;
-            double?: boolean;
+            int?: boolean;
+            binary?: boolean;
             /** @deprecated */
             textual?: boolean;
+            pojo?: boolean;
             boolean?: boolean;
-            binary?: boolean;
-            floatingPointNumber?: boolean;
+            double?: boolean;
+            short?: boolean;
             missingNode?: boolean;
-            integralNumber?: boolean;
-            bigDecimal?: boolean;
-            bigInteger?: boolean;
+            valueNode?: boolean;
+            floatingPointNumber?: boolean;
             /** @enum {string} */
             nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
-            valueNode?: boolean;
-            number?: boolean;
+            bigInteger?: boolean;
+            bigDecimal?: boolean;
+            integralNumber?: boolean;
             embeddedValue?: boolean;
         };
         WorkImageInput: {
@@ -886,6 +902,17 @@ export interface components {
             actorId?: string;
             /** Format: date-time */
             createdAt?: string;
+        };
+        AuditEventResponse: {
+            /** Format: uuid */
+            id?: string;
+            eventType?: string;
+            resourceType?: string;
+            /** Format: uuid */
+            resourceId?: string;
+            actorDisplayName?: string;
+            /** Format: date-time */
+            occurredAt?: string;
         };
     };
     responses: never;
@@ -1699,6 +1726,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["InquiryResponse"][];
+                };
+            };
+        };
+    };
+    recentEvents: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AuditEventResponse"][];
                 };
             };
         };

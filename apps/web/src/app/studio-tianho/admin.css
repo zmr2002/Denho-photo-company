@@ -1164,6 +1164,46 @@
   font-size: 0.72rem;
 }
 
+.admin-activity-list {
+  display: grid;
+  list-style: none;
+}
+
+.admin-activity-list li {
+  display: grid;
+  grid-template-columns: 0.75rem 1fr;
+  gap: 0.75rem;
+  min-height: 4rem;
+}
+
+.admin-activity-marker {
+  position: relative;
+  width: 0.65rem;
+  height: 0.65rem;
+  margin-top: 0.35rem;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--admin-accent, #c95838);
+  box-shadow: 0 0 0 1px #d8d2ca;
+}
+
+.admin-activity-list li:not(:last-child) .admin-activity-marker::after {
+  position: absolute;
+  top: 0.65rem;
+  bottom: -3rem;
+  left: 50%;
+  width: 1px;
+  background: #ddd7cf;
+  content: "";
+}
+
+.admin-activity-list small {
+  display: block;
+  margin-top: 0.3rem;
+  color: var(--admin-muted, #77736d);
+  font-size: 0.7rem;
+}
+
 .admin-login-page {
   min-height: 100vh;
   display: grid;
