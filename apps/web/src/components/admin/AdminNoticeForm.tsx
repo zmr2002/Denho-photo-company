@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { AdminActionFeedback, useAdministrationAction } from "@/components/admin/AdminActionFeedback";
 import { noticeMutationSchema } from "@/lib/admin/validation";
 import { useUnsavedChanges } from "@/lib/admin/useUnsavedChanges";
 import { adminResponseMessage, writeAdminApi } from "@/lib/api/browser";
@@ -20,9 +21,8 @@ function localeLabel(locale: AdminNoticeFormValues["locale"]) {
 
 export function AdminNoticeForm({ defaultValues, contentVersion = 0 }: { defaultValues: AdminNoticeFormValues; contentVersion?: number }) {
   const router = useRouter();
-  const [message, setMessage] = useState("");
-  const [submitting, setSubmitting] = useState(false);
   const [version, setVersion] = useState(contentVersion);
+  const { feedback, pending: submitting, run, showError, showSuccess } = useAdministrationAction();
   const {
     register,
     handleSubmit,
@@ -35,48 +35,45 @@ export function AdminNoticeForm({ defaultValues, contentVersion = 0 }: { default
   useUnsavedChanges(isDirty);
 
   async function onSubmit(values: AdminNoticeFormValues) {
-    setSubmitting(true);
-    setMessage("");
+    await run(async () => {
+      const response = await writeAdminApi("/api/v1/admin/notices", "PATCH", {
+        ...values,
+        startAt: siteDateInputToTimestamp(values.startAt),
+        endAt: siteDateInputToTimestamp(values.endAt),
+        expectedVersion: version,
+      });
 
-    const response = await writeAdminApi("/api/v1/admin/notices", "PATCH", {
-      ...values,
-      startAt: siteDateInputToTimestamp(values.startAt),
-      endAt: siteDateInputToTimestamp(values.endAt),
-      expectedVersion: version,
+      if (!response.ok) {
+        showError(adminResponseMessage(response, "保存失败，请稍后重试。"));
+        return;
+      }
+
+      const result = (await response.json()) as { id: string; version: number; status: string };
+      setVersion(result.version);
+      if (values.status === "published" && result.status === "DRAFT") {
+        const publishResponse = await writeAdminApi(`/api/v1/admin/notices/${result.id}/publish`, "POST", { expectedVersion: result.version });
+        if (!publishResponse.ok) {
+          showError(adminResponseMessage(publishResponse, "通知已保存为草稿，但无法发布当前版本。"));
+          router.refresh();
+          return;
+        }
+        const published = (await publishResponse.json()) as { version: number };
+        setVersion(published.version);
+      }
+      if (values.status === "draft" && result.status === "PUBLISHED") {
+        const unpublishResponse = await writeAdminApi(`/api/v1/admin/notices/${result.id}/unpublish`, "POST", { expectedVersion: result.version });
+        if (!unpublishResponse.ok) {
+          showError(adminResponseMessage(unpublishResponse, "通知已保存，但无法撤下当前发布版本。"));
+          router.refresh();
+          return;
+        }
+        const unpublished = (await unpublishResponse.json()) as { version: number };
+        setVersion(unpublished.version);
+      }
+      reset(values);
+      showSuccess("通知已保存。");
+      router.refresh();
     });
-
-    setSubmitting(false);
-
-    if (!response.ok) {
-      setMessage(adminResponseMessage(response, "保存失败，请稍后重试。"));
-      return;
-    }
-
-    const result = (await response.json()) as { id: string; version: number; status: string };
-    setVersion(result.version);
-    if (values.status === "published" && result.status === "DRAFT") {
-      const publishResponse = await writeAdminApi(`/api/v1/admin/notices/${result.id}/publish`, "POST", { expectedVersion: result.version });
-      if (!publishResponse.ok) {
-        setMessage(adminResponseMessage(publishResponse, "通知已保存为草稿，但无法发布当前版本。"));
-        router.refresh();
-        return;
-      }
-      const published = (await publishResponse.json()) as { version: number };
-      setVersion(published.version);
-    }
-    if (values.status === "draft" && result.status === "PUBLISHED") {
-      const unpublishResponse = await writeAdminApi(`/api/v1/admin/notices/${result.id}/unpublish`, "POST", { expectedVersion: result.version });
-      if (!unpublishResponse.ok) {
-        setMessage(adminResponseMessage(unpublishResponse, "通知已保存，但无法撤下当前发布版本。"));
-        router.refresh();
-        return;
-      }
-      const unpublished = (await unpublishResponse.json()) as { version: number };
-      setVersion(unpublished.version);
-    }
-    reset(values);
-    setMessage("已保存。");
-    router.refresh();
   }
 
   return (
@@ -173,7 +170,7 @@ export function AdminNoticeForm({ defaultValues, contentVersion = 0 }: { default
         <button className="admin-button" disabled={submitting} type="submit">
           {submitting ? "保存中" : "保存通知"}
         </button>
-        {message ? <p className="admin-user">{message}</p> : null}
+        <AdminActionFeedback feedback={feedback} />
       </div>
     </form>
   );

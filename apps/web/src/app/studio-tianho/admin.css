@@ -697,11 +697,23 @@
 
 .admin-save-message {
   min-height: 1.4rem;
-  color: #5d685a;
-  font-size: 0.8rem;
 }
 
-.admin-save-message:not(:empty) {
+.admin-action-feedback {
+  min-height: 1.25rem;
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.admin-action-feedback-success {
+  color: #486045;
+}
+
+.admin-action-feedback-error {
+  color: #9f3426;
+}
+
+.admin-action-feedback:not(:empty) {
   animation: admin-message-pulse 360ms ease-out both;
 }
 
@@ -879,7 +891,7 @@
   .admin-block,
   .admin-advanced-content,
   .admin-login-panel,
-  .admin-save-message:not(:empty) {
+  .admin-action-feedback:not(:empty) {
     animation: none;
   }
 
