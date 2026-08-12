@@ -1,4 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
+import { randomBytes, randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -9,6 +10,15 @@ const databasePort = process.env.API_TEST_DATABASE_PORT || localEnvironment.POST
 const databaseName = process.env.API_TEST_DATABASE_NAME || localEnvironment.POSTGRES_DB || "tianho";
 const databaseUsername = process.env.API_TEST_DATABASE_USERNAME || localEnvironment.POSTGRES_USER || "tianho";
 const databasePassword = process.env.API_TEST_DATABASE_PASSWORD || localEnvironment.POSTGRES_PASSWORD || "tianho-local";
+const browserRunId = process.env.BROWSER_TEST_RUN_ID || randomUUID();
+const browserAdministratorEmail = `browser-${browserRunId}@example.test`;
+const browserAdministratorPassword = `browser-${browserRunId}-password`;
+const clientAddressBytes = randomBytes(2);
+const browserClientAddress = process.env.BROWSER_TEST_CLIENT_IP || `198.18.${clientAddressBytes[0]}.${clientAddressBytes[1]}`;
+process.env.BROWSER_TEST_RUN_ID = browserRunId;
+process.env.BROWSER_TEST_ADMIN_EMAIL = browserAdministratorEmail;
+process.env.BROWSER_TEST_ADMIN_PASSWORD = browserAdministratorPassword;
+process.env.BROWSER_TEST_CLIENT_IP = browserClientAddress;
 const isWindows = process.platform === "win32";
 const webCommand = isWindows
   ? "set CONTENT_PROVIDER=mock&& npm run build && set CONTENT_PROVIDER=api&& npm run start"
@@ -43,6 +53,10 @@ export default defineConfig({
         DATABASE_PASSWORD: databasePassword,
         SESSION_SCHEMA_INITIALIZATION: "never",
         CONTENT_BOOTSTRAP_ENABLED: "true",
+        ADMIN_BOOTSTRAP_ENABLED: "true",
+        ADMIN_BOOTSTRAP_EMAIL: browserAdministratorEmail,
+        ADMIN_BOOTSTRAP_PASSWORD: browserAdministratorPassword,
+        ADMIN_BOOTSTRAP_DISPLAY_NAME: "浏览器验收账号",
       },
       url: `${apiBaseUrl}/actuator/health/readiness`,
       reuseExistingServer: !process.env.CI,
