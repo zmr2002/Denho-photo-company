@@ -496,7 +496,6 @@ export interface components {
             locale: string;
             consentVersion: string;
             consented?: boolean;
-            turnstileToken?: string;
             companyWebsite?: string;
         };
         PublicInquiryResponse: {
@@ -641,25 +640,25 @@ export interface components {
             object?: boolean;
             float?: boolean;
             container?: boolean;
-            string?: boolean;
-            number?: boolean;
-            long?: boolean;
-            int?: boolean;
-            binary?: boolean;
-            /** @deprecated */
-            textual?: boolean;
-            pojo?: boolean;
-            boolean?: boolean;
-            double?: boolean;
-            short?: boolean;
-            missingNode?: boolean;
-            valueNode?: boolean;
-            floatingPointNumber?: boolean;
             /** @enum {string} */
             nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
-            bigInteger?: boolean;
-            bigDecimal?: boolean;
             integralNumber?: boolean;
+            floatingPointNumber?: boolean;
+            missingNode?: boolean;
+            bigInteger?: boolean;
+            valueNode?: boolean;
+            bigDecimal?: boolean;
+            number?: boolean;
+            int?: boolean;
+            long?: boolean;
+            double?: boolean;
+            binary?: boolean;
+            short?: boolean;
+            /** @deprecated */
+            textual?: boolean;
+            string?: boolean;
+            boolean?: boolean;
+            pojo?: boolean;
             embeddedValue?: boolean;
         };
         WorkImageInput: {

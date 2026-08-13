@@ -198,7 +198,6 @@ class InquiryProtectionTests {
                   "locale":"en",
                   "consentVersion":"2026-07",
                   "consented":true,
-                  "turnstileToken":"",
                   "companyWebsite":"%s"
                 }
                 """.formatted(idempotencyKey, website);

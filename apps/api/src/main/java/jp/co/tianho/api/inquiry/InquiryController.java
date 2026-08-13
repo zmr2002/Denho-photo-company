@@ -45,7 +45,7 @@ public class InquiryController {
         if (request.companyWebsite() != null && !request.companyWebsite().isBlank()) {
             return new PublicInquiryResponse(UUID.randomUUID(), InquiryStatus.NEW, java.time.OffsetDateTime.now());
         }
-        String ipHash = protectionService.verify(servletRequest.getRemoteAddr(), request.turnstileToken());
+        String ipHash = protectionService.verify(servletRequest.getRemoteAddr());
         return inquiryService.create(request, ipHash);
     }
 

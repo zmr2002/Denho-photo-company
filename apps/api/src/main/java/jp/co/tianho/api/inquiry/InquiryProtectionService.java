@@ -17,22 +17,19 @@ import org.springframework.transaction.support.TransactionTemplate;
 public class InquiryProtectionService {
 
     private final JdbcClient jdbcClient;
-    private final TurnstileVerifier turnstileVerifier;
     private final String ipHashKey;
     private final TransactionTemplate transactionTemplate;
 
     public InquiryProtectionService(
             JdbcClient jdbcClient,
-            TurnstileVerifier turnstileVerifier,
             PlatformTransactionManager transactionManager,
             @Value("${tianho.inquiry.ip-hash-key}") String ipHashKey) {
         this.jdbcClient = jdbcClient;
-        this.turnstileVerifier = turnstileVerifier;
         this.ipHashKey = ipHashKey;
         this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
 
-    public String verify(String remoteAddress, String turnstileToken) {
+    public String verify(String remoteAddress) {
         String ipHash = hashAddress(remoteAddress);
         Integer requestCount = transactionTemplate.execute(status -> jdbcClient.sql("""
                         INSERT INTO inquiry_request_buckets (ip_hash, bucket_start, request_count)
@@ -51,7 +48,6 @@ public class InquiryProtectionService {
                 .single());
         if (requestCount == null) throw new IllegalStateException("Inquiry rate limit could not be updated");
         if (requestCount > 5) throw new InquiryRateLimitException();
-        turnstileVerifier.verify(turnstileToken, remoteAddress);
         return ipHash;
     }
 
