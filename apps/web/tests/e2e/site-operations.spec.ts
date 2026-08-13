@@ -81,6 +81,8 @@ test("protects administration and exposes readiness", async ({ page, request }) 
   const unauthorized = await request.get(`${apiBaseUrl}/api/v1/admin/inquiries`);
   expect(unauthorized.status()).toBe(401);
   expect(unauthorized.headers()["cache-control"]).toContain("no-store");
+  expect(unauthorized.headers()["content-security-policy"]).toContain("connect-src 'self'");
+  expect(unauthorized.headers()["content-security-policy"]).toContain("frame-src 'none'");
 
   for (const path of [
     "/studio-tianho/preview/articles/example/",
