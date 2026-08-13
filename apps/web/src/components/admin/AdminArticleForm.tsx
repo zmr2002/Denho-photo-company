@@ -9,7 +9,7 @@ import { AdminActionFeedback, useAdministrationAction } from "@/components/admin
 import { ArticleRevisionHistory } from "@/components/admin/ArticleRevisionHistory";
 import { UnsavedArticlePreview } from "@/components/admin/UnsavedArticlePreview";
 import { MediaPickerDialog } from "@/components/admin/MediaPickerDialog";
-import { articleMutationSchema } from "@/lib/admin/validation";
+import { articleMutationSchema, nullable } from "@/lib/admin/validation";
 import { useUnsavedChanges } from "@/lib/admin/useUnsavedChanges";
 import { adminResponseMessage, writeAdminApi } from "@/lib/api/browser";
 import { articleToFormValues } from "@/lib/admin/article-form";
@@ -92,8 +92,26 @@ export function AdminArticleForm({
       const payload = {
         ...values,
         excerpt: resolveArticleExcerpt(values.excerpt, values.blocks, values.title),
+        heroLabel: nullable(values.heroLabel),
+        heroImagePath: nullable(values.heroImagePath),
+        heroAlt: nullable(values.heroAlt),
+        heroCaption: nullable(values.heroCaption),
+        closingNote: nullable(values.closingNote),
+        ctaLabel: nullable(values.ctaLabel),
+        ctaHref: nullable(values.ctaHref),
+        seoTitle: nullable(values.seoTitle),
+        seoDescription: nullable(values.seoDescription),
+        youtubeUrl: nullable(values.youtubeUrl),
         relatedServices: splitLines(values.relatedServicesText),
-        blocks: values.blocks.map((block, index) => ({ ...block, sortOrder: index })),
+        blocks: values.blocks.map((block, index) => ({
+          ...block,
+          heading: nullable(block.heading),
+          body: nullable(block.body),
+          imagePath: nullable(block.imagePath),
+          imageAlt: nullable(block.imageAlt),
+          caption: nullable(block.caption),
+          sortOrder: index,
+        })),
         publishedAt: siteDateInputToTimestamp(values.publishedAt),
         demo: isTutorial,
       };

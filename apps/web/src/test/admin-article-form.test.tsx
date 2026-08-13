@@ -93,6 +93,15 @@ describe("article editor", () => {
       ],
     });
     expect(payload).not.toHaveProperty("relatedServicesText");
+    expect(payload).toMatchObject({
+      ctaHref: null,
+      heroImagePath: null,
+      youtubeUrl: null,
+      blocks: [
+        { type: "paragraph", body: "这是第一段正文，会自动成为文章摘要。", heading: null },
+        { type: "heading", heading: "拍摄准备", body: null },
+      ],
+    });
     expect(router.refresh).toHaveBeenCalled();
     expect(router.push).toHaveBeenCalledWith("/studio-tianho/articles/article-1");
     expect(await screen.findByText("文章已保存。")).toBeVisible();
