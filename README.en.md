@@ -41,7 +41,7 @@ My work covers requirements clarification, information architecture, frontend an
 - Argon2id password hashing
 - Passwords of at least 8 characters with temporary lockout after repeated failures
 - Server-side sessions and authorization checks
-- Form protection with Cloudflare Turnstile, origin validation, and rate limiting
+- Form protection with origin validation, a honeypot field, and rate limiting
 - Security headers including Content Security Policy
 - Database migrations with Flyway
 - Encrypted backup and restore-verification tooling
