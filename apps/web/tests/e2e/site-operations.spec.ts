@@ -23,6 +23,8 @@ test("serves all public language routes with security headers", async ({ page, r
   expect(response?.headers()["content-security-policy"]).toContain("default-src 'self'");
   expect(response?.headers()["content-security-policy"]).toMatch(/'nonce-[^']+'/);
   expect(response?.headers()["content-security-policy"]).not.toMatch(/script-src [^;]*'unsafe-inline'/);
+  expect(response?.headers()["content-security-policy"]).toContain("connect-src 'self'");
+  expect(response?.headers()["content-security-policy"]).toContain("frame-src 'none'");
   expect(response?.headers()["content-security-policy"]).not.toContain("upgrade-insecure-requests");
   expect(response?.headers()["content-security-policy-report-only"]).toBeUndefined();
 
