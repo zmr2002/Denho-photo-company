@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { getCsrfHeaders, writeAdminApi } from "@/lib/api/browser";
+import { uploadAdminMedia, writeAdminApi } from "@/lib/api/browser";
 import type { MediaAsset } from "@/lib/api/admin";
 
 type MediaLibraryPanelProps = {
@@ -25,21 +25,13 @@ export function MediaLibraryPanel({ activeAssets, recycledAssets }: MediaLibrary
     setUploading(true);
     setMessage("");
     try {
-      const csrfHeaders = await getCsrfHeaders();
-      if (!csrfHeaders) {
-        setMessage("无法取得安全验证信息，请刷新页面。");
+      const result = await uploadAdminMedia(file);
+      if (result.validationMessage) {
+        setMessage(result.validationMessage);
         return;
       }
-      const body = new FormData();
-      body.append("file", file);
-      const response = await fetch("/api/v1/admin/media", {
-        method: "POST",
-        credentials: "same-origin",
-        headers: csrfHeaders,
-        body,
-      });
-      if (!response.ok) {
-        const problem = (await response.json().catch(() => null)) as { detail?: string } | null;
+      if (!result.response?.ok) {
+        const problem = (await result.response?.json().catch(() => null)) as { detail?: string } | null;
         setMessage(problem?.detail || "上传失败，请检查图片格式和大小。网络中断时可以直接重试。");
         return;
       }

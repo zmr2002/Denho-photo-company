@@ -909,6 +909,31 @@
   font-weight: 600;
 }
 
+.admin-picker-upload {
+  display: grid;
+  grid-template-columns: minmax(12rem, 1fr) minmax(13rem, 1.2fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  background: var(--admin-surface, #f7f5f2);
+}
+
+.admin-picker-upload div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.admin-picker-upload small {
+  color: var(--admin-muted, #77736d);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.admin-picker-upload .admin-error {
+  grid-column: 1 / -1;
+}
+
 .admin-picker-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
@@ -1346,6 +1371,10 @@
   .admin-revision-actions {
     grid-column: 1 / -1;
     justify-content: flex-start;
+  }
+
+  .admin-picker-upload {
+    grid-template-columns: 1fr;
   }
 
 }

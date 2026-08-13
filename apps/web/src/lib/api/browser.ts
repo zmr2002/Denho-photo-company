@@ -28,6 +28,33 @@ export async function writeAdminApi(path: string, method: "POST" | "PATCH", body
   }
 }
 
+export function validateMediaFile(file: Pick<File, "size" | "type">) {
+  if (file.type !== "image/jpeg" && file.type !== "image/png") return "只能上传 JPEG 或 PNG 图片。";
+  if (file.size > 15 * 1024 * 1024) return "图片不能超过 15 MB。";
+  return null;
+}
+
+export async function uploadAdminMedia(file: File) {
+  const validationMessage = validateMediaFile(file);
+  if (validationMessage) return { response: null, validationMessage };
+
+  const csrfHeaders = await getCsrfHeaders();
+  if (!csrfHeaders) return { response: new Response(null, { status: 503 }), validationMessage: null };
+  const body = new FormData();
+  body.append("file", file);
+  try {
+    const response = await fetch("/api/v1/admin/media", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: csrfHeaders,
+      body,
+    });
+    return { response, validationMessage: null };
+  } catch {
+    return { response: new Response(null, { status: 503 }), validationMessage: null };
+  }
+}
+
 export function adminResponseMessage(response: Response, fallback: string) {
   if (response.status === 401) return "登录已过期。请重新登录，当前页面内容仍会保留。";
   if (response.status === 403) return "当前账号没有执行此操作的权限。";
