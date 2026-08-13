@@ -3,13 +3,17 @@ package jp.co.tianho.api.media;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import jp.co.tianho.api.audit.AuditEventRepository;
 import jp.co.tianho.api.auth.AdministratorPrincipal;
 import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Service
 public class MediaLifecycleService {
@@ -18,16 +22,19 @@ public class MediaLifecycleService {
     private final MediaAssetRepository assetRepository;
     private final MediaObjectStorage objectStorage;
     private final AuditEventRepository auditEventRepository;
+    private final TransactionTemplate transactionTemplate;
 
     public MediaLifecycleService(
             JdbcClient jdbcClient,
             MediaAssetRepository assetRepository,
             MediaObjectStorage objectStorage,
-            AuditEventRepository auditEventRepository) {
+            AuditEventRepository auditEventRepository,
+            PlatformTransactionManager transactionManager) {
         this.jdbcClient = jdbcClient;
         this.assetRepository = assetRepository;
         this.objectStorage = objectStorage;
         this.auditEventRepository = auditEventRepository;
+        this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
 
     @Transactional
@@ -71,8 +78,32 @@ public class MediaLifecycleService {
         return assetRepository.findById(id).orElseThrow(MediaAssetNotFoundException::new);
     }
 
-    @Transactional
     public void purge(UUID id, AdministratorPrincipal actor, String ipAddress) {
+        CleanupTask cleanup = transactionTemplate.execute(status -> prepareCleanup(id, actor, ipAddress));
+        if (cleanup == null) throw new IllegalStateException("Media cleanup could not be prepared");
+        completeCleanup(cleanup);
+    }
+
+    @Scheduled(
+            fixedDelayString = "${tianho.media.cleanup.retry-delay:3600000}",
+            initialDelayString = "${tianho.media.cleanup.initial-delay:60000}")
+    public void retryIncompleteCleanups() {
+        List<CleanupTask> cleanups = jdbcClient.sql("""
+                        SELECT id, object_key, thumbnail_key
+                        FROM media_cleanup_records
+                        WHERE result IN ('PENDING', 'FAILED')
+                        ORDER BY cleaned_at, id
+                        LIMIT 20
+                        """)
+                .query((resultSet, rowNumber) -> new CleanupTask(
+                        resultSet.getObject("id", UUID.class),
+                        resultSet.getString("object_key"),
+                        resultSet.getString("thumbnail_key")))
+                .list();
+        cleanups.forEach(this::completeCleanup);
+    }
+
+    private CleanupTask prepareCleanup(UUID id, AdministratorPrincipal actor, String ipAddress) {
         StoredAsset asset = requireAsset(id);
         if (asset.status() != MediaAssetStatus.TRASHED
                 || asset.purgeAfter() == null
@@ -83,13 +114,6 @@ public class MediaLifecycleService {
             throw new MediaLifecycleException("Referenced media cannot be permanently removed");
         }
 
-        try {
-            objectStorage.delete(asset.objectKey());
-            objectStorage.delete(asset.thumbnailKey());
-        } catch (RuntimeException exception) {
-            recordCleanup(asset, "FAILED", "Object storage deletion failed");
-            throw exception;
-        }
         int updated = jdbcClient.sql("""
                         UPDATE media_assets SET status = 'DELETED', trashed_at = NULL, purge_after = NULL,
                             updated_at = CURRENT_TIMESTAMP
@@ -100,9 +124,20 @@ public class MediaLifecycleService {
                 .param("id", id)
                 .update();
         requireUpdated(updated);
-        recordCleanup(asset, "DELETED", null);
+        UUID cleanupId = recordCleanup(asset, "PENDING", null);
         auditEventRepository.record(
                 actor.id(), "MEDIA_DELETED", "MEDIA_ASSET", id, Map.of(), ipAddress);
+        return new CleanupTask(cleanupId, asset.objectKey(), asset.thumbnailKey());
+    }
+
+    private void completeCleanup(CleanupTask cleanup) {
+        try {
+            objectStorage.delete(cleanup.objectKey());
+            objectStorage.delete(cleanup.thumbnailKey());
+            updateCleanup(cleanup.id(), "DELETED", null);
+        } catch (RuntimeException exception) {
+            updateCleanup(cleanup.id(), "FAILED", "Object storage deletion will be retried");
+        }
     }
 
     private StoredAsset requireAsset(UUID id) {
@@ -129,17 +164,32 @@ public class MediaLifecycleService {
                 referenceCount);
     }
 
-    private void recordCleanup(StoredAsset asset, String result, String details) {
+    private UUID recordCleanup(StoredAsset asset, String result, String details) {
+        UUID cleanupId = UUID.randomUUID();
         jdbcClient.sql("""
                         INSERT INTO media_cleanup_records (
-                            asset_id, object_key, thumbnail_key, result, details
+                            id, asset_id, object_key, thumbnail_key, result, details
                         ) VALUES (
-                            :assetId, :objectKey, :thumbnailKey, :result, :details
+                            :id, :assetId, :objectKey, :thumbnailKey, :result, :details
                         )
                         """)
+                .param("id", cleanupId)
                 .param("assetId", asset.id())
                 .param("objectKey", asset.objectKey())
                 .param("thumbnailKey", asset.thumbnailKey())
+                .param("result", result)
+                .param("details", details, java.sql.Types.VARCHAR)
+                .update();
+        return cleanupId;
+    }
+
+    private void updateCleanup(UUID cleanupId, String result, String details) {
+        jdbcClient.sql("""
+                        UPDATE media_cleanup_records
+                        SET result = :result, details = :details, cleaned_at = CURRENT_TIMESTAMP
+                        WHERE id = :id AND result <> 'DELETED'
+                        """)
+                .param("id", cleanupId)
                 .param("result", result)
                 .param("details", details, java.sql.Types.VARCHAR)
                 .update();
@@ -166,5 +216,8 @@ public class MediaLifecycleService {
             MediaAssetStatus status,
             OffsetDateTime purgeAfter,
             long referenceCount) {
+    }
+
+    private record CleanupTask(UUID id, String objectKey, String thumbnailKey) {
     }
 }
