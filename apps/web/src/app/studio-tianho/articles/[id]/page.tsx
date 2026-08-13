@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AdminArticleForm } from "@/components/admin/AdminArticleForm";
-import { ArticleRevisionHistory } from "@/components/admin/ArticleRevisionHistory";
+import { ArticleEditorWorkspace } from "@/components/admin/ArticleEditorWorkspace";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { articleToFormValues } from "@/lib/admin/article-form";
 import { isTutorialArticle, localeLabel, statusLabel } from "@/lib/admin/labels";
@@ -62,14 +61,14 @@ export default async function EditAdminArticlePage({ params }: PageProps) {
             </Link>
           </div>
         </header>
-        <AdminArticleForm
+        <ArticleEditorWorkspace
           articleId={article.id}
           canManagePublication={session.role === "ADMIN"}
           contentVersion={article.version}
           defaultValues={articleToFormValues(article)}
           isTutorial={isTutorialArticle(article)}
+          revisions={revisions}
         />
-        <ArticleRevisionHistory revisions={revisions} />
       </section>
     </AdminShell>
   );

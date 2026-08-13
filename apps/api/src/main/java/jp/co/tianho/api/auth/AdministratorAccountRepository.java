@@ -21,7 +21,7 @@ class AdministratorAccountRepository {
     Optional<AdministratorAccount> findByEmail(String email) {
         return jdbcClient.sql("""
                         SELECT id, email, display_name, password_hash, password_scheme, role, active,
-                               verified_at, failed_login_count, locked_until
+                               failed_login_count, locked_until
                         FROM administrator_users
                         WHERE email = :email
                         """)
@@ -100,7 +100,9 @@ class AdministratorAccountRepository {
         return jdbcClient.sql("""
                         SELECT count(*)
                         FROM administrator_login_attempts
-                        WHERE ip_address = :ipAddress AND attempted_at >= :since
+                        WHERE ip_address = :ipAddress
+                          AND successful = FALSE
+                          AND attempted_at >= :since
                         """)
                 .param("ipAddress", ipAddress)
                 .param("since", since)
@@ -111,9 +113,9 @@ class AdministratorAccountRepository {
     void createBootstrapAdministrator(String email, String displayName, String passwordHash) {
         jdbcClient.sql("""
                         INSERT INTO administrator_users (
-                            email, display_name, password_hash, password_scheme, role, active, verified_at
+                            email, display_name, password_hash, password_scheme, role, active
                         ) VALUES (
-                            :email, :displayName, :passwordHash, 'ARGON2ID', 'ADMIN', TRUE, CURRENT_TIMESTAMP
+                            :email, :displayName, :passwordHash, 'ARGON2ID', 'ADMIN', TRUE
                         )
                         ON CONFLICT (email) DO NOTHING
                         """)
@@ -132,7 +134,6 @@ class AdministratorAccountRepository {
                 resultSet.getString("password_scheme"),
                 resultSet.getString("role"),
                 resultSet.getBoolean("active"),
-                resultSet.getObject("verified_at", OffsetDateTime.class),
                 resultSet.getInt("failed_login_count"),
                 resultSet.getObject("locked_until", OffsetDateTime.class));
     }

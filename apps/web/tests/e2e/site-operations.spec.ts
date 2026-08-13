@@ -23,6 +23,8 @@ test("serves all public language routes with security headers", async ({ page, r
   expect(response?.headers()["content-security-policy"]).toContain("default-src 'self'");
   expect(response?.headers()["content-security-policy"]).toMatch(/'nonce-[^']+'/);
   expect(response?.headers()["content-security-policy"]).not.toMatch(/script-src [^;]*'unsafe-inline'/);
+  expect(response?.headers()["content-security-policy"]).toContain("connect-src 'self'");
+  expect(response?.headers()["content-security-policy"]).toContain("frame-src 'none'");
   expect(response?.headers()["content-security-policy"]).not.toContain("upgrade-insecure-requests");
   expect(response?.headers()["content-security-policy-report-only"]).toBeUndefined();
 
@@ -79,6 +81,8 @@ test("protects administration and exposes readiness", async ({ page, request }) 
   const unauthorized = await request.get(`${apiBaseUrl}/api/v1/admin/inquiries`);
   expect(unauthorized.status()).toBe(401);
   expect(unauthorized.headers()["cache-control"]).toContain("no-store");
+  expect(unauthorized.headers()["content-security-policy"]).toContain("connect-src 'self'");
+  expect(unauthorized.headers()["content-security-policy"]).toContain("frame-src 'none'");
 
   for (const path of [
     "/studio-tianho/preview/articles/example/",
@@ -87,7 +91,10 @@ test("protects administration and exposes readiness", async ({ page, request }) 
     "/studio-tianho/preview/notices/zh/",
   ]) {
     await page.goto(path);
-    await expect(page).toHaveURL(/\/studio-tianho\/login\/?$/);
+    await expect(page).toHaveURL(/\/studio-tianho\/login\//);
+    const loginUrl = new URL(page.url());
+    expect(loginUrl.pathname).toBe("/studio-tianho/login/");
+    expect(loginUrl.searchParams.get("returnTo")).toBe(path);
   }
   await expect(page.locator('input[name="email"]')).toBeVisible();
   await expect(page.locator('input[name="password"]')).toBeVisible();

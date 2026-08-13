@@ -6,6 +6,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
@@ -60,6 +62,9 @@ class MediaLifecycleTests {
 
     @MockitoBean
     private MediaObjectStorage objectStorage;
+
+    @Autowired
+    private MediaLifecycleService mediaLifecycleService;
 
     @BeforeEach
     void insertAdministrator() {
@@ -195,6 +200,44 @@ class MediaLifecycleTests {
                 .single();
         assertThat(state).isEqualTo("DELETED");
         assertThat(cleanupRecords).isEqualTo(1);
+        String cleanupResult = jdbcClient.sql("SELECT result FROM media_cleanup_records WHERE asset_id = :id")
+                .param("id", assetId)
+                .query(String.class)
+                .single();
+        assertThat(cleanupResult).isEqualTo("DELETED");
+        verify(objectStorage).delete("original/" + assetId + ".png");
+        verify(objectStorage).delete("thumbnail/" + assetId + ".png");
+    }
+
+    @Test
+    void retainsFailedObjectCleanupForRetry() throws Exception {
+        UUID assetId = insertAsset();
+        mockMvc.perform(post("/api/v1/admin/media/{id}/trash", assetId)
+                        .with(authentication(authenticationFor(AdministratorRole.EDITOR))).with(csrf()))
+                .andExpect(status().isOk());
+        jdbcClient.sql("""
+                        UPDATE media_assets SET purge_after = CURRENT_TIMESTAMP - INTERVAL '1 second'
+                        WHERE id = :id
+                        """)
+                .param("id", assetId)
+                .update();
+        doThrow(new RuntimeException("storage unavailable"))
+                .when(objectStorage).delete("thumbnail/" + assetId + ".png");
+
+        mockMvc.perform(post("/api/v1/admin/media/{id}/purge", assetId)
+                        .with(authentication(authenticationFor(AdministratorRole.ADMIN))).with(csrf()))
+                .andExpect(status().isNoContent());
+
+        assertThat(jdbcClient.sql("SELECT status::text FROM media_assets WHERE id = :id")
+                .param("id", assetId).query(String.class).single()).isEqualTo("DELETED");
+        assertThat(jdbcClient.sql("SELECT result FROM media_cleanup_records WHERE asset_id = :id")
+                .param("id", assetId).query(String.class).single()).isEqualTo("FAILED");
+
+        reset(objectStorage);
+        mediaLifecycleService.retryIncompleteCleanups();
+
+        assertThat(jdbcClient.sql("SELECT result FROM media_cleanup_records WHERE asset_id = :id")
+                .param("id", assetId).query(String.class).single()).isEqualTo("DELETED");
         verify(objectStorage).delete("original/" + assetId + ".png");
         verify(objectStorage).delete("thumbnail/" + assetId + ".png");
     }

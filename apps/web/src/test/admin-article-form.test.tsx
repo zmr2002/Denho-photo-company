@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AdminArticleForm, resolveArticleExcerpt } from "@/components/admin/AdminArticleForm";
 import { blankArticleFormValues } from "@/lib/admin/article-form";
 import { writeAdminApi } from "@/lib/api/browser";
+import type { AdminArticle, AdminRevision } from "@/lib/api/admin";
 
 const router = vi.hoisted(() => ({
   push: vi.fn(),
@@ -92,6 +93,15 @@ describe("article editor", () => {
       ],
     });
     expect(payload).not.toHaveProperty("relatedServicesText");
+    expect(payload).toMatchObject({
+      ctaHref: null,
+      heroImagePath: null,
+      youtubeUrl: null,
+      blocks: [
+        { type: "paragraph", body: "这是第一段正文，会自动成为文章摘要。", heading: null },
+        { type: "heading", heading: "拍摄准备", body: null },
+      ],
+    });
     expect(router.refresh).toHaveBeenCalled();
     expect(router.push).toHaveBeenCalledWith("/studio-tianho/articles/article-1");
     expect(await screen.findByText("文章已保存。")).toBeVisible();
@@ -205,4 +215,87 @@ describe("article editor", () => {
     expect(await screen.findByText("文章已保存。")).toBeVisible();
     expect(screen.getByText("已发布")).toBeVisible();
   });
+
+  it("loads a saved revision as an unsaved edit while preserving the current status and version", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    const values = blankArticleFormValues();
+    values.title = "当前文章标题";
+    values.slug = "current-article";
+    values.status = "published";
+    values.blocks[0].body = "当前正文";
+    const revision: AdminRevision = {
+      id: "revision-2",
+      version: 2,
+      action: "UPDATED",
+      actorId: "user",
+      createdAt: "2026-08-13T00:00:00Z",
+      snapshot: articleSnapshot("历史文章标题"),
+    };
+    vi.mocked(writeAdminApi).mockResolvedValue({
+      ok: true,
+      json: async () => ({ id: "article-4", version: 9, status: "PUBLISHED" }),
+    } as Response);
+
+    render(
+      <AdminArticleForm
+        articleId="article-4"
+        canManagePublication
+        contentVersion={8}
+        defaultValues={values}
+        revisions={[revision]}
+      />,
+    );
+
+    fireEvent.click(screen.getByText("修改记录"));
+    fireEvent.click(screen.getByRole("button", { name: "载入此版本" }));
+    expect(await screen.findByDisplayValue("历史文章标题")).toBeVisible();
+    expect(screen.getByText("已发布")).toBeVisible();
+    expect(screen.getByText("版本 2 已载入为未保存修改，请预览确认后保存。")).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "保存修改" }));
+    await waitFor(() => expect(writeAdminApi).toHaveBeenCalledTimes(1));
+    expect(writeAdminApi).toHaveBeenCalledWith(
+      "/api/v1/admin/articles/article-4",
+      "PATCH",
+      expect.objectContaining({ expectedVersion: 8, article: expect.objectContaining({ title: "历史文章标题" }) }),
+    );
+  });
 });
+
+function articleSnapshot(title: string): AdminArticle {
+  return {
+    id: "article-4",
+    locale: "zh",
+    slug: "historical-article",
+    title,
+    excerpt: "历史摘要",
+    category: "通知",
+    authorName: "编辑团队",
+    heroLabel: null,
+    heroImagePath: null,
+    heroAlt: null,
+    heroTone: "neutral",
+    heroCaption: null,
+    closingNote: null,
+    ctaLabel: null,
+    ctaHref: null,
+    status: "draft",
+    publishedAt: "2026-08-12T00:00:00+09:00",
+    displayOrder: 0,
+    relatedServices: [],
+    seoTitle: null,
+    seoDescription: null,
+    youtubeUrl: null,
+    demo: false,
+    version: 2,
+    blocks: [{
+      type: "paragraph",
+      heading: null,
+      body: "历史正文",
+      imagePath: null,
+      imageAlt: null,
+      imageTone: "neutral",
+      caption: null,
+      sortOrder: 0,
+    }],
+  };
+}

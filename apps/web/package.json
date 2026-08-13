@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "node scripts/start-standalone.mjs",
     "lint": "eslint",
     "api:generate": "npx --yes openapi-typescript@7.13.0 ../api/openapi.json -o src/api-contract/api-schema.ts && node scripts/normalize-api-schema.mjs",
     "test:unit": "vitest run",

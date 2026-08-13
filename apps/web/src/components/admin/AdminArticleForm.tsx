@@ -6,13 +6,15 @@ import { useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { AdminActionFeedback, useAdministrationAction } from "@/components/admin/AdminActionFeedback";
+import { ArticleRevisionHistory } from "@/components/admin/ArticleRevisionHistory";
 import { UnsavedArticlePreview } from "@/components/admin/UnsavedArticlePreview";
 import { MediaPickerDialog } from "@/components/admin/MediaPickerDialog";
-import { articleMutationSchema } from "@/lib/admin/validation";
+import { articleMutationSchema, nullable } from "@/lib/admin/validation";
 import { useUnsavedChanges } from "@/lib/admin/useUnsavedChanges";
 import { adminResponseMessage, writeAdminApi } from "@/lib/api/browser";
+import { articleToFormValues } from "@/lib/admin/article-form";
 import { siteDateInputToTimestamp } from "@/lib/site-date";
-import type { MediaAsset } from "@/lib/api/admin";
+import type { AdminRevision, MediaAsset } from "@/lib/api/admin";
 
 const articleFormSchema = articleMutationSchema.omit({ excerpt: true, relatedServices: true }).extend({
   excerpt: z.string().trim().max(10_000, "内容过长").optional(),
@@ -34,6 +36,7 @@ type AdminArticleFormProps = {
   defaultValues: AdminArticleFormValues;
   isTutorial?: boolean;
   canManagePublication?: boolean;
+  revisions?: AdminRevision[];
 };
 
 type SaveIntent = "save" | "publish" | "draft";
@@ -50,6 +53,7 @@ export function AdminArticleForm({
   defaultValues,
   isTutorial = false,
   canManagePublication = false,
+  revisions = [],
 }: AdminArticleFormProps) {
   const router = useRouter();
   const [version, setVersion] = useState(contentVersion);
@@ -73,13 +77,41 @@ export function AdminArticleForm({
   const blocks = useWatch({ control, name: "blocks" });
   useUnsavedChanges(isDirty);
 
+  function loadRevision(revision: AdminRevision) {
+    if (isDirty && !window.confirm("载入历史版本会替换当前尚未保存的修改。确定继续吗？")) return;
+    reset(
+      { ...articleToFormValues(revision.snapshot), status: currentStatus },
+      { keepDefaultValues: true },
+    );
+    setPreviewValues(null);
+    showSuccess(`版本 ${revision.version} 已载入为未保存修改，请预览确认后保存。`);
+  }
+
   async function onSubmit(values: AdminArticleFormValues, intent: SaveIntent = "save") {
     await run(async () => {
       const payload = {
         ...values,
         excerpt: resolveArticleExcerpt(values.excerpt, values.blocks, values.title),
+        heroLabel: nullable(values.heroLabel),
+        heroImagePath: nullable(values.heroImagePath),
+        heroAlt: nullable(values.heroAlt),
+        heroCaption: nullable(values.heroCaption),
+        closingNote: nullable(values.closingNote),
+        ctaLabel: nullable(values.ctaLabel),
+        ctaHref: nullable(values.ctaHref),
+        seoTitle: nullable(values.seoTitle),
+        seoDescription: nullable(values.seoDescription),
+        youtubeUrl: nullable(values.youtubeUrl),
         relatedServices: splitLines(values.relatedServicesText),
-        blocks: values.blocks.map((block, index) => ({ ...block, sortOrder: index })),
+        blocks: values.blocks.map((block, index) => ({
+          ...block,
+          heading: nullable(block.heading),
+          body: nullable(block.body),
+          imagePath: nullable(block.imagePath),
+          imageAlt: nullable(block.imageAlt),
+          caption: nullable(block.caption),
+          sortOrder: index,
+        })),
         publishedAt: siteDateInputToTimestamp(values.publishedAt),
         demo: isTutorial,
       };
@@ -433,6 +465,8 @@ export function AdminArticleForm({
           </section>
         </div>
       </details>
+
+      {articleId ? <ArticleRevisionHistory onLoadRevision={loadRevision} revisions={revisions} /> : null}
 
       <div className="admin-actions admin-save-bar">
         <button className="admin-button" disabled={submitting} type="submit">

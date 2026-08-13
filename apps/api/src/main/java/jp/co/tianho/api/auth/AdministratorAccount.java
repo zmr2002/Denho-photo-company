@@ -11,7 +11,6 @@ record AdministratorAccount(
         String passwordScheme,
         String role,
         boolean active,
-        OffsetDateTime verifiedAt,
         int failedLoginCount,
         OffsetDateTime lockedUntil) {
 }

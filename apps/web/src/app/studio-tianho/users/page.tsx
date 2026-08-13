@@ -21,7 +21,7 @@ export default async function AdministratorUsersPage() {
         </header>
         <div className="admin-info-box">
           <strong>权限说明</strong>
-          <p>编辑可维护草稿、媒体和咨询；管理员还可发布内容、管理账号和查看操作记录。新账号首次登录时完成验证器绑定。</p>
+          <p>编辑可维护草稿、媒体和咨询；管理员还可发布内容、管理账号和查看操作记录。新账号创建后可直接使用邮箱和初始密码登录。</p>
         </div>
         <UserManagement currentUserId={session.userId} initialUsers={users} />
       </section>

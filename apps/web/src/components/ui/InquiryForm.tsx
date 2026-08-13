@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import Script from "next/script";
+import { useState } from "react";
 import type { InquiryFormContent } from "@/data/pages";
 import { getCsrfHeaders } from "@/lib/api/browser";
 
@@ -22,71 +21,10 @@ const successText = {
   en: "Your inquiry has been received. We will respond after reviewing it.",
 };
 
-const verificationFailureText = {
-  ja: "安全確認を読み込めませんでした。ページを再読み込みし、広告ブロックが有効な場合は一時的に無効にしてください。",
-  zh: "安全验证组件加载失败。请刷新页面；如果启用了广告拦截，请暂时关闭后重试。",
-  en: "The security check could not load. Refresh the page and temporarily disable content blocking if it is enabled.",
-};
-
-const verificationExpiredText = {
-  ja: "安全確認の有効期限が切れました。もう一度確認してから送信してください。",
-  zh: "安全验证已过期，请重新完成验证后提交。",
-  en: "The security check expired. Complete it again before submitting.",
-};
-
-type TurnstileApi = {
-  render: (container: HTMLElement, options: Record<string, unknown>) => string;
-  remove: (widgetId: string) => void;
-  reset: (widgetId: string) => void;
-};
-
-declare global {
-  interface Window {
-    turnstile?: TurnstileApi;
-  }
-}
-
 export function InquiryForm({ content, locale }: InquiryFormProps) {
-  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const [idempotencyKey, setIdempotencyKey] = useState(() => crypto.randomUUID());
   const [status, setStatus] = useState(content.statusText);
   const [submitting, setSubmitting] = useState(false);
-  const [turnstileReady, setTurnstileReady] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState("");
-  const turnstileContainer = useRef<HTMLDivElement>(null);
-  const turnstileWidgetId = useRef<string | null>(null);
-
-  useEffect(() => {
-    if (!turnstileSiteKey || !turnstileReady || !window.turnstile || !turnstileContainer.current) return;
-    turnstileWidgetId.current = window.turnstile.render(turnstileContainer.current, {
-      sitekey: turnstileSiteKey,
-      callback: (token: string) => {
-        setTurnstileToken(token);
-        setStatus(content.statusText);
-      },
-      "expired-callback": () => {
-        setTurnstileToken("");
-        setStatus(verificationExpiredText[locale]);
-      },
-      "error-callback": () => {
-        setTurnstileToken("");
-        setStatus(verificationFailureText[locale]);
-      },
-    });
-    return () => {
-      if (turnstileWidgetId.current && window.turnstile) {
-        window.turnstile.remove(turnstileWidgetId.current);
-      }
-      turnstileWidgetId.current = null;
-    };
-  }, [content.statusText, locale, turnstileReady, turnstileSiteKey]);
-
-  function resetTurnstile() {
-    setTurnstileToken("");
-    if (turnstileWidgetId.current && window.turnstile) {
-      window.turnstile.reset(turnstileWidgetId.current);
-    }
-  }
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -114,11 +52,9 @@ export function InquiryForm({ content, locale }: InquiryFormProps) {
           locale,
           consentVersion: "2026-07",
           consented: data.get("consented") === "on",
-          turnstileToken,
           companyWebsite: data.get("companyWebsite") || "",
         }),
       });
-      resetTurnstile();
       if (!response.ok) {
         setStatus(locale === "zh" ? "提交失败，请检查填写内容。" : locale === "ja" ? "送信できませんでした。入力内容をご確認ください。" : "Submission failed. Please check your entries.");
         return;
@@ -135,18 +71,6 @@ export function InquiryForm({ content, locale }: InquiryFormProps) {
 
   return (
     <form className="inquiry-form" aria-label={content.ariaLabel} onSubmit={submit}>
-      {turnstileSiteKey ? (
-        <Script
-          async
-          defer
-          onError={() => {
-            setTurnstileToken("");
-            setStatus(verificationFailureText[locale]);
-          }}
-          onReady={() => setTurnstileReady(true)}
-          src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
-        />
-      ) : null}
       <div className="form-row">
         <label htmlFor="name-company">{content.nameLabel} <span>{content.nameEnglish}</span></label>
         <input id="name-company" name="nameCompany" type="text" placeholder={content.namePlaceholder} maxLength={240} required />
@@ -183,9 +107,8 @@ export function InquiryForm({ content, locale }: InquiryFormProps) {
         <label htmlFor="company-website">Website</label>
         <input autoComplete="off" id="company-website" name="companyWebsite" tabIndex={-1} type="text" />
       </div>
-      {turnstileSiteKey ? <div ref={turnstileContainer} /> : null}
       <div className="form-actions">
-        <button type="submit" disabled={submitting || Boolean(turnstileSiteKey && !turnstileToken)}>{submitting ? "…" : content.buttonLabel}</button>
+        <button type="submit" disabled={submitting}>{submitting ? "…" : content.buttonLabel}</button>
         <p aria-live="polite">{status}</p>
       </div>
     </form>

@@ -85,11 +85,6 @@ tianho:
     ip-hash-key: ${INQUIRY_IP_HASH_KEY:tianho-local-inquiry-ip-key}
     retention-period: ${INQUIRY_RETENTION_PERIOD:180d}
     retention-cron: ${INQUIRY_RETENTION_CRON:0 35 3 * * *}
-    turnstile:
-      enabled: ${TURNSTILE_ENABLED:false}
-      secret: ${TURNSTILE_SECRET_KEY:}
-      connect-timeout: ${TURNSTILE_CONNECT_TIMEOUT:2s}
-      read-timeout: ${TURNSTILE_READ_TIMEOUT:5s}
     notifications:
       enabled: ${INQUIRY_NOTIFICATIONS_ENABLED:false}
       region: ${SES_REGION:ap-northeast-1}

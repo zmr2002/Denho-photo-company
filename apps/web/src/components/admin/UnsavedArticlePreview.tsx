@@ -7,7 +7,23 @@ import { Header } from "@/components/site/Header";
 import { articleFormValuesToPreview } from "@/lib/admin/article-preview";
 import type { AdminArticleFormValues } from "@/components/admin/AdminArticleForm";
 
-export function UnsavedArticlePreview({ values, onClose }: { values: AdminArticleFormValues; onClose: () => void }) {
+type UnsavedArticlePreviewProps = {
+  values: AdminArticleFormValues;
+  onClose: () => void;
+  title?: string;
+  description?: string;
+  closeLabel?: string;
+  ariaLabel?: string;
+};
+
+export function UnsavedArticlePreview({
+  values,
+  onClose,
+  title = "当前稿预览",
+  description = "显示的是表单中尚未保存的内容，页面样式与访客文章页相同。",
+  closeLabel = "返回编辑",
+  ariaLabel = "当前文章稿预览",
+}: UnsavedArticlePreviewProps) {
   const closeButton = useRef<HTMLButtonElement>(null);
   const article = articleFormValuesToPreview(values);
 
@@ -26,13 +42,13 @@ export function UnsavedArticlePreview({ values, onClose }: { values: AdminArticl
   }, [onClose]);
 
   return (
-    <div className="admin-live-preview" role="dialog" aria-label="当前文章稿预览" aria-modal="true">
+    <div className="admin-live-preview" role="dialog" aria-label={ariaLabel} aria-modal="true">
       <div className="admin-live-preview-toolbar">
         <div>
-          <strong>当前稿预览</strong>
-          <span>显示的是表单中尚未保存的内容，页面样式与访客文章页相同。</span>
+          <strong>{title}</strong>
+          <span>{description}</span>
         </div>
-        <button className="admin-button" onClick={onClose} ref={closeButton} type="button">返回编辑</button>
+        <button className="admin-button" onClick={onClose} ref={closeButton} type="button">{closeLabel}</button>
       </div>
       <div className="admin-live-preview-page">
         <div className="site-shell page-theme-works" lang={article.language}>

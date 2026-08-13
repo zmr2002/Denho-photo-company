@@ -5,12 +5,12 @@ function createContentSecurityPolicy(nonce: string, secureRequest: boolean) {
 
   return [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${developmentScriptSource} https://challenges.cloudflare.com`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${developmentScriptSource}`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob:",
     "font-src 'self'",
-    "connect-src 'self' https://challenges.cloudflare.com",
-    "frame-src https://challenges.cloudflare.com",
+    "connect-src 'self'",
+    "frame-src 'none'",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -28,6 +28,7 @@ export function proxy(request: NextRequest) {
   const locale = request.nextUrl.pathname.match(/^\/(ja|zh|en)(?:\/|$)/)?.[1] ?? "ja";
   requestHeaders.set("x-nonce", nonce);
   requestHeaders.set("x-site-locale", locale);
+  requestHeaders.set("x-admin-return-path", `${request.nextUrl.pathname}${request.nextUrl.search}`);
   requestHeaders.set("Content-Security-Policy", contentSecurityPolicy);
 
   const response = NextResponse.next({ request: { headers: requestHeaders } });

@@ -58,7 +58,6 @@ class InquiryOriginTests {
                   "locale":"en",
                   "consentVersion":"2026-07",
                   "consented":true,
-                  "turnstileToken":"",
                   "companyWebsite":""
                 }
                 """.formatted(UUID.randomUUID());

@@ -496,7 +496,6 @@ export interface components {
             locale: string;
             consentVersion: string;
             consented?: boolean;
-            turnstileToken?: string;
             companyWebsite?: string;
         };
         PublicInquiryResponse: {
@@ -554,8 +553,6 @@ export interface components {
             /** @enum {string} */
             role?: "ADMIN" | "EDITOR";
             active?: boolean;
-            /** Format: date-time */
-            verifiedAt?: string;
             /** Format: date-time */
             lastLoginAt?: string;
             /** Format: date-time */
@@ -641,25 +638,25 @@ export interface components {
             object?: boolean;
             float?: boolean;
             container?: boolean;
-            string?: boolean;
             number?: boolean;
             long?: boolean;
-            int?: boolean;
+            double?: boolean;
             binary?: boolean;
+            boolean?: boolean;
             /** @deprecated */
             textual?: boolean;
-            pojo?: boolean;
-            boolean?: boolean;
-            double?: boolean;
             short?: boolean;
-            missingNode?: boolean;
+            pojo?: boolean;
+            int?: boolean;
+            string?: boolean;
             valueNode?: boolean;
+            integralNumber?: boolean;
+            missingNode?: boolean;
             floatingPointNumber?: boolean;
+            bigDecimal?: boolean;
+            bigInteger?: boolean;
             /** @enum {string} */
             nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
-            bigInteger?: boolean;
-            bigDecimal?: boolean;
-            integralNumber?: boolean;
             embeddedValue?: boolean;
         };
         WorkImageInput: {

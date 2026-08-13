@@ -9,7 +9,7 @@ vi.mock("@/lib/api/browser", () => ({
   writeAdminApi: vi.fn(),
 }));
 
-const owner: AdministratorUser = { id: "owner", email: "owner@example.com", displayName: "负责人", role: "ADMIN", active: true, verifiedAt: "2026-08-01T00:00:00Z", lastLoginAt: null, createdAt: "2026-08-01T00:00:00Z" };
+const owner: AdministratorUser = { id: "owner", email: "owner@example.com", displayName: "负责人", role: "ADMIN", active: true, lastLoginAt: null, createdAt: "2026-08-01T00:00:00Z" };
 
 describe("user management", () => {
   beforeEach(() => {
@@ -18,7 +18,7 @@ describe("user management", () => {
   });
 
   it("creates an editor and clears sensitive input", async () => {
-    const editor = { ...owner, id: "editor", email: "editor@example.com", displayName: "编辑", role: "EDITOR" as const, verifiedAt: null };
+    const editor = { ...owner, id: "editor", email: "editor@example.com", displayName: "编辑", role: "EDITOR" as const };
     vi.mocked(writeAdminApi).mockResolvedValue(new Response(JSON.stringify(editor), { status: 201 }));
     render(<UserManagement currentUserId="owner" initialUsers={[owner]} />);
     fireEvent.change(screen.getByLabelText("显示名称"), { target: { value: "编辑" } });
@@ -33,6 +33,8 @@ describe("user management", () => {
   it("does not offer destructive controls for the current account", () => {
     render(<UserManagement currentUserId="owner" initialUsers={[owner]} />);
     expect(screen.getByText("不能在此修改自己的角色或停用自己")).toBeVisible();
+    expect(screen.getByText("尚未登录")).toBeVisible();
+    expect(screen.queryByText(/验证器|首次验证/)).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "停用账号" })).not.toBeInTheDocument();
   });
 });
