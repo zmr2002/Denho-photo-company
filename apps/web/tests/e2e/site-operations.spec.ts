@@ -91,7 +91,10 @@ test("protects administration and exposes readiness", async ({ page, request }) 
     "/studio-tianho/preview/notices/zh/",
   ]) {
     await page.goto(path);
-    await expect(page).toHaveURL(/\/studio-tianho\/login\/?$/);
+    await expect(page).toHaveURL(/\/studio-tianho\/login\//);
+    const loginUrl = new URL(page.url());
+    expect(loginUrl.pathname).toBe("/studio-tianho/login/");
+    expect(loginUrl.searchParams.get("returnTo")).toBe(path);
   }
   await expect(page.locator('input[name="email"]')).toBeVisible();
   await expect(page.locator('input[name="password"]')).toBeVisible();
