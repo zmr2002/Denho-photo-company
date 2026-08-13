@@ -85,6 +85,7 @@ export type AdminRevision = {
   id: string;
   version: number;
   action: string;
+  snapshot: AdminArticle;
   actorId: string;
   createdAt: string;
 };

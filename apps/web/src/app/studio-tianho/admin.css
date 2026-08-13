@@ -781,7 +781,7 @@
 
 .admin-revision-list article {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto 1fr auto;
   gap: 0.75rem;
   align-items: center;
   padding: 0.75rem 0.2rem;
@@ -791,6 +791,17 @@
 .admin-revision-list article div {
   display: grid;
   gap: 0.15rem;
+}
+
+.admin-revision-actions {
+  display: flex !important;
+  grid-auto-flow: column;
+  gap: 0.5rem !important;
+}
+
+.admin-revision-actions .admin-button-secondary {
+  min-height: 2.25rem;
+  padding: 0.45rem 0.7rem;
 }
 
 .admin-advanced-settings summary {
@@ -1327,6 +1338,16 @@
     align-items: stretch;
     flex-direction: column;
   }
+
+  .admin-revision-list article {
+    grid-template-columns: auto 1fr;
+  }
+
+  .admin-revision-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+
 }
 
 @media (prefers-reduced-motion: reduce) {
