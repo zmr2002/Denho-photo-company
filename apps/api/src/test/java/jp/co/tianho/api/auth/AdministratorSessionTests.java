@@ -198,6 +198,31 @@ class AdministratorSessionTests {
                 .andExpect(result -> assertThat(result.getResponse().getHeader("Retry-After")).isEqualTo("900"));
     }
 
+    @Test
+    @Transactional
+    void successfulLoginsDoNotConsumeTheAddressFailureLimit() throws Exception {
+        String address = "203.0.113.43";
+        for (int attempt = 0; attempt < 20; attempt++) {
+            jdbcClient.sql("""
+                            INSERT INTO administrator_login_attempts (
+                                email, ip_address, successful, failure_reason
+                            ) VALUES ('admin@example.com', :address, TRUE, NULL)
+                            """)
+                    .param("address", address)
+                    .update();
+        }
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .with(csrf())
+                        .with(request -> {
+                            ((MockHttpServletRequest) request).setRemoteAddr(address);
+                            return request;
+                        })
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginJson("admin@example.com", "administrator-test-password")))
+                .andExpect(status().isOk());
+    }
+
     private String loginJson(String email, String password) {
         return """
                 {"email":"%s","password":"%s"}

@@ -100,7 +100,9 @@ class AdministratorAccountRepository {
         return jdbcClient.sql("""
                         SELECT count(*)
                         FROM administrator_login_attempts
-                        WHERE ip_address = :ipAddress AND attempted_at >= :since
+                        WHERE ip_address = :ipAddress
+                          AND successful = FALSE
+                          AND attempted_at >= :since
                         """)
                 .param("ipAddress", ipAddress)
                 .param("since", since)
