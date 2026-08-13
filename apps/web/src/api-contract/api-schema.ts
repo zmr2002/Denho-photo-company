@@ -554,8 +554,6 @@ export interface components {
             role?: "ADMIN" | "EDITOR";
             active?: boolean;
             /** Format: date-time */
-            verifiedAt?: string;
-            /** Format: date-time */
             lastLoginAt?: string;
             /** Format: date-time */
             createdAt?: string;
@@ -640,25 +638,25 @@ export interface components {
             object?: boolean;
             float?: boolean;
             container?: boolean;
-            /** @enum {string} */
-            nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
-            integralNumber?: boolean;
-            floatingPointNumber?: boolean;
-            missingNode?: boolean;
-            bigInteger?: boolean;
-            valueNode?: boolean;
-            bigDecimal?: boolean;
             number?: boolean;
-            int?: boolean;
             long?: boolean;
             double?: boolean;
             binary?: boolean;
-            short?: boolean;
+            boolean?: boolean;
             /** @deprecated */
             textual?: boolean;
-            string?: boolean;
-            boolean?: boolean;
+            short?: boolean;
             pojo?: boolean;
+            int?: boolean;
+            string?: boolean;
+            valueNode?: boolean;
+            integralNumber?: boolean;
+            missingNode?: boolean;
+            floatingPointNumber?: boolean;
+            bigDecimal?: boolean;
+            bigInteger?: boolean;
+            /** @enum {string} */
+            nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
             embeddedValue?: boolean;
         };
         WorkImageInput: {

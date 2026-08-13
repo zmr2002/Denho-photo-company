@@ -67,7 +67,6 @@ export type AdministratorUser = {
   displayName: string;
   role: "ADMIN" | "EDITOR";
   active: boolean;
-  verifiedAt: string | null;
   lastLoginAt: string | null;
   createdAt: string;
 };

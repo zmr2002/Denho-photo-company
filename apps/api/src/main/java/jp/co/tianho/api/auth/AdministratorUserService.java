@@ -33,7 +33,7 @@ public class AdministratorUserService {
     @Transactional(readOnly = true)
     public List<UserResponse> findUsers() {
         return jdbcClient.sql("""
-                        SELECT id, email, display_name, role, active, verified_at, last_login_at, created_at
+                        SELECT id, email, display_name, role, active, last_login_at, created_at
                         FROM administrator_users
                         ORDER BY created_at ASC, id ASC
                         """)
@@ -128,7 +128,7 @@ public class AdministratorUserService {
 
     private UserResponse findUser(UUID id) {
         return jdbcClient.sql("""
-                        SELECT id, email, display_name, role, active, verified_at, last_login_at, created_at
+                        SELECT id, email, display_name, role, active, last_login_at, created_at
                         FROM administrator_users
                         WHERE id = :id
                         """)
@@ -157,7 +157,6 @@ public class AdministratorUserService {
                 resultSet.getString("display_name"),
                 AdministratorRole.valueOf(resultSet.getString("role")),
                 resultSet.getBoolean("active"),
-                resultSet.getObject("verified_at", OffsetDateTime.class),
                 resultSet.getObject("last_login_at", OffsetDateTime.class),
                 resultSet.getObject("created_at", OffsetDateTime.class));
     }
@@ -168,7 +167,6 @@ public class AdministratorUserService {
             String displayName,
             AdministratorRole role,
             boolean active,
-            OffsetDateTime verifiedAt,
             OffsetDateTime lastLoginAt,
             OffsetDateTime createdAt) {
     }

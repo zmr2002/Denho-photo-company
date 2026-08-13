@@ -75,7 +75,7 @@ export function UserManagement({ currentUserId, initialUsers }: { currentUserId:
                 <p className="admin-label">{user.role === "ADMIN" ? "管理员" : "编辑"} · {user.active ? "可登录" : "已停用"}</p>
                 <h3>{user.displayName}{isCurrent ? "（当前账号）" : ""}</h3>
                 <p>{user.email}</p>
-                <small>{user.verifiedAt ? "验证器已绑定" : "等待首次验证"} · {user.lastLoginAt ? `最后登录 ${new Date(user.lastLoginAt).toLocaleString("zh-CN")}` : "尚未登录"}</small>
+                <small>{user.lastLoginAt ? `最后登录 ${new Date(user.lastLoginAt).toLocaleString("zh-CN")}` : "尚未登录"}</small>
               </div>
               {!isCurrent ? (
                 <div className="admin-actions">
