@@ -87,8 +87,13 @@ test("honors reduced motion and returns to login after logout", async ({ page })
   await expect(page).toHaveURL(/\/studio-tianho\/login\/?$/);
 
   await page.goto("/studio-tianho/articles");
-  await expect(page).toHaveURL(/\/studio-tianho\/login\/?$/);
+  await expect(page).toHaveURL(/\/studio-tianho\/login\/?\?returnTo=%2Fstudio-tianho%2Farticles(?:%2F)?$/);
   await expect(page.getByRole("heading", { name: "田豊管理中心" })).toBeVisible();
+  await page.getByLabel("邮箱").fill(administrator.email);
+  await page.getByLabel("密码").fill(administrator.password);
+  await page.getByRole("button", { name: "登录", exact: true }).click();
+  await expect(page).toHaveURL(/\/studio-tianho\/articles\/?$/);
+  await expect(page.getByRole("heading", { name: "文章管理" })).toBeVisible();
 });
 
 test("covers editor permissions, publishing, conflicts and revision recovery", async ({ page }, testInfo) => {

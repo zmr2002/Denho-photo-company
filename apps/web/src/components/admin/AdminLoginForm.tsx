@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { adminResponseMessage, writeAdminApi } from "@/lib/api/browser";
 
-export function AdminLoginForm() {
+export function AdminLoginForm({ returnTo = "/studio-tianho" }: { returnTo?: string }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,7 +26,7 @@ export function AdminLoginForm() {
     }
 
     setSubmitting(false);
-    router.push("/studio-tianho");
+    router.push(returnTo);
     router.refresh();
   }
 

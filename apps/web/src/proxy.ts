@@ -28,6 +28,7 @@ export function proxy(request: NextRequest) {
   const locale = request.nextUrl.pathname.match(/^\/(ja|zh|en)(?:\/|$)/)?.[1] ?? "ja";
   requestHeaders.set("x-nonce", nonce);
   requestHeaders.set("x-site-locale", locale);
+  requestHeaders.set("x-admin-return-path", `${request.nextUrl.pathname}${request.nextUrl.search}`);
   requestHeaders.set("Content-Security-Policy", contentSecurityPolicy);
 
   const response = NextResponse.next({ request: { headers: requestHeaders } });

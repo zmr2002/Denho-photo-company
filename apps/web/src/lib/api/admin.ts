@@ -1,8 +1,9 @@
 import "server-only";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import type { components } from "@/api-contract/api-schema";
+import { administrationLoginPath } from "@/lib/auth/return-path";
 
 const apiBaseUrl = process.env.API_INTERNAL_URL || "http://127.0.0.1:8080";
 
@@ -157,7 +158,7 @@ async function adminApiFetch(path: string, requireSuccess = true) {
     headers: cookieHeader ? { Cookie: cookieHeader } : undefined,
   });
   if (requireSuccess && response.status === 401) {
-    redirect("/studio-tianho/login");
+    redirect(administrationLoginPath((await headers()).get("x-admin-return-path")));
   }
   if (requireSuccess && !response.ok) {
     throw new Error(`Administration API returned ${response.status}`);
