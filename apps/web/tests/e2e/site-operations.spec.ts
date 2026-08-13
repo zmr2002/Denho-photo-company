@@ -42,6 +42,7 @@ test("preserves the services to works link", async ({ page }) => {
 });
 
 test("submits a validated contact inquiry", async ({ page }) => {
+  await page.setExtraHTTPHeaders({ "X-Forwarded-For": requiredEnvironment("BROWSER_TEST_CLIENT_IP") });
   await page.goto("/en/contact/");
   await dismissOpeningNotice(page);
   await page.locator('[name="nameCompany"]').fill("Browser Check Company");
@@ -52,6 +53,12 @@ test("submits a validated contact inquiry", async ({ page }) => {
   await page.locator('form[aria-label] button[type="submit"]').click();
   await expect(page.getByText("Your inquiry has been received.")).toBeVisible();
 });
+
+function requiredEnvironment(name: string) {
+  const value = process.env[name];
+  if (!value) throw new Error(`${name} is required for browser checks`);
+  return value;
+}
 
 test("renders published content from the public API", async ({ page, request }) => {
   const response = await request.get(`${apiBaseUrl}/api/v1/public/articles?locale=zh`);

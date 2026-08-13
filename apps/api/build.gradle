@@ -19,6 +19,7 @@ repositories {
 
 ext['netty.version'] = '4.2.16.Final'
 ext['postgresql.version'] = '42.7.12'
+ext['httpcore5.version'] = '5.4.3'
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
