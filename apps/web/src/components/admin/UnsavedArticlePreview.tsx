@@ -13,6 +13,7 @@ type UnsavedArticlePreviewProps = {
   title?: string;
   description?: string;
   closeLabel?: string;
+  ariaLabel?: string;
 };
 
 export function UnsavedArticlePreview({
@@ -21,6 +22,7 @@ export function UnsavedArticlePreview({
   title = "当前稿预览",
   description = "显示的是表单中尚未保存的内容，页面样式与访客文章页相同。",
   closeLabel = "返回编辑",
+  ariaLabel = "当前文章稿预览",
 }: UnsavedArticlePreviewProps) {
   const closeButton = useRef<HTMLButtonElement>(null);
   const article = articleFormValuesToPreview(values);
@@ -40,7 +42,7 @@ export function UnsavedArticlePreview({
   }, [onClose]);
 
   return (
-    <div className="admin-live-preview" role="dialog" aria-label={title} aria-modal="true">
+    <div className="admin-live-preview" role="dialog" aria-label={ariaLabel} aria-modal="true">
       <div className="admin-live-preview-toolbar">
         <div>
           <strong>{title}</strong>

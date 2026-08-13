@@ -44,6 +44,7 @@ export function ArticleRevisionHistory({ revisions, onLoadRevision }: ArticleRev
       </details>
       {previewRevision ? (
         <UnsavedArticlePreview
+          ariaLabel={`历史版本 ${previewRevision.version} 预览`}
           closeLabel="返回修改记录"
           description={`显示版本 ${previewRevision.version} 保存时的内容，页面样式与访客文章页相同。`}
           onClose={() => setPreviewRevision(null)}
